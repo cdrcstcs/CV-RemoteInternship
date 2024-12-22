@@ -37,4 +37,14 @@ class User extends Model
     ];
 
     // Optionally, add any relationships or additional methods here
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'users_roles', 'users_id', 'roles_id');
+    }
+
+    public function coupons()
+    {
+        return $this->belongsToMany(Coupon::class, 'users_coupons', 'users_id', 'coupons_id')
+            ->withTimestamps();  // Include timestamps if needed
+    }
 }

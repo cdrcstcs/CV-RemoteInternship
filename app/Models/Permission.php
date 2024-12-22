@@ -20,4 +20,9 @@ class Permission extends Model
     ];
 
     // Define any relationships if needed (for example, permissions can be associated with roles or users in some cases)
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'roles_permissions', 'permissions_id', 'roles_id');
+    }
 }

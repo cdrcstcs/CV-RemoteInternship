@@ -21,4 +21,16 @@ class Coupon extends Model
     ];
 
     // You can also define any specific logic for this model, if necessary.
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'users_coupons', 'coupons_id', 'users_id')
+            ->withTimestamps();  // Include timestamps if needed
+    }
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'products_coupons', 'coupons_id', 'products_id')
+                    ->withTimestamps();
+    }
 }

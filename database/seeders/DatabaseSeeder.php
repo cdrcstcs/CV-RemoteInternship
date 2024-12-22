@@ -22,7 +22,12 @@ use App\Models\{
     Order,
     OrderItem,
     Provider,
-    Rating
+    Rating,
+    ProductCategory,
+    ProductCoupon,
+    RolePermission,
+    UserCoupon,
+    UserRole,
 };
 
 class DatabaseSeeder extends Seeder
@@ -90,5 +95,11 @@ class DatabaseSeeder extends Seeder
 
         // Seed Ratings
         Rating::factory(10)->create(); // Example: Create 10 ratings
+
+        ProductCategory::factory(5)->create();
+        ProductCoupon::factory(5)->create();
+        RolePermission::factory(5)->create();
+        UserCoupon::factory(5)->create();
+        UserRole::factory(5)->create();
     }
 }

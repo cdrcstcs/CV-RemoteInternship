@@ -24,4 +24,14 @@ class Product extends Model
     {
         return $this->belongsTo(User::class, 'supplier_id');
     }
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'products_categories', 'products_id', 'categories_id');
+    }
+    public function coupons()
+    {
+        return $this->belongsToMany(Coupon::class, 'products_coupons', 'products_id', 'coupons_id')
+                    ->withTimestamps();
+    }
 }

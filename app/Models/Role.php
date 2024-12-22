@@ -20,4 +20,13 @@ class Role extends Model
     ];
 
     // Define relationships (if needed)
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'users_roles', 'roles_id', 'users_id');
+    }
+
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class, 'roles_permissions', 'roles_id', 'permissions_id');
+    }
 }
