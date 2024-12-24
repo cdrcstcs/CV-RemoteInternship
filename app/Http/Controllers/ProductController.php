@@ -5,17 +5,22 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Cloudinary\Cloudinary;
+use Cloudinary\Uploader;
 use Cloudinary\Api\Upload\UploadApi;
 
 class ProductController extends Controller
 {
+    protected $cloudinary;
+
     public function __construct()
     {
-        // Cloudinary configuration
-        \Cloudinary::config([
-            'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
-            'api_key' => env('CLOUDINARY_API_KEY'),
-            'api_secret' => env('CLOUDINARY_API_SECRET')
+        // Initialize Cloudinary instance with configuration
+        $this->cloudinary = new Cloudinary([
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                'api_key' => env('CLOUDINARY_API_KEY'),
+                'api_secret' => env('CLOUDINARY_API_SECRET')
+            ]
         ]);
     }
 
@@ -45,7 +50,7 @@ class ProductController extends Controller
                 return response()->json(json_decode($featuredProducts));
             }
 
-            // If not in Redis, fetch from MongoDB
+            // If not in Redis, fetch from database
             $featuredProducts = Product::where('isFeatured', true)->get();
 
             if ($featuredProducts->isEmpty()) {
@@ -73,13 +78,15 @@ class ProductController extends Controller
                 'price' => 'required|numeric',
                 'image' => 'nullable|image',
                 'category' => 'nullable|string',
+                'isFeatured' => 'nullable|boolean',  // Add validation for isFeatured
             ]);
 
+            // Handle image upload to Cloudinary
             $imageUrl = '';
             if ($request->hasFile('image')) {
                 $uploadedFile = $request->file('image');
-                $uploadResponse = \Cloudinary\Uploader::upload($uploadedFile->getRealPath(), [
-                    'folder' => 'products'
+                $uploadResponse = Uploader::upload($uploadedFile->getRealPath(), [
+                    'folder' => 'products',
                 ]);
                 $imageUrl = $uploadResponse['secure_url'];
             }
@@ -90,6 +97,7 @@ class ProductController extends Controller
                 'price' => $validated['price'],
                 'image' => $imageUrl,
                 'category' => $validated['category'],
+                'isFeatured' => $validated['isFeatured'] ?? false,  // Default to false if not provided
             ]);
 
             return response()->json($product, 201);
@@ -106,10 +114,10 @@ class ProductController extends Controller
         try {
             $product = Product::findOrFail($id);
 
-            // Delete the image from Cloudinary
+            // Delete the image from Cloudinary if it exists
             if ($product->image) {
                 $publicId = basename(parse_url($product->image, PHP_URL_PATH), ".jpg");
-                \Cloudinary\Uploader::destroy('products/' . $publicId);
+                Uploader::destroy('products/' . $publicId);
             }
 
             $product->delete();

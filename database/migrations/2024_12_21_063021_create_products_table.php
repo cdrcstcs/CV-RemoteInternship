@@ -17,6 +17,9 @@ return new class extends Migration
             $table->decimal('price', 18, 2)->nullable()->default(null);
             $table->string('description', 500)->nullable()->default(null);
             $table->foreignId('supplier_id')->nullable()->constrained('users')->nullOnDelete(); // Foreign key for the supplier
+            $table->boolean('isFeatured')->default(false); // Add the isFeatured column, default to false
+            $table->string('image',1000)->nullable(); // Add image column as a string (nullable to allow missing images)
+
             $table->timestamps(); // CreatedAt and UpdatedAt (DateAdded, DateUpdated)
 
             $table->index('supplier_id'); // Index for supplier_id
