@@ -2,11 +2,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Cloudinary\Cloudinary;
 use Cloudinary\Uploader;
 use Cloudinary\Api\Upload\UploadApi;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -147,15 +149,62 @@ class ProductController extends Controller
     /**
      * Get products by category
      */
-    public function getProductsByCategory($category)
-    {
-        try {
-            $products = Product::where('category', $category)->get();
-            return response()->json(['products' => $products]);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
-        }
-    }
+
+     public function getProductsByCategory($searchTerm)
+     {
+         try {
+             // Check if the search term is null or empty
+             if (empty($searchTerm)) {
+                 // Log the error
+                 Log::warning('Search term is empty or null');
+     
+                 // Return a response with a specific message for empty search term
+                 return response()->json(['message' => 'Search term cannot be null or empty'], 400);
+             }
+     
+             // Log the incoming search term
+             Log::info('Searching for products by category', ['searchTerm' => $searchTerm]);
+     
+             // Convert search term to lowercase and use the LOWER() SQL function to make the comparison case-insensitive
+             $searchTermLower = strtolower($searchTerm);
+     
+             // Search for categories where the category_name or description contains the provided search term (case-insensitive)
+             $categories = Category::whereRaw('LOWER(category_name) like ?', ['%' . $searchTermLower . '%'])
+                 ->orWhereRaw('LOWER(description) like ?', ['%' . $searchTermLower . '%'])
+                 ->get();
+     
+             // Log the found categories
+             Log::info('Categories found', ['categories' => $categories->pluck('category_name')]);
+     
+             // Check if any categories were found
+             if ($categories->isEmpty()) {
+                 Log::warning('No categories found', ['searchTerm' => $searchTerm]);
+                 return response()->json(['message' => 'No categories found with that search term'], 404);
+             }
+     
+             // Collect all products related to these categories using the pivot table
+             $products = $categories->flatMap(function ($category) {
+                 return $category->products; // Fetch related products for each category
+             });
+     
+             // Log the found products
+             Log::info('Products found for categories', ['products' => $products->pluck('name')]);
+     
+             // Return the unique products (to avoid duplicates)
+             return response()->json(['products' => $products->unique('id')]);
+     
+         } catch (\Exception $e) {
+             // Log the general error
+             Log::error('Error fetching products by category', [
+                 'error' => $e->getMessage(),
+                 'stack' => $e->getTraceAsString()
+             ]);
+     
+             // Handle any potential errors
+             return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
+         }
+     }
+     
 
     /**
      * Toggle the featured status of a product
