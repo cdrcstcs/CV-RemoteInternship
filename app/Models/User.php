@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Model
+class User extends Model implements JWTSubject
 {
     use HasFactory;
 
@@ -46,5 +47,27 @@ class User extends Model
     {
         return $this->belongsToMany(Coupon::class, 'users_coupons', 'users_id', 'coupons_id')
             ->withTimestamps();  // Include timestamps if needed
+    }
+
+    // Implement the methods required by the JWTSubject interface
+
+    /**
+     * Get the unique identifier for the user.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey(); // Typically the user's ID
+    }
+
+    /**
+     * Return a key value array, containing any custom claims you want to add to your token.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return []; // You can add custom claims here if needed
     }
 }
