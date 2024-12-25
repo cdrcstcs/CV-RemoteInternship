@@ -29,10 +29,9 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/profile', [AuthController::class, 'getProfile']);
 
         // Cart Routes (Authenticated users)
-        Route::get('/cart', [CartController::class, 'getCartProducts']);
         Route::post('/cart', [CartController::class, 'addToCart']);
-        Route::delete('/cart', [CartController::class, 'removeAllFromCart']);
-        Route::put('/cart/{id}', [CartController::class, 'updateQuantity']);
+        Route::delete('/allfromcart', [CartController::class, 'removeAllFromCart']);
+        Route::delete('/cart', [CartController::class, 'removeCartItem']);
 
         // Coupon Routes (Authenticated users)
         Route::get('/coupon', [CouponController::class, 'getCoupon']);

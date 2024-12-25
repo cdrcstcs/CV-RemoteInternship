@@ -2,33 +2,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    /**
-     * Get all the products in the cart with quantities.
-     */
-    public function getCartProducts(Request $request)
-    {
-        try {
-            $user = $request->user();  // Get the authenticated user
-
-            // Fetch products from the database where the product ID is in the cartItems
-            $products = Product::whereIn('id', $user->cartItems->pluck('id'))->get();
-
-            // Add quantity to each product in the cart
-            $cartItems = $products->map(function ($product) use ($user) {
-                $item = $user->cartItems->firstWhere('id', $product->id);
-                return array_merge($product->toArray(), ['quantity' => $item['quantity']]);
-            });
-
-            return response()->json($cartItems);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
-        }
-    }
 
     /**
      * Add product to the user's cart.
@@ -38,25 +18,83 @@ class CartController extends Controller
         try {
             $user = $request->user();  // Get the authenticated user
             $productId = $request->input('productId');
+            $orderId = $request->input('orderId');
+            $product = Product::find($productId);  // Correct method: find()
 
-            // Check if the product is already in the cart
-            $existingItem = $user->cartItems->firstWhere('id', $productId);
-
-            if ($existingItem) {
-                // Increment the quantity if the product exists in the cart
-                $existingItem['quantity'] += 1;
-            } else {
-                // Add the product to the cart with quantity 1
-                $user->cartItems->push(['id' => $productId, 'quantity' => 1]);
+            if (!$product) {
+                return response()->json(['message' => 'Product not found'], 404);
             }
 
-            $user->save();  // Save the updated cartItems
+            $pricePerProduct = $product->price;
 
-            return response()->json($user->cartItems);
+            // If no orderId is provided or the order doesn't exist, create a new order
+            $order = Order::find($orderId);
+
+            if (!$order) {
+                // Create a new order if it doesn't exist
+                $order = new Order([
+                    'user_id' => $user->id,
+                    'status' => 'pending',  // Set the initial status, modify as needed
+                    'order_date' => now(),
+                    'total_amount' => 0,  // Start with a total amount of 0
+                ]);
+
+                // Optionally generate a tracking number (can be done here or later)
+                $order->tracking_number = strtoupper('TRACK-' . uniqid());
+
+                // Save the new order
+                $order->save();
+            }
+
+            // Check if the product is already in the cart (OrderItem exists for this order and product)
+            $existingItem = OrderItem::where('orders_id', $order->id)
+                                    ->where('products_id', $productId)
+                                    ->first();
+
+            // If the product is already in the cart
+            if ($existingItem) {
+                // Store the previous total amount before updating the quantity
+                $previousTotalAmount = $existingItem->total_amount;
+
+                // Increment the quantity by 1
+                $existingItem->quantity += 1;
+                $existingItem->total_amount = $existingItem->quantity * $pricePerProduct;  // Recalculate total amount for the item
+
+                // Save the updated order item
+                $existingItem->save();
+
+                // Update the total amount of the order by adding the difference between the new total and the old total
+                $order->total_amount += $existingItem->total_amount - $previousTotalAmount;
+            } else {
+                // If the product is not in the cart, add it
+                $newOrderItem = new OrderItem([
+                    'orders_id' => $order->id,
+                    'products_id' => $productId,
+                    'quantity' => 1,
+                    'total_amount' => $pricePerProduct
+                ]);
+                $newOrderItem->save();  // Save the new order item
+
+                // Update the total amount of the order
+                $order->total_amount += $pricePerProduct;
+            }
+
+            // Save the updated order
+            $order->save();
+
+            // Retrieve all order items for this order
+            $allOrderItems = OrderItem::where('orders_id', $order->id)->with('product')->get();
+
+            return response()->json([
+                'orderItems' => $allOrderItems,
+                'orderId' => $order->id,  // Return the updated order, including the tracking number and total amount
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
         }
     }
+
+
 
     /**
      * Remove a product or all products from the user's cart.
@@ -64,58 +102,175 @@ class CartController extends Controller
     public function removeAllFromCart(Request $request)
     {
         try {
-            $user = $request->user();  // Get the authenticated user
-            $productId = $request->input('productId');
+            // Get the authenticated user
+            $user = $request->user();
+            $orderId = $request->input('orderId');
 
-            if (!$productId) {
-                // If no productId is provided, clear all items in the cart
-                $user->cartItems = [];
-            } else {
-                // Remove the specific product from the cart
-                $user->cartItems = $user->cartItems->filter(function ($item) use ($productId) {
-                    return $item['id'] !== $productId;
-                });
+            // Find the order associated with the provided orderId
+            $order = Order::find($orderId);
+
+            if (!$order) {
+                return response()->json(['message' => 'Order not found'], 404);
             }
 
-            $user->save();  // Save the updated cartItems
+            // Check if the order belongs to the authenticated user
+            if ($order->user_id !== $user->id) {
+                return response()->json(['message' => 'You are not authorized to modify this order'], 403);
+            }
 
-            return response()->json($user->cartItems);
+            // Remove all order items related to the order
+            $orderItems = OrderItem::where('orders_id', $orderId)->get();
+
+            // Delete all order items
+            foreach ($orderItems as $orderItem) {
+                $orderItem->delete();
+            }
+
+            // Delete the order itself
+            $order->delete();
+
+            return response()->json([
+                'message' => 'Order and all items removed from cart',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function removeCartItem(Request $request)
+    {
+        try {
+            // Get the authenticated user
+            $user = $request->user();
+            $orderId = $request->input('orderId');
+            $productId = $request->input('productId');
+            // Find the order associated with the provided orderId
+            $order = Order::find($orderId);
+
+            if (!$order) {
+                return response()->json(['message' => 'Order not found'], 404);
+            }
+
+            // Check if the order belongs to the authenticated user
+            if ($order->user_id !== $user->id) {
+                return response()->json(['message' => 'You are not authorized to modify this order'], 403);
+            }
+
+            // Find the specific order item for the provided productId
+            $orderItem = OrderItem::where('orders_id', $orderId)
+                                ->where('products_id', $productId)
+                                ->first();
+
+            if (!$orderItem) {
+                return response()->json(['message' => 'Product not found in cart'], 404);
+            }
+
+            // Store the total amount of the item being deleted
+            $itemTotalAmount = $orderItem->total_amount;
+
+            // Delete the order item from the cart
+            $orderItem->delete();
+
+            // Update the total amount of the order
+            $order->total_amount -= $itemTotalAmount;
+
+            // Save the updated order
+            $order->save();
+
+            // Retrieve the updated order items
+            $allOrderItems = OrderItem::where('orders_id', $orderId)->with('product')->get();
+
+            return response()->json([
+                'orderId' => $order->id,
+                'orderItems' => $allOrderItems,
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
         }
     }
 
     /**
-     * Update the quantity of a product in the user's cart.
+     * Update the quantity of a product in the user's cart by incrementing or decrementing.
      */
-    public function updateQuantity(Request $request, $productId)
+    public function updateOrderItemQuantity(Request $request)
     {
         try {
-            $user = $request->user();  // Get the authenticated user
-            $quantity = $request->input('quantity');
+            // Get the authenticated user
+            $user = $request->user();
+            $orderId = $request->input('orderId');
+            $productId = $request->input('productId');
+            $isIncrement = $request->input('isIncrement'); // true for increment, false for decrement
 
-            // Find the item in the user's cart
-            $existingItem = $user->cartItems->firstWhere('id', $productId);
+            // Ensure 'isIncrement' is either true or false
+            if ($isIncrement === null) {
+                return response()->json(['message' => 'isIncrement flag is required'], 400);
+            }
 
-            if ($existingItem) {
-                if ($quantity == 0) {
-                    // If quantity is 0, remove the product from the cart
-                    $user->cartItems = $user->cartItems->filter(function ($item) use ($productId) {
-                        return $item['id'] !== $productId;
-                    });
-                } else {
-                    // Otherwise, update the quantity
-                    $existingItem['quantity'] = $quantity;
-                }
+            // Find the order associated with the provided orderId
+            $order = Order::find($orderId);
 
-                $user->save();  // Save the updated cartItems
+            if (!$order) {
+                return response()->json(['message' => 'Order not found'], 404);
+            }
 
-                return response()->json($user->cartItems);
-            } else {
+            // Check if the order belongs to the authenticated user
+            if ($order->user_id !== $user->id) {
+                return response()->json(['message' => 'You are not authorized to modify this order'], 403);
+            }
+
+            // Find the specific order item for the provided productId
+            $orderItem = OrderItem::where('orders_id', $orderId)
+                                ->where('products_id', $productId)
+                                ->first();
+
+            if (!$orderItem) {
+                return response()->json(['message' => 'Product not found in cart'], 404);
+            }
+
+            // Get the price per product for recalculating the total amount
+            $product = Product::find($productId);
+            if (!$product) {
                 return response()->json(['message' => 'Product not found'], 404);
             }
+
+            $pricePerProduct = $product->price;
+
+            // Store the previous total amount before updating the quantity
+            $previousTotalAmount = $orderItem->total_amount;
+
+            // Adjust the quantity based on the 'isIncrement' flag
+            if ($isIncrement) {
+                $orderItem->quantity += 1; // Increase quantity by 1
+            } else {
+                if ($orderItem->quantity > 1) {
+                    $orderItem->quantity -= 1; // Decrease quantity by 1, but never go below 1
+                } else {
+                    return response()->json(['message' => 'Quantity cannot be less than 1'], 400);
+                }
+            }
+
+            // Recalculate the total amount for the item
+            $orderItem->total_amount = $orderItem->quantity * $pricePerProduct;
+
+            // Save the updated order item
+            $orderItem->save();
+
+            // Update the total amount of the order by adding the difference between the new total and the old total
+            $order->total_amount += $orderItem->total_amount - $previousTotalAmount;
+
+            // Save the updated order
+            $order->save();
+
+            // Retrieve the updated order items
+            $allOrderItems = OrderItem::where('orders_id', $orderId)->with('product')->get();
+
+            return response()->json([
+                'orderId' => $order->id,
+                'orderItems' => $allOrderItems,
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
         }
     }
+
 }

@@ -65,7 +65,7 @@ const FeaturedProducts = ({ featuredProducts }) => {
 												${(Number(product.price) || 0).toFixed(2)}
 											</p>
 											<button
-												onClick={() => addToCart(product)}
+												onClick={() => addToCart(product.id)}
 												className='w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 px-4 rounded transition-colors duration-300 
 												flex items-center justify-center'
 											>
