@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('code', 45)->nullable(); // Coupon code
             $table->string('discount', 45)->nullable(); // Discount value (can be percentage or fixed)
             $table->dateTime('expiration_date')->nullable(); // Expiration date for the coupon
-            $table->string('is_active', 45)->nullable(); // Indicates whether the coupon is active or not
             $table->timestamps(); // Timestamps for created_at and updated_at
 
         });

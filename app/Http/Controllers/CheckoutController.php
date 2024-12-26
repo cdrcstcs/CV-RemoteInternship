@@ -18,6 +18,35 @@ class CheckoutController extends Controller
         Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
     }
 
+
+    // Update the order total before proceeding to checkout
+    public function updateOrderTotal(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $orderId = $request->input('orderId');
+            $totalAmount = $request->input('totalAmount');
+
+            $order = Order::find($orderId);
+            if (!$order) {
+                return response()->json(['message' => 'Order not found'], 404);
+            }
+
+            if ($order->user_id !== $user->id) {
+                return response()->json(['message' => 'You are not authorized to modify this order'], 403);
+            }
+
+            $order->total_amount = $totalAmount;
+            $order->save();
+
+            return response()->json([
+                'message' => 'order updated successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
+        }
+    }
+
     /**
      * Create a Stripe Checkout session
      */

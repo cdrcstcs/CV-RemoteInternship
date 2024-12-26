@@ -17,7 +17,6 @@ class Coupon extends Model
         'code',
         'discount',
         'expiration_date',
-        'is_active',
     ];
 
     // You can also define any specific logic for this model, if necessary.

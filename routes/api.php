@@ -32,14 +32,16 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/cart', [CartController::class, 'addToCart']);
         Route::delete('/allfromcart', [CartController::class, 'removeAllFromCart']);
         Route::delete('/cart', [CartController::class, 'removeCartItem']);
+        Route::post('/cart/quantity', [CartController::class, 'updateOrderItemQuantity']);
 
         // Coupon Routes (Authenticated users)
-        Route::get('/coupon', [CouponController::class, 'getCoupon']);
-        Route::post('/coupon/validate', [CouponController::class, 'validateCoupon']);
+        Route::post('/coupon', [CouponController::class, 'getMyCoupon']);
+        Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
 
         // Payment Routes (Authenticated users)
         Route::post('/payment/create-checkout-session', [PaymentController::class, 'createCheckoutSession']);
         Route::post('/payment/checkout-success', [PaymentController::class, 'checkoutSuccess']);
+        Route::put('/payment/update-total', [PaymentController::class, 'updateOrderTotal']);
 
         // Product Routes (Admin only)
         Route::get('/products', [ProductController::class, 'getAllProducts']);
