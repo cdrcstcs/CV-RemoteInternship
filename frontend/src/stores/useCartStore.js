@@ -21,7 +21,7 @@ export const useCartStore = create((set, get) => ({
 
       const productIds = cart.map(item => item.product_id); // Extract the product IDs from cart items
 
-      const response = await axiosInstance.get(`/coupons`, {
+      const response = await axiosInstance.post(`/coupon`, {
         params: { productIds }, // Pass productIds (cart items) to the backend
       });
 
@@ -44,7 +44,7 @@ export const useCartStore = create((set, get) => ({
       const productIds = cart.map(item => item.product_id); // Extract the product IDs from cart items
 
       // Send the coupon id, product IDs, and orderId to validate the coupon
-      const response = await axiosInstance.post("/coupons/apply", { couponId, productIds, orderId });
+      const response = await axiosInstance.post("/coupon/apply", { couponId, productIds, orderId });
 
       // Update the state with the coupon data, and the updated cart and totals
       set({

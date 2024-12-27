@@ -13,17 +13,17 @@ return new class extends Migration
     public function up()
     {
         Schema::create('order_items', function (Blueprint $table) {
+            $table->id();  // Auto-incrementing primary key (id)
+
             // Define foreign key columns first
             $table->unsignedBigInteger('orders_id');  // Foreign key referencing orders table
             $table->unsignedBigInteger('products_id');  // Foreign key referencing products table
 
             // Define other columns
             $table->integer('quantity')->nullable();  // Quantity
-            $table->string('total_amount', 45)->nullable();  // Total amount (as string)
+            $table->integer('total_amount')->nullable();  // Total amount (as string)
 
             // Define composite primary key
-            $table->primary(['orders_id', 'products_id']);
-
             // Define foreign keys
             $table->foreign('orders_id')
                 ->references('id')->on('orders')

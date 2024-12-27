@@ -19,12 +19,6 @@ class CartController extends Controller
         try {
             $user = $request->user();  // Get the authenticated user
 
-            // Log user information as an array
-            Log::info('Login attempt', $user->toArray());
-
-            // Log authenticated user information as an array
-            Log::info('Login attempt', Auth::user() ? Auth::user()->toArray() : null);
-
             $productId = $request->input('productId');
             $orderId = $request->input('orderId');
             $product = Product::find($productId);  // Correct method: find()
@@ -61,6 +55,8 @@ class CartController extends Controller
 
             // If the product is already in the cart
             if ($existingItem) {
+                Log::info('Existing Item', $existingItem->toArray());
+
                 // Store the previous total amount before updating the quantity
                 $previousTotalAmount = $existingItem->total_amount;
 

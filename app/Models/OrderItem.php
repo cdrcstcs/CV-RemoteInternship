@@ -11,10 +11,7 @@ class OrderItem extends Model
 
     // Table name
     protected $table = 'order_items'; // Note that Laravel will use the plural form "order_items"
-
-    // Primary key definition
-    protected $primaryKey = ['orders_id', 'products_id']; // Composite primary key
-    public $incrementing = false; // This is necessary because the primary key is not auto-incrementing
+    protected $primaryKey = 'id';  // Default primary key
 
     // Define the columns that can be mass-assigned
     protected $fillable = [
