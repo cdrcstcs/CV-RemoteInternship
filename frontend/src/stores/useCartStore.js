@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "../lib/axios";
+import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
 
 export const useCartStore = create((set, get) => ({
@@ -7,31 +7,33 @@ export const useCartStore = create((set, get) => ({
   orderId: null,
   isCouponApplied: false,
   isOrderChanged: false,
+  coupon: null, // Selected coupon
+  userCoupons: [], // List of user coupons
 
-  // Fetch coupon data and include the cart items
-  getMyCoupon: async () => {
+  // Fetch all user coupons and include the cart items
+  getMyCoupons: async () => {
     try {
       const { cart } = get(); // Get the current cart items
       if (!cart || cart.length === 0) {
-        toast.error("Cart is empty. Unable to fetch coupon.");
+        toast.error("Cart is empty. Unable to fetch coupons.");
         return;
       }
 
       const productIds = cart.map(item => item.product_id); // Extract the product IDs from cart items
 
-      const response = await axios.get(`/coupons`, {
+      const response = await axiosInstance.get(`/coupons`, {
         params: { productIds }, // Pass productIds (cart items) to the backend
       });
 
-      set({ coupon: response.data });
+      set({ userCoupons: response.data }); // Store the list of user coupons
     } catch (error) {
-      console.error("Error fetching coupon:", error);
-      toast.error(error.response?.data?.message || "Failed to fetch coupon. Please try again.");
+      console.error("Error fetching coupons:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch coupons. Please try again.");
     }
   },
 
   // Apply a coupon, update cart and totals
-  applyCoupon: async (code) => {
+  applyCoupon: async (couponId) => {
     try {
       const { cart, orderId } = get(); // Get the current cart and orderId
       if (!cart || cart.length === 0) {
@@ -41,13 +43,14 @@ export const useCartStore = create((set, get) => ({
 
       const productIds = cart.map(item => item.product_id); // Extract the product IDs from cart items
 
-      // Send the coupon code, product IDs, and orderId to validate the coupon
-      const response = await axios.post("/coupons/apply", { code, productIds, orderId });
+      // Send the coupon id, product IDs, and orderId to validate the coupon
+      const response = await axiosInstance.post("/coupons/apply", { couponId, productIds, orderId });
 
       // Update the state with the coupon data, and the updated cart and totals
       set({
         cart: response.data.cart, // Update the cart with the new items (with the coupon applied)
         isCouponApplied: true, // Mark coupon as applied
+        coupon: response.data.coupon, // Set the applied coupon
       });
 
       toast.success("Coupon applied successfully");
@@ -64,7 +67,8 @@ export const useCartStore = create((set, get) => ({
       // Reset cart, total, and subtotal when coupon is removed
       set({
         isCouponApplied: false,
-        coupon: null,
+        coupon: null, // Remove the applied coupon
+        userCoupons: [], // Optionally clear the user coupons list
       });
 
       toast.success("Coupon removed");
@@ -77,7 +81,7 @@ export const useCartStore = create((set, get) => ({
   // Clear the cart, reset orderId, and reset coupon states
   clearCart: async () => {
     try {
-      await axios.delete(`/allfromcart`);
+      await axiosInstance.delete(`/allfromcart`);
       set({ cart: [], orderId: null, isCouponApplied: false }); // Reset cart and coupon state
       toast.success("Cart cleared successfully");
     } catch (error) {
@@ -90,7 +94,7 @@ export const useCartStore = create((set, get) => ({
   addToCart: async (productId) => {
     try {
       const { orderId } = get(); // Get the current orderId
-      const response = await axios.post("/cart", { productId, orderId }); // Send orderId with productId
+      const response = await axiosInstance.post("/cart", { productId, orderId }); // Send orderId with productId
       const { orderId: newOrderId, orderItems } = response.data;
 
       set({
@@ -110,7 +114,7 @@ export const useCartStore = create((set, get) => ({
   removeFromCart: async (productId) => {
     try {
       const { orderId } = get(); // Get the current orderId
-      const response = await axios.delete("/cart", { data: { productId, orderId } }); // Send data as part of request body
+      const response = await axiosInstance.delete("/cart", { data: { productId, orderId } }); // Send data as part of request body
       const { orderId: newOrderId, orderItems } = response.data;
 
       set({
@@ -130,7 +134,7 @@ export const useCartStore = create((set, get) => ({
   updateQuantity: async (productId, isIncrement) => {
     try {
       const { orderId } = get(); // Get the current orderId
-      const response = await axios.put("/cart/quantity", { productId, orderId, isIncrement }); // Sending the isIncrement flag
+      const response = await axiosInstance.put("/cart/quantity", { productId, orderId, isIncrement }); // Sending the isIncrement flag
       const { orderId: newOrderId, orderItems } = response.data;
 
       set({

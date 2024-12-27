@@ -2,182 +2,133 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Support\Facades\Cookie;
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Illuminate\Support\Facades\Redis;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    // Signup user
+    // Signup method
     public function signup(Request $request)
     {
-        $request->validate([
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'phone_number' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-            'language' => 'nullable|string|in:en,es,fr',  // You can extend this list as per requirement
-            'two_factor_enabled' => 'nullable|boolean',
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|string|email|unique:users,email|max:255',
+            'phone_number' => 'nullable|string|max:15', // Optional field for phone number
+            'ip_address' => 'nullable|ip', // Optional field for IP address
+            'password' => 'required|string|min:6',
+            'language' => 'nullable|string|max:2', // Optional language code (e.g., 'en', 'fr')
         ]);
 
+        // Handle validation failure
+        if ($validator->fails()) {
+            Log::warning('Signup validation failed', $validator->errors()->toArray());
+            return response()->json(['message' => $validator->errors()->first()], 400);
+        }
+
         try {
-            // Create the user in the database
+            // Create the user
             $user = User::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
-                'phone_number' => $request->phone_number,
                 'email' => $request->email,
+                'phone_number' => $request->phone_number,
+                'ip_address' => $request->ip_address,
+                'language' => $request->language ?? 'en', // Default to 'en' if not provided
                 'password' => Hash::make($request->password),
-                'language' => $request->language ?? 'en', // Default to 'en' if no language is provided
-                'two_factor_enabled' => $request->two_factor_enabled ?? false, // Default to false
             ]);
 
-            // Generate tokens
-            $tokens = $this->generateTokens($user->id);
+            // Create a new token for the user
+            $token = $user->createToken('token-name')->plainTextToken;
 
-            // Store the refresh token in Redis
-            $this->storeRefreshToken($user->id, $tokens['refresh_token']);
-
-            // Set cookies
-            $this->setCookies($tokens['access_token'], $tokens['refresh_token']);
-
+            // Return all user details along with the token
             return response()->json([
-                'id' => $user->id,
-                'first_name' => $user->first_name,
-                'last_name' => $user->last_name,
-                'email' => $user->email,
-                'phone_number' => $user->phone_number,
-                'language' => $user->language,
-                'two_factor_enabled' => $user->two_factor_enabled,
+                'message' => 'User registered successfully',
+                'user' => $user,
+                'token' => $token
             ], 201);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error in signup', 'error' => $e->getMessage()], 500);
+        } catch (\Exception $error) {
+            Log::error("Signup error: ", ['error' => $error->getMessage()]);
+            return response()->json(['message' => 'Server error'], 500);
         }
     }
 
-    // Login user
+    // Login method
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string',
         ]);
 
-        try {
-            $user = User::where('email', $request->email)->first();
-
-            if ($user && Hash::check($request->password, $user->password)) {
-                $tokens = $this->generateTokens($user->id);
-
-                // Store the refresh token in Redis
-                $this->storeRefreshToken($user->id, $tokens['refresh_token']);
-
-                // Set cookies
-                $this->setCookies($tokens['access_token'], $tokens['refresh_token']);
-
-                return response()->json([
-                    'id' => $user->id,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'email' => $user->email,
-                    'phone_number' => $user->phone_number,
-                    'language' => $user->language,
-                    'two_factor_enabled' => $user->two_factor_enabled,
-                ]);
-            } else {
-                return response()->json(['message' => 'Invalid credentials'], 400);
-            }
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error in login', 'error' => $e->getMessage()], 500);
+        // Handle validation failure
+        if ($validator->fails()) {
+            Log::warning('Login validation failed', $validator->errors()->toArray());
+            return response()->json(['message' => $validator->errors()->first()], 400);
         }
+
+        // Attempt to log the user in
+        $credentials = $request->only('email', 'password');
+        Log::info('Login attempt', $credentials);
+
+        // Find the user by email first
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            Log::warning('Invalid login credentials', $credentials);
+            return response()->json(['message' => 'Invalid credentials'], 400);
+        }
+
+        // Log the user in
+        Auth::login($user);
+
+        // Generate the token
+        $token = $user->createToken('token-name')->plainTextToken;
+
+        // Optionally, you can log the successful login
+        Log::info('User logged in successfully', ['user_id' => $user->id]);
+
+        // Return all user details along with the token
+        return response()->json([
+            'message' => 'Logged in successfully',
+            'user' => $user,
+            'token' => $token
+        ]);
     }
 
-    // Logout user
+    // Logout method
     public function logout(Request $request)
     {
         try {
-            $refreshToken = $request->cookie('refreshToken');
-            if ($refreshToken) {
-                $decoded = JWTAuth::decode($refreshToken);
-                Redis::del("refresh_token:{$decoded['sub']}");
+            if (!$request->user()) {
+                return response()->json(['message' => 'Unauthorized'], 401);
             }
 
-            // Clear cookies
-            Cookie::queue(Cookie::forget('accessToken'));
-            Cookie::queue(Cookie::forget('refreshToken'));
+            // Delete all tokens for the user
+            $request->user()->tokens()->delete(); // Revoke all tokens
+
+            // Optionally, log out session-based authentication
+            Auth::logout();
+
+            // Log the logout action
+            Log::info('User logged out successfully', ['user_id' => $request->user()->id]);
 
             return response()->json(['message' => 'Logged out successfully']);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error in logout', 'error' => $e->getMessage()], 500);
+        } catch (\Exception $error) {
+            Log::error("Logout error: ", ['error' => $error->getMessage()]);
+            return response()->json(['message' => 'Server error'], 500);
         }
     }
 
-    // Refresh access token
-    public function refreshToken(Request $request)
+    public function getCurrentUser(Request $request)
     {
-        try {
-            $refreshToken = $request->cookie('refreshToken');
-
-            if (!$refreshToken) {
-                return response()->json(['message' => 'No refresh token provided'], 401);
-            }
-
-            $decoded = JWTAuth::decode($refreshToken);
-            $storedToken = Redis::get("refresh_token:{$decoded['sub']}");
-
-            if ($storedToken !== $refreshToken) {
-                return response()->json(['message' => 'Invalid refresh token'], 401);
-            }
-
-            $accessToken = JWTAuth::fromUser(User::find($decoded['sub']));
-
-            // Set new access token in cookies
-            Cookie::queue(Cookie::make('accessToken', $accessToken, 15, null, null, true, true));
-
-            return response()->json(['message' => 'Token refreshed successfully']);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error in refreshing token', 'error' => $e->getMessage()], 500);
-        }
-    }
-
-    // Get user profile
-    public function getProfile(Request $request)
-    {
-        try {
-            return response()->json($request->user());
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error fetching profile', 'error' => $e->getMessage()], 500);
-        }
-    }
-
-    // Helper method to generate JWT tokens
-    private function generateTokens($userId)
-    {
-        $accessToken = JWTAuth::fromUser(User::find($userId));
-        $refreshToken = JWTAuth::fromUser(User::find($userId), ['exp' => Carbon::now()->addDays(7)->timestamp]);
-
-        return [
-            'access_token' => $accessToken,
-            'refresh_token' => $refreshToken,
-        ];
-    }
-
-    // Helper method to store refresh token in Redis
-    private function storeRefreshToken($userId, $refreshToken)
-    {
-        Redis::setex("refresh_token:{$userId}", 7 * 24 * 60 * 60, $refreshToken); // expires in 7 days
-    }
-
-    // Helper method to set access and refresh tokens in cookies
-    private function setCookies($accessToken, $refreshToken)
-    {
-        Cookie::queue(Cookie::make('accessToken', $accessToken, 15, null, null, true, true));  // 15 minutes
-        Cookie::queue(Cookie::make('refreshToken', $refreshToken, 7 * 24 * 60, null, null, true, true));  // 7 days
+        // Return the authenticated user
+        return response()->json($request->user());
     }
 }

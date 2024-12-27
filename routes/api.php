@@ -15,7 +15,7 @@ Route::middleware('custom_cors')->group(function () {
     Route::post('/signup', [AuthController::class, 'signup']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
+    Route::middleware('auth:sanctum')->get('/me', [AuthController::class, 'getCurrentUser']);
 
     // Public Product Routes
     Route::get('/products/featured', [ProductController::class, 'getFeaturedProducts']);
@@ -23,16 +23,14 @@ Route::middleware('custom_cors')->group(function () {
     Route::get('/products/recommendations', [ProductController::class, 'getRecommendedProducts']);
 
     // Protected Routes
-    Route::middleware('auth:api')->group(function () {
-
-        // Profile Route
-        Route::get('/profile', [AuthController::class, 'getProfile']);
-
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
+        
         // Cart Routes (Authenticated users)
         Route::post('/cart', [CartController::class, 'addToCart']);
         Route::delete('/allfromcart', [CartController::class, 'removeAllFromCart']);
         Route::delete('/cart', [CartController::class, 'removeCartItem']);
-        Route::post('/cart/quantity', [CartController::class, 'updateOrderItemQuantity']);
+        Route::put('/cart/quantity', [CartController::class, 'updateOrderItemQuantity']);
 
         // Coupon Routes (Authenticated users)
         Route::post('/coupon', [CouponController::class, 'getMyCoupon']);

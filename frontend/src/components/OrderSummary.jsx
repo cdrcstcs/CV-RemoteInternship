@@ -4,30 +4,30 @@ import { Link } from "react-router-dom";
 import { MoveRight } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "../lib/axios";
+import { useEffect } from "react";
 
 const stripePromise = loadStripe(
   "pk_test_51KZYccCoOZF2UhtOwdXQl3vcizup20zqKqT9hVUIsVzsdBrhqbUI2fE0ZdEVLdZfeHjeyFXtqaNsyCJCmZWnjNZa00PzMAjlcL"
 );
 
 const OrderSummary = () => {
-  // Get only cart and orderId from the store
+  // Get the cart and orderId from the store
   const { cart, orderId } = useCartStore();
 
   // Calculate subtotal, savings, and total directly in the component
   const subtotal = cart.reduce((acc, item) => acc + item.total_amount, 0);
+  console.log(subtotal);
   const couponDiscount = cart.reduce((acc, item) => acc + item.discount, 0); // Assuming each item might have a discount
   const total = subtotal - couponDiscount;
 
   const savings = subtotal - total;
-  const formattedSubtotal = subtotal.toFixed(2);
-  const formattedTotal = total.toFixed(2);
-  const formattedSavings = savings.toFixed(2);
+  const formattedSubtotal = subtotal;
+  const formattedTotal = total;
+  const formattedSavings = savings;
 
   // Handle payment
   const handlePayment = async () => {
     try {
-      // Update order on the backend before proceeding to checkout
-      await axios.put("/payment/update-total", { orderId, totalAmount: total });
 
       // Initialize Stripe and proceed with the checkout
       const stripe = await stripePromise;
@@ -48,6 +48,23 @@ const OrderSummary = () => {
     }
   };
 
+  // Listen for cart changes and update the total amount on the server
+  useEffect(() => {
+    if (orderId && cart.length > 0) {
+      const updateTotal = async () => {
+        try {
+          // Update the total amount on the backend
+          await axios.put("/payment/update-total", { orderId, totalAmount: total });
+        } catch (error) {
+          console.error("Error updating order total:", error);
+        }
+      };
+
+      // Update total when cart changes
+      updateTotal();
+    }
+  }, [cart, total, orderId]); // Only re-run when cart or total changes
+
   return (
     <motion.div
       className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6"
@@ -63,7 +80,7 @@ const OrderSummary = () => {
           {cart.map((item) => (
             <dl key={item.product_id} className="flex items-center justify-between gap-4">
               <dt className="text-base font-normal text-gray-300">{item.product.name}</dt>
-              <dd className="text-base font-medium text-white">${item.total_amount.toFixed(2)}</dd>
+              <dd className="text-base font-medium text-white">${item.total_amount}</dd>
             </dl>
           ))}
 

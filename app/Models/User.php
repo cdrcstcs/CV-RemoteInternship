@@ -1,20 +1,19 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Foundation\Auth\User as Authenticatable;  // Use Authenticatable
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Factories\HasFactory; // Correct namespace for HasFactory
 
-class User extends Model implements JWTSubject
+class User extends Authenticatable  // Extend Authenticatable
 {
-    use HasFactory;
+    use HasFactory, HasApiTokens;
 
-    protected $table = 'users'; // Specifies the table name
+    protected $table = 'users';
 
-    protected $primaryKey = 'id'; // Primary key column name
+    protected $primaryKey = 'id';
 
-    public $timestamps = true; // Indicates whether the model should manage created_at and updated_at timestamps
+    public $timestamps = true;
 
     protected $fillable = [
         'first_name',
@@ -31,13 +30,13 @@ class User extends Model implements JWTSubject
     ];
 
     protected $casts = [
-        'two_factor_enabled' => 'boolean', // Casts the two_factor_enabled attribute to a boolean value
-        'is_admin' => 'boolean', // Casts the is_admin attribute to a boolean value
-        'last_login' => 'datetime', // Automatically casts to a datetime
-        'last_password_change' => 'datetime', // Automatically casts to a datetime
+        'two_factor_enabled' => 'boolean',
+        'is_admin' => 'boolean',
+        'last_login' => 'datetime',
+        'last_password_change' => 'datetime',
     ];
 
-    // Optionally, add any relationships or additional methods here
+    // Relationships and other methods as usual
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'users_roles', 'users_id', 'roles_id');
@@ -45,29 +44,16 @@ class User extends Model implements JWTSubject
 
     public function coupons()
     {
-        return $this->belongsToMany(Coupon::class, 'users_coupons', 'users_id', 'coupons_id')
-            ->withTimestamps();  // Include timestamps if needed
+        return $this->belongsToMany(Coupon::class, 'users_coupons', 'users_id', 'coupons_id')->withTimestamps();
     }
 
-    // Implement the methods required by the JWTSubject interface
-
-    /**
-     * Get the unique identifier for the user.
-     *
-     * @return mixed
-     */
-    public function getJWTIdentifier()
+    public function setPasswordAttribute($value)
     {
-        return $this->getKey(); // Typically the user's ID
+        $this->attributes['password'] = bcrypt($value);
     }
 
-    /**
-     * Return a key value array, containing any custom claims you want to add to your token.
-     *
-     * @return array
-     */
-    public function getJWTCustomClaims()
+    public function getFullNameAttribute()
     {
-        return []; // You can add custom claims here if needed
+        return $this->first_name . ' ' . $this->last_name;
     }
 }

@@ -17,7 +17,6 @@ class CouponFactory extends Factory
     public function definition(): array
     {
         return [
-            'code' => $this->faker->unique()->lexify('COUPON-??????'), // Random coupon code with a prefix 'COUPON-'
             'discount' => $this->faker->numberBetween(5, 50), // Random discount percentage between 5 and 50
             'expiration_date' => $this->faker->dateTimeBetween('now', '+1 year'), // Random expiration date within the next year
         ];

@@ -1,12 +1,13 @@
 import { create } from "zustand";
-import axios from "../lib/axios";
+import axiosInstance from "../lib/axios"; // Ensure this is the correct path to your axiosInstance instance
 import { toast } from "react-hot-toast";
 
 export const useUserStore = create((set, get) => ({
   user: null,
   loading: false,
-  checkingAuth: true,
+  checkingAuth: false,
 
+  // Signup user
   signup: async ({ first_name, last_name, phone_number, email, password, confirmPassword, language = "en" }) => {
     set({ loading: true });
 
@@ -17,92 +18,99 @@ export const useUserStore = create((set, get) => ({
     }
 
     try {
-      const res = await axios.post("/signup", { first_name, last_name, phone_number, email, password, language });
-      set({ user: res.data, loading: false });
+      // Make the API call for signup
+      const res = await axiosInstance.post("/signup", { 
+        first_name, 
+        last_name, 
+        phone_number, 
+        email, 
+        password, 
+        language 
+      });
+
+      // Save the access token (you may adjust to store refresh token if needed in the future)
+      localStorage.setItem("access_token", res.data.token);
+
+      // Update the user state with the user data returned from the API
+      set({ user: res.data.user, loading: false });
+
+      // Show success message
       toast.success("Account created successfully!");
     } catch (error) {
       set({ loading: false });
+
+      // Show error message from API response
       toast.error(error.response?.data?.message || "An error occurred during signup");
     }
   },
 
+  // Login user
   login: async (email, password) => {
     set({ loading: true });
 
     try {
-      const res = await axios.post("/login", { email, password });
-      set({ user: res.data, loading: false });
+      // Make the API call for login
+      const res = await axiosInstance.post("/login", { email, password });
+
+      // Save the access token (store refresh token if necessary in the future)
+      localStorage.setItem("access_token", res.data.token);
+
+      // Update the user state with the user data returned from the API
+      set({ user: res.data.user, loading: false });
+
+      // Show success message
+      toast.success("Logged in successfully!");
     } catch (error) {
       set({ loading: false });
+
+      // Show error message from API response
       toast.error(error.response?.data?.message || "An error occurred during login");
     }
   },
 
+  // Logout user
   logout: async () => {
     try {
-      await axios.post("/logout");
-      set({ user: null });
+      // Make the API call for logout
+      await axiosInstance.post("/logout");
+
+      // Clear access token from localStorage (and any other tokens you may store)
+      localStorage.removeItem("access_token");
+
+      // Reset user state and set checkingAuth to false
+      set({ user: null, checkingAuth: false });
+
+      // Show success message
+      toast.success("Logged out successfully!");
     } catch (error) {
+      // Handle any error that occurs during logout
       toast.error(error.response?.data?.message || "An error occurred during logout");
     }
   },
 
+  // Optionally, check authentication on page load (to auto-login if token exists)
   checkAuth: async () => {
     set({ checkingAuth: true });
-    try {
-      const response = await axios.get("/profile");
-      set({ user: response.data, checkingAuth: false });
-    } catch (error) {
-      console.log(error.message);
-      set({ checkingAuth: false, user: null });
-    }
-  },
 
-  refreshToken: async () => {
-    // Prevent multiple simultaneous refresh attempts
-    if (get().checkingAuth) return;
+    const token = localStorage.getItem("access_token");
 
-    set({ checkingAuth: true });
-    try {
-      const response = await axios.post("/refresh-token");
+    if (!token) {
       set({ checkingAuth: false });
-      return response.data;
+      return; // No token, can't check auth
+    }
+
+    try {
+      // Make a call to the backend to check if the token is still valid
+      const res = await axiosInstance.get("/me");
+
+      // Set the user state with the valid user data
+      set({ user: res.data.user, checkingAuth: false });
     } catch (error) {
+      // If the token is invalid or expired, clear it from localStorage
+      localStorage.removeItem("access_token");
+
       set({ user: null, checkingAuth: false });
-      throw error;
     }
   },
 }));
 
-// Axios interceptor for token refresh
-let refreshPromise = null;
-
-axios.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        // If a refresh is already in progress, wait for it to complete
-        if (refreshPromise) {
-          await refreshPromise;
-          return axios(originalRequest);
-        }
-
-        // Start a new refresh process
-        refreshPromise = useUserStore.getState().refreshToken();
-        await refreshPromise;
-        refreshPromise = null;
-
-        return axios(originalRequest);
-      } catch (refreshError) {
-        // If refresh fails, logout the user
-        useUserStore.getState().logout();
-        return Promise.reject(refreshError);
-      }
-    }
-    return Promise.reject(error);
-  }
-);

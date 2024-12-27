@@ -56,7 +56,7 @@ class CouponController extends Controller
     {
         try {
             $user = $request->user();  // Get the authenticated user
-            $couponCode = $request->code;  // Coupon code from the request
+            $couponId = $request->couponId;  // Coupon code from the request
             $productIds = $request->productIds;  // Product IDs from the request
             $orderId = $request->orderId;  // Order ID (if applicable)
 
@@ -65,7 +65,7 @@ class CouponController extends Controller
             }
 
             // Validate if the coupon exists
-            $coupon = Coupon::where('code', $couponCode)->first();
+            $coupon = Coupon::where('id', $couponId)->first();
 
             if (!$coupon) {
                 return response()->json(['message' => 'Coupon code is invalid.'], 400);

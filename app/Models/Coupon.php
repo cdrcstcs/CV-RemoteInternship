@@ -14,7 +14,6 @@ class Coupon extends Model
 
     // If needed, define the columns that are fillable
     protected $fillable = [
-        'code',
         'discount',
         'expiration_date',
     ];

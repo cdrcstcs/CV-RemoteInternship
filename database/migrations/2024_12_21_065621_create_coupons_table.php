@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('coupons', function (Blueprint $table) {
             $table->id(); // Id for the coupon
-            $table->string('code', 45)->nullable(); // Coupon code
             $table->string('discount', 45)->nullable(); // Discount value (can be percentage or fixed)
             $table->dateTime('expiration_date')->nullable(); // Expiration date for the coupon
             $table->timestamps(); // Timestamps for created_at and updated_at

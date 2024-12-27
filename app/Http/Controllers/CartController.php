@@ -5,6 +5,7 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
@@ -17,6 +18,13 @@ class CartController extends Controller
     {
         try {
             $user = $request->user();  // Get the authenticated user
+
+            // Log user information as an array
+            Log::info('Login attempt', $user->toArray());
+
+            // Log authenticated user information as an array
+            Log::info('Login attempt', Auth::user() ? Auth::user()->toArray() : null);
+
             $productId = $request->input('productId');
             $orderId = $request->input('orderId');
             $product = Product::find($productId);  // Correct method: find()
