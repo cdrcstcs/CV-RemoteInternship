@@ -40,8 +40,27 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         // Seed Users
-        User::factory(10)->create();  // Example: Create 10 users
-
+        $users = User::factory(10)->create();  // Example: Create 10 users
+        $products = Product::factory()->count(10)->create(); // Example: creating 10 products
+        foreach ($users as $user) {
+            // Create a coupon
+            $coupons = Coupon::factory(10)->create();
+            foreach($coupons as $coupon) {
+                foreach ($products as $product) {    
+                    // Link the coupon to the product via the ProductCoupon table
+                    ProductCoupon::create([
+                        'products_id' => $product->id, // Link to the product
+                        'coupons_id' => $coupon->id,   // Link to the coupon
+                    ]);
+                }
+    
+                UserCoupon::create([
+                    'users_id' => $user->id, // Link to the product
+                    'coupons_id' => $coupon->id,   // Link to the coupon
+                ]);
+            }
+            
+        }
         // Seed Roles
         Role::factory(5)->create(); // Example: Create 5 roles
 
@@ -65,12 +84,6 @@ class DatabaseSeeder extends Seeder
 
         // Seed Categories
         Category::factory(5)->create(); // Example: Create 5 categories
-
-        // Seed Products
-        Product::factory(20)->create(); // Example: Create 20 products
-
-        // Seed Coupons
-        Coupon::factory(5)->create(); // Example: Create 5 coupons
 
         // Seed Invoices
         Invoice::factory(10)->create(); // Example: Create 10 invoices
@@ -97,9 +110,9 @@ class DatabaseSeeder extends Seeder
         Rating::factory(10)->create(); // Example: Create 10 ratings
 
         ProductCategory::factory(5)->create();
-        ProductCoupon::factory(5)->create();
+
+
         RolePermission::factory(5)->create();
-        UserCoupon::factory(5)->create();
         UserRole::factory(5)->create();
     }
 }

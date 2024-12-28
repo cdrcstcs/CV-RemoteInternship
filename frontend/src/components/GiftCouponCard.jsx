@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useCartStore } from "../stores/useCartStore";
 
 const GiftCouponCard = () => {
-  const { userCoupons, isCouponApplied, applyCoupon, removeCoupon, getMyCoupons, coupon } = useCartStore();
+  const { userCoupons, isCouponApplied, applyCoupon, getMyCoupons } = useCartStore();
   const [selectedCoupon, setSelectedCoupon] = useState(null); // Track the selected coupon
 
   useEffect(() => {
@@ -12,13 +12,10 @@ const GiftCouponCard = () => {
 
   const handleApplyCoupon = (couponId) => {
     if (couponId) {
+      console.log(couponId);
       applyCoupon(couponId); // Apply the selected coupon
+      setSelectedCoupon(userCoupons.find(coupon => coupon.id === couponId)); // Set the selected coupon
     }
-  };
-
-  const handleRemoveCoupon = async () => {
-    await removeCoupon(); // Remove the applied coupon
-    setSelectedCoupon(null); // Reset selected coupon
   };
 
   return (
@@ -33,47 +30,31 @@ const GiftCouponCard = () => {
           Select a Coupon:
         </label>
 
-        <select
-          id="voucher"
-          className="block w-full rounded-lg border border-gray-600 bg-gray-700 p-2.5 text-sm text-white placeholder-gray-400 focus:border-emerald-500 focus:ring-emerald-500"
-          value={selectedCoupon?.id || ""}
-          onChange={(e) => setSelectedCoupon(userCoupons.find(coupon => coupon.id === e.target.value))}
-        >
-          <option value="" disabled>Select a coupon</option>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {userCoupons.map((coupon) => (
-            <option key={coupon.id} value={coupon.id}>
-              {coupon.code} - {coupon.discount}% off
-            </option>
+            <motion.div
+              key={coupon.id}
+              className={`cursor-pointer rounded-lg border p-4 text-center ${
+                selectedCoupon?.id === coupon.id ? 'bg-emerald-600 border-emerald-500' : 'bg-gray-700 border-gray-600'
+              }`}
+              onClick={() => handleApplyCoupon(coupon.id)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <h4 className="text-lg font-medium text-white">{coupon.code}</h4>
+              <p className="mt-2 text-sm text-gray-400">{coupon.discount}% off</p>
+            </motion.div>
           ))}
-        </select>
-
-        <motion.button
-          type="button"
-          className="w-full rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => handleApplyCoupon(selectedCoupon?.id)}
-        >
-          Apply Code
-        </motion.button>
+        </div>
       </div>
 
-      {isCouponApplied && coupon && (
+      {/* Optionally display the applied coupon if one is applied */}
+      {isCouponApplied && selectedCoupon && (
         <div className="mt-4">
           <h3 className="text-lg font-medium text-gray-300">Applied Coupon</h3>
           <p className="mt-2 text-sm text-gray-400">
-            {coupon.code} - {coupon.discount}% off
+            {selectedCoupon.code} - {selectedCoupon.discount}% off
           </p>
-
-          <motion.button
-            type="button"
-            className="mt-2 flex w-full items-center justify-center rounded-lg bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleRemoveCoupon}
-          >
-            Remove Coupon
-          </motion.button>
         </div>
       )}
     </motion.div>

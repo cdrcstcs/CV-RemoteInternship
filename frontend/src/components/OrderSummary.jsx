@@ -12,23 +12,16 @@ const stripePromise = loadStripe(
 
 const OrderSummary = () => {
   // Get the cart and orderId from the store
-  const { cart, orderId } = useCartStore();
+  const { cart, orderId, totalAmount, discountAmount, totalAfterDiscount, isCouponApplied, coupon, applyCoupon } = useCartStore();
 
-  // Calculate subtotal, savings, and total directly in the component
-  const subtotal = cart.reduce((acc, item) => acc + item.total_amount, 0);
-  console.log(subtotal);
-  const couponDiscount = cart.reduce((acc, item) => acc + item.discount, 0); // Assuming each item might have a discount
-  const total = subtotal - couponDiscount;
-
-  const savings = subtotal - total;
-  const formattedSubtotal = subtotal;
-  const formattedTotal = total;
-  const formattedSavings = savings;
+  // Calculate total, savings, and total directly in the component
+  const formattedTotal = totalAmount.toFixed(2);
+  const formattedDiscountAmount = discountAmount.toFixed(2);
+  const formattedTotalAfterDiscount = totalAfterDiscount.toFixed(2);
 
   // Handle payment
   const handlePayment = async () => {
     try {
-
       // Initialize Stripe and proceed with the checkout
       const stripe = await stripePromise;
       const res = await axios.post("/payment/create-checkout-session", {
@@ -50,20 +43,11 @@ const OrderSummary = () => {
 
   // Listen for cart changes and update the total amount on the server
   useEffect(() => {
-    if (orderId && cart.length > 0) {
-      const updateTotal = async () => {
-        try {
-          // Update the total amount on the backend
-          await axios.put("/payment/update-total", { orderId, totalAmount: total });
-        } catch (error) {
-          console.error("Error updating order total:", error);
-        }
-      };
-
-      // Update total when cart changes
-      updateTotal();
+    // Ensure coupon is only applied once, and only when the cart has items
+    if (orderId && cart.length > 0 && !isCouponApplied && coupon) {
+      applyCoupon(coupon.id);  // Apply coupon if not already applied
     }
-  }, [cart, total, orderId]); // Only re-run when cart or total changes
+  }, [cart, totalAmount, orderId, isCouponApplied, coupon, applyCoupon]); // Only re-run when necessary
 
   return (
     <motion.div
@@ -78,27 +62,31 @@ const OrderSummary = () => {
         {/* Display Order Items */}
         <div className="space-y-2">
           {cart.map((item) => (
-            <dl key={item.product_id} className="flex items-center justify-between gap-4">
+            <dl key={item.product.id} className="flex items-center justify-between gap-4">
               <dt className="text-base font-normal text-gray-300">{item.product.name}</dt>
-              <dd className="text-base font-medium text-white">${item.total_amount}</dd>
+              <dd className="text-base font-medium text-white">${item.total_amount.toFixed(2)}</dd>
             </dl>
           ))}
 
-          <dl className="flex items-center justify-between gap-4">
-            <dt className="text-base font-normal text-gray-300">Original price</dt>
-            <dd className="text-base font-medium text-white">${formattedSubtotal}</dd>
-          </dl>
+		<dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
+		<dt className="text-base font-bold text-white">Total</dt>
+		<dd className="text-base font-bold text-emerald-400">${formattedTotal}</dd>
+		</dl>
+          {/* Conditionally display Discount Amount and Total After Discount if Coupon is Applied */}
+          {isCouponApplied && (
+            <>
+              <dl className="flex items-center justify-between gap-4">
+                <dt className="text-base font-normal text-gray-300">Discount Applied</dt>
+                <dd className="text-base font-medium text-emerald-400">-${formattedDiscountAmount}</dd>
+              </dl>
 
-          {savings > 0 && (
-            <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-300">Savings</dt>
-              <dd className="text-base font-medium text-emerald-400">-${formattedSavings}</dd>
-            </dl>
+            </>
           )}
 
+          {/* Display the final total */}
           <dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
-            <dt className="text-base font-bold text-white">Total</dt>
-            <dd className="text-base font-bold text-emerald-400">${formattedTotal}</dd>
+            <dt className="text-base font-bold text-white">Total After Discount</dt>
+            <dd className="text-base font-bold text-emerald-400">${formattedTotalAfterDiscount}</dd>
           </dl>
         </div>
 

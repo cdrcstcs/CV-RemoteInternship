@@ -9,6 +9,9 @@ export const useCartStore = create((set, get) => ({
   isOrderChanged: false,
   coupon: null, // Selected coupon
   userCoupons: [], // List of user coupons
+  totalAmount: 0, // Total amount before discount
+  discountAmount: 0, // Discount applied
+  totalAfterDiscount: 0, // Total after discount
 
   // Fetch all user coupons and include the cart items
   getMyCoupons: async () => {
@@ -19,16 +22,12 @@ export const useCartStore = create((set, get) => ({
         return;
       }
 
-      const productIds = cart.map(item => item.product_id); // Extract the product IDs from cart items
+      const productIds = cart.map(item => item.products_id); // Extract the product IDs from cart items
+      const response = await axiosInstance.post(`/coupon`, { productIds });
 
-      const response = await axiosInstance.post(`/coupon`, {
-        params: { productIds }, // Pass productIds (cart items) to the backend
-      });
-
-      set({ userCoupons: response.data }); // Store the list of user coupons
+      set({ userCoupons: response.data, isCouponApplied:false }); // Store the list of user coupons
     } catch (error) {
       console.error("Error fetching coupons:", error);
-      toast.error(error.response?.data?.message || "Failed to fetch coupons. Please try again.");
     }
   },
 
@@ -41,16 +40,20 @@ export const useCartStore = create((set, get) => ({
         return;
       }
 
-      const productIds = cart.map(item => item.product_id); // Extract the product IDs from cart items
+      const productIds = cart.map(item => item.products_id); // Extract the product IDs from cart items
 
       // Send the coupon id, product IDs, and orderId to validate the coupon
       const response = await axiosInstance.post("/coupon/apply", { couponId, productIds, orderId });
 
       // Update the state with the coupon data, and the updated cart and totals
       set({
-        cart: response.data.cart, // Update the cart with the new items (with the coupon applied)
+        cart: response.data.order_items, // Update the cart with the new items (with the coupon applied)
+        orderId: response.data.order_id, // Ensure the orderId is updated correctly
         isCouponApplied: true, // Mark coupon as applied
         coupon: response.data.coupon, // Set the applied coupon
+        totalAmount: response.data.total_amount, // Set the total amount
+        discountAmount: response.data.discount_amount, // Set the discount amount
+        totalAfterDiscount: response.data.total_after_discount, // Set the total after discount
       });
 
       toast.success("Coupon applied successfully");
@@ -60,29 +63,21 @@ export const useCartStore = create((set, get) => ({
     }
   },
 
-  // Remove the coupon and reset cart totals
-  removeCoupon: () => {
-    const { cart } = get();
-    try {
-      // Reset cart, total, and subtotal when coupon is removed
-      set({
-        isCouponApplied: false,
-        coupon: null, // Remove the applied coupon
-        userCoupons: [], // Optionally clear the user coupons list
-      });
-
-      toast.success("Coupon removed");
-    } catch (error) {
-      console.error("Error removing coupon:", error);
-      toast.error("Failed to remove coupon. Please try again.");
-    }
-  },
-
   // Clear the cart, reset orderId, and reset coupon states
   clearCart: async () => {
     try {
       await axiosInstance.delete(`/allfromcart`);
-      set({ cart: [], orderId: null, isCouponApplied: false }); // Reset cart and coupon state
+      set({
+        cart: [], // Clear the cart
+        orderId: null, // Reset the orderId
+        isCouponApplied: false, // Reset coupon applied status
+        coupon: null, // Reset coupon
+        userCoupons: [], // Optionally clear user coupons
+        totalAmount: 0, // Reset totalAmount
+        discountAmount: 0, // Reset discountAmount
+        totalAfterDiscount: 0, // Reset totalAfterDiscount
+      });
+
       toast.success("Cart cleared successfully");
     } catch (error) {
       console.error("Error clearing cart:", error);
@@ -95,12 +90,13 @@ export const useCartStore = create((set, get) => ({
     try {
       const { orderId } = get(); // Get the current orderId
       const response = await axiosInstance.post("/cart", { productId, orderId }); // Send orderId with productId
-      const { orderId: newOrderId, orderItems } = response.data;
+      const { orderId: newOrderId, orderItems, totalAmount } = response.data;
 
       set({
         orderId: newOrderId, // Update the orderId if changed
         cart: orderItems, // Update the cart with the new items
         isOrderChanged: !get().isOrderChanged, // Toggle the `isOrderChanged` flag
+		totalAmount: totalAmount,
       });
 
       toast.success("Product added to cart");
@@ -115,12 +111,13 @@ export const useCartStore = create((set, get) => ({
     try {
       const { orderId } = get(); // Get the current orderId
       const response = await axiosInstance.delete("/cart", { data: { productId, orderId } }); // Send data as part of request body
-      const { orderId: newOrderId, orderItems } = response.data;
+      const { orderId: newOrderId, orderItems, totalAmount } = response.data;
 
       set({
         orderId: newOrderId, // Update the orderId if changed
         cart: orderItems, // Update the cart with the new items
         isOrderChanged: !get().isOrderChanged, // Toggle the `isOrderChanged` flag
+		totalAmount: totalAmount,
       });
 
       toast.success("Product removed from cart");
@@ -135,12 +132,14 @@ export const useCartStore = create((set, get) => ({
     try {
       const { orderId } = get(); // Get the current orderId
       const response = await axiosInstance.put("/cart/quantity", { productId, orderId, isIncrement }); // Sending the isIncrement flag
-      const { orderId: newOrderId, orderItems } = response.data;
+      const { orderId: newOrderId, orderItems, totalAmount} = response.data;
 
       set({
         orderId: newOrderId, // Update the orderId if changed
         cart: orderItems, // Update the cart with the new items
         isOrderChanged: !get().isOrderChanged, // Toggle the `isOrderChanged` flag
+		totalAmount: totalAmount,
+
       });
 
       toast.success(isIncrement ? "Quantity increased" : "Quantity decreased");

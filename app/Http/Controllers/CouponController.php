@@ -6,10 +6,12 @@ use App\Models\Coupon;
 use App\Models\ProductCoupon;
 use App\Models\UserCoupon;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CouponController extends Controller
 {
@@ -21,6 +23,7 @@ class CouponController extends Controller
         try {
             $user = $request->user();  // Get the authenticated user
             $productIds = $request->productIds;  // Product IDs from the request
+            Log::info('Product Ids', ['product id'=>$productIds]);
 
             if (empty($productIds)) {
                 return response()->json(['message' => 'No products in the cart.'], 400);
@@ -88,7 +91,7 @@ class CouponController extends Controller
             }
 
             // Get the order items for the products in the cart
-            $orderItems = $order->orderItems()->whereIn('products_id', $productIds)->get();
+            $orderItems = OrderItem::where('orders_id', $order->id)->whereIn('products_id', $productIds)->with('product')->get();
 
             if ($orderItems->isEmpty()) {
                 return response()->json(['message' => 'No matching products found in the order.'], 400);
@@ -101,11 +104,7 @@ class CouponController extends Controller
 
             // Calculate the discount based on coupon type
             $discountAmount = 0;
-            if ($coupon->discount_type === 'percentage') {
-                $discountAmount = ($totalAmount * $coupon->discount) / 100;
-            } elseif ($coupon->discount_type === 'fixed') {
-                $discountAmount = $coupon->discount;
-            }
+            $discountAmount = ($totalAmount * $coupon->discount) / 100;
 
             $totalAfterDiscount = max(0, $totalAmount - $discountAmount);
 
@@ -118,6 +117,7 @@ class CouponController extends Controller
                 'order_id' => $order->id,
                 'total_amount' => $totalAmount,
                 'discount_amount' => $discountAmount,
+                'coupon' => $coupon,
                 'total_after_discount' => $totalAfterDiscount,
                 'order_items' => $orderItems,
             ]);

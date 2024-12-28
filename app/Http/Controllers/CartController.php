@@ -88,10 +88,13 @@ class CartController extends Controller
 
             // Retrieve all order items for this order
             $allOrderItems = OrderItem::where('orders_id', $order->id)->with('product')->get();
-
+            $totalAmount = $allOrderItems->sum(function ($item) {
+                return $item->total_amount;  // Assuming each order item has a total_amount field
+            });
             return response()->json([
                 'orderItems' => $allOrderItems,
                 'orderId' => $order->id,  // Return the updated order, including the tracking number and total amount
+                'totalAmount' => $totalAmount,
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
@@ -183,10 +186,14 @@ class CartController extends Controller
 
             // Retrieve the updated order items
             $allOrderItems = OrderItem::where('orders_id', $orderId)->with('product')->get();
-
+            $totalAmount = $allOrderItems->sum(function ($item) {
+                return $item->total_amount;  // Assuming each order item has a total_amount field
+            });
             return response()->json([
                 'orderId' => $order->id,
                 'orderItems' => $allOrderItems,
+                'totalAmount' => $totalAmount,
+
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
@@ -267,10 +274,14 @@ class CartController extends Controller
 
             // Retrieve the updated order items
             $allOrderItems = OrderItem::where('orders_id', $orderId)->with('product')->get();
-
+            $totalAmount = $allOrderItems->sum(function ($item) {
+                return $item->total_amount;  // Assuming each order item has a total_amount field
+            });
             return response()->json([
                 'orderId' => $order->id,
                 'orderItems' => $allOrderItems,
+                'totalAmount' => $totalAmount,
+
             ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
