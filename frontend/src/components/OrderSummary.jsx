@@ -4,50 +4,58 @@ import { Link } from "react-router-dom";
 import { MoveRight } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "../lib/axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const stripePromise = loadStripe(
-  "pk_test_51KZYccCoOZF2UhtOwdXQl3vcizup20zqKqT9hVUIsVzsdBrhqbUI2fE0ZdEVLdZfeHjeyFXtqaNsyCJCmZWnjNZa00PzMAjlcL"
+  "pk_test_51PMjcCIw69kb65LMm6zd49cWEi1zj4wFnwVbF9mxurJg1JlgoH0S7tOPdJglr0YmyejIYYfDTHhVTFOSgt0SD0rv00YmclMWcR"
 );
 
 const OrderSummary = () => {
   // Get the cart and orderId from the store
   const { cart, orderId, totalAmount, discountAmount, totalAfterDiscount, isCouponApplied, coupon, applyCoupon } = useCartStore();
 
-  // Calculate total, savings, and total directly in the component
+  const [isProcessing, setIsProcessing] = useState(false); // Track payment processing state
+
+  // Format amounts to two decimal places
   const formattedTotal = totalAmount.toFixed(2);
   const formattedDiscountAmount = discountAmount.toFixed(2);
   const formattedTotalAfterDiscount = totalAfterDiscount.toFixed(2);
 
   // Handle payment
   const handlePayment = async () => {
+    setIsProcessing(true);
     try {
       // Initialize Stripe and proceed with the checkout
       const stripe = await stripePromise;
-      const res = await axios.post("/payment/create-checkout-session", {
-        products: cart,
-      });
 
-      const session = res.data;
+      // Send data to backend to create checkout session
+      const res = await axios.post("/payment/create-checkout-session", {orderId});
+
+      const sessionId = res.data.id;
+	  console.log(sessionId);
       const result = await stripe.redirectToCheckout({
-        sessionId: session.id,
+        sessionId: sessionId,
       });
 
       if (result.error) {
-        console.error("Error:", result.error);
+        console.error("Error:", result.error.message);
+        alert("There was an issue with the checkout process. Please try again.");
       }
     } catch (error) {
       console.error("Error during payment process:", error);
+      alert("There was an error during the payment process. Please try again later.");
+    } finally {
+      setIsProcessing(false); // Reset processing state
     }
   };
 
-  // Listen for cart changes and update the total amount on the server
+  // Listen for cart changes and apply coupon if needed
   useEffect(() => {
-    // Ensure coupon is only applied once, and only when the cart has items
+    // Apply coupon automatically if it's available and not already applied
     if (orderId && cart.length > 0 && !isCouponApplied && coupon) {
-      applyCoupon(coupon.id);  // Apply coupon if not already applied
+      applyCoupon(coupon.id); // Apply coupon if not already applied
     }
-  }, [cart, totalAmount, orderId, isCouponApplied, coupon, applyCoupon]); // Only re-run when necessary
+  }, [cart, orderId, isCouponApplied, coupon, applyCoupon]);
 
   return (
     <motion.div
@@ -68,38 +76,40 @@ const OrderSummary = () => {
             </dl>
           ))}
 
-		<dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
-		<dt className="text-base font-bold text-white">Total</dt>
-		<dd className="text-base font-bold text-emerald-400">${formattedTotal}</dd>
-		</dl>
-          {/* Conditionally display Discount Amount and Total After Discount if Coupon is Applied */}
+          <dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
+            <dt className="text-base font-bold text-white">Total</dt>
+            <dd className="text-base font-bold text-emerald-400">${formattedTotal}</dd>
+          </dl>
+
+          {/* Conditionally display Discount Amount if Coupon is Applied */}
           {isCouponApplied && (
             <>
               <dl className="flex items-center justify-between gap-4">
                 <dt className="text-base font-normal text-gray-300">Discount Applied</dt>
                 <dd className="text-base font-medium text-emerald-400">-${formattedDiscountAmount}</dd>
               </dl>
-
             </>
           )}
 
-          {/* Display the final total */}
+          {/* Display the final total after discount */}
           <dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
             <dt className="text-base font-bold text-white">Total After Discount</dt>
             <dd className="text-base font-bold text-emerald-400">${formattedTotalAfterDiscount}</dd>
           </dl>
         </div>
 
-        {/* Proceed to Checkout */}
+        {/* Proceed to Checkout Button */}
         <motion.button
           className="flex w-full items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handlePayment}
+          disabled={isProcessing} // Disable button while processing payment
         >
-          Proceed to Checkout
+          {isProcessing ? "Processing..." : "Proceed to Checkout"}
         </motion.button>
 
+        {/* Continue Shopping Link */}
         <div className="flex items-center justify-center gap-2">
           <span className="text-sm font-normal text-gray-400">or</span>
           <Link

@@ -50,12 +50,12 @@ function App() {
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/cart" element={user ? <CartPage /> : <Navigate to="/login" />} />
           <Route
-            path="/purchase-success"
-            element={user ? <PurchaseSuccessPage /> : <Navigate to="/login" />}
+            path="/purchase-success/:sessionId"
+            element={<PurchaseSuccessPage />}
           />
           <Route
             path="/purchase-cancel"
-            element={user ? <PurchaseCancelPage /> : <Navigate to="/login" />}
+            element={<PurchaseCancelPage />}
           />
         </Routes>
       </div>

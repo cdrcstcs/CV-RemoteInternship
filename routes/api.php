@@ -39,7 +39,6 @@ Route::middleware('custom_cors')->group(function () {
         // Payment Routes (Authenticated users)
         Route::post('/payment/create-checkout-session', [CheckoutController::class, 'createCheckoutSession']);
         Route::post('/payment/checkout-success', [CheckoutController::class, 'checkoutSuccess']);
-        Route::put('/payment/update-total', [CheckoutController::class, 'updateOrderTotal']);
 
         // Product Routes (Admin only)
         Route::get('/products', [ProductController::class, 'getAllProducts']);

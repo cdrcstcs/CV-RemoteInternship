@@ -36,7 +36,6 @@ return [
     ],
     'stripe' => [
     'secret' => env('STRIPE_SECRET_KEY'),
-    'public' => env('STRIPE_PUBLIC_KEY'),
     ],
     'cloudinary' => [
     'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
