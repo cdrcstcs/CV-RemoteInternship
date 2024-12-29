@@ -101,10 +101,8 @@ export const useCartStore = create((set, get) => ({
   },
 
   // Clear the cart, reset orderId, and reset coupon states
-  clearCart: async () => {
-    try {
-      await axiosInstance.delete(`/allfromcart`);
-      set({
+  clearCart: () => {
+	set({
         cart: [], // Clear the cart
         orderId: null, // Reset the orderId
         isCouponApplied: false, // Reset coupon applied status
@@ -115,11 +113,7 @@ export const useCartStore = create((set, get) => ({
         totalAfterDiscount: 0, // Reset totalAfterDiscount
       });
 
-      toast.success("Cart cleared successfully");
-    } catch (error) {
-      console.error("Error clearing cart:", error);
-      toast.error(error.response?.data?.message || "Failed to clear cart. Please try again.");
-    }
+    toast.success("Cart cleared successfully");
   },
 
   // Add a product to the cart

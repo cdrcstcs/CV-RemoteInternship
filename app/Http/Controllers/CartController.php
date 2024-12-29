@@ -102,48 +102,6 @@ class CartController extends Controller
     }
 
 
-
-    /**
-     * Remove a product or all products from the user's cart.
-     */
-    public function removeAllFromCart(Request $request)
-    {
-        try {
-            // Get the authenticated user
-            $user = $request->user();
-            $orderId = $request->input('orderId');
-
-            // Find the order associated with the provided orderId
-            $order = Order::find($orderId);
-
-            if (!$order) {
-                return response()->json(['message' => 'Order not found'], 404);
-            }
-
-            // Check if the order belongs to the authenticated user
-            if ($order->user_id !== $user->id) {
-                return response()->json(['message' => 'You are not authorized to modify this order'], 403);
-            }
-
-            // Remove all order items related to the order
-            $orderItems = OrderItem::where('orders_id', $orderId)->get();
-
-            // Delete all order items
-            foreach ($orderItems as $orderItem) {
-                $orderItem->delete();
-            }
-
-            // Delete the order itself
-            $order->delete();
-
-            return response()->json([
-                'message' => 'Order and all items removed from cart',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
-        }
-    }
-
     public function removeCartItem(Request $request)
     {
         try {

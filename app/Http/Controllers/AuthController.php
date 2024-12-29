@@ -105,6 +105,7 @@ class AuthController extends Controller
     // Logout method
     public function logout(Request $request)
     {
+        Log::info('Login attempt', ['kk'=>$request->user()->id]);
         try {
             if (!$request->user()) {
                 return response()->json(['message' => 'Unauthorized'], 401);

@@ -29,7 +29,6 @@ Route::middleware('custom_cors')->group(function () {
         
         // Cart Routes (Authenticated users)
         Route::post('/cart', [CartController::class, 'addToCart']);
-        Route::delete('/allfromcart', [CartController::class, 'removeAllFromCart']);
         Route::delete('/cart', [CartController::class, 'removeCartItem']);
         Route::put('/cart/quantity', [CartController::class, 'updateOrderItemQuantity']);
 

@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 export const useUserStore = create((set, get) => ({
   user: null,
   loading: false,
-  checkingAuth: false,
+  checkingAuth:true,
 
   // Signup user
   signup: async ({ first_name, last_name, phone_number, email, password, confirmPassword, language = "en" }) => {
@@ -68,48 +68,45 @@ export const useUserStore = create((set, get) => ({
     }
   },
 
-  // Logout user
   logout: async () => {
     try {
-      // Make the API call for logout
-      await axiosInstance.post("/logout");
-
-      // Clear access token from localStorage (and any other tokens you may store)
-      localStorage.removeItem("access_token");
-
-      // Reset user state and set checkingAuth to false
-      set({ user: null, checkingAuth: false });
-
-      // Show success message
-      toast.success("Logged out successfully!");
+      // Step 1: Send logout request to the server
+      const response = await axiosInstance.post("/logout");
+      
+      // Step 2: If the server responds successfully, remove the token
+      if (response.status === 200) {
+        localStorage.removeItem("access_token");
+        set({ user: null }); // Update user state to null
+  
+        // Show success message
+        toast.success("Logged out successfully!");
+      } else {
+        // Handle unexpected response
+        toast.error("Logout failed. Please try again.");
+      }
     } catch (error) {
       // Handle any error that occurs during logout
       toast.error(error.response?.data?.message || "An error occurred during logout");
     }
   },
+  
 
-  // Optionally, check authentication on page load (to auto-login if token exists)
   checkAuth: async () => {
-    set({ checkingAuth: true });
+    set({ checkingAuth: true }); // Set checkingAuth to true when checking authentication
 
     const token = localStorage.getItem("access_token");
 
     if (!token) {
-      set({ checkingAuth: false });
+      set({ checkingAuth: false }); // Set checkingAuth to false if no token exists
       return; // No token, can't check auth
     }
 
     try {
-      // Make a call to the backend to check if the token is still valid
       const res = await axiosInstance.get("/me");
-
-      // Set the user state with the valid user data
-      set({ user: res.data.user, checkingAuth: false });
+      set({ user: res.data, checkingAuth: false }); // Set user data and checkingAuth to false
     } catch (error) {
-      // If the token is invalid or expired, clear it from localStorage
       localStorage.removeItem("access_token");
-
-      set({ user: null, checkingAuth: false });
+      set({ user: null, checkingAuth: false }); // Set user to null and checkingAuth to false
     }
   },
 }));
