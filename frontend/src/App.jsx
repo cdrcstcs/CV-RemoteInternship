@@ -12,6 +12,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import CartPage from "./pages/CartPage";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
+import PaymentPage from "./pages/PaymentPage";
 import { useUserStore } from "./stores/useUserStore";
 
 function App() {
@@ -50,12 +51,16 @@ function App() {
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/cart" element={user ? <CartPage /> : <Navigate to="/login" />} />
           <Route
-            path="/purchase-success/:sessionId"
-            element={<PurchaseSuccessPage />}
+            path="/purchase-success"
+            element={user ? <PurchaseSuccessPage /> : <Navigate to="/login" />}
           />
           <Route
             path="/purchase-cancel"
-            element={<PurchaseCancelPage />}
+            element={user ? <PurchaseCancelPage /> : <Navigate to="/login" />}
+          />
+		  <Route
+            path="/payment"
+            element={user ? <PaymentPage /> : <Navigate to="/login" />}
           />
         </Routes>
       </div>

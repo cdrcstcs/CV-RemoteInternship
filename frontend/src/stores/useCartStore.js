@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
+import { redirect } from "react-router-dom";
 
 export const useCartStore = create((set, get) => ({
   cart: [],
@@ -12,6 +13,42 @@ export const useCartStore = create((set, get) => ({
   totalAmount: 0, // Total amount before discount
   discountAmount: 0, // Discount applied
   totalAfterDiscount: 0, // Total after discount
+  isPaymentProcessing: false, // Flag for payment processing status
+
+  // Payment processing logic moved to the store
+  processPayment: async (paymentMethod, paymentGateway, currency) => {
+    const { orderId } = get(); // Get the current orderId and total amount
+
+    if (!orderId) {
+      toast.error("Order not found. Please try again.");
+      return;
+    }
+
+    set({ isPaymentProcessing: true, paymentMessage: '' }); // Set loading state
+
+    const formData = {
+      orderId: orderId,
+      payment_method: paymentMethod,
+      gateway: paymentGateway,
+      currency: currency,
+    };
+
+    try {
+      const response = await axiosInstance.post('/payment/process', formData);
+
+      if (response.data.success) {
+        toast.success('Payment processed successfully!');
+		window.location.href = '/purchase-success';
+	} else {
+        toast.error(`Error: ${response.data.error}`);
+      }
+    } catch (error) {
+      set({ paymentMessage: 'An error occurred while processing the payment.' });
+      toast.error('An error occurred while processing the payment.');
+    } finally {
+      set({ isPaymentProcessing: false });
+    }
+  },
 
   // Fetch all user coupons and include the cart items
   getMyCoupons: async () => {

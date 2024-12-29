@@ -11,11 +11,8 @@ const PurchaseSuccessPage = () => {
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
-		const handleCheckoutSuccess = async (sessionId) => {
+		const handleCheckoutSuccess = () => {
 			try {
-				await axios.post("/payments/checkout-success", {
-					sessionId,
-				});
 				clearCart();
 			} catch (error) {
 				console.log(error);
@@ -24,13 +21,7 @@ const PurchaseSuccessPage = () => {
 			}
 		};
 
-		const sessionId = new URLSearchParams(window.location.search).get("session_id");
-		if (sessionId) {
-			handleCheckoutSuccess(sessionId);
-		} else {
-			setIsProcessing(false);
-			setError("No session ID found in the URL");
-		}
+		handleCheckoutSuccess();
 	}, [clearCart]);
 
 	if (isProcessing) return "Processing...";

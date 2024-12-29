@@ -1,52 +1,27 @@
 import { motion } from "framer-motion";
 import { useCartStore } from "../stores/useCartStore";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MoveRight } from "lucide-react";
-import { loadStripe } from "@stripe/stripe-js";
-import axios from "../lib/axios";
-import { useEffect, useState } from "react";
-
-const stripePromise = loadStripe(
-  "pk_test_51PMjcCIw69kb65LMm6zd49cWEi1zj4wFnwVbF9mxurJg1JlgoH0S7tOPdJglr0YmyejIYYfDTHhVTFOSgt0SD0rv00YmclMWcR"
-);
+import { useState, useEffect } from "react";
 
 const OrderSummary = () => {
-  // Get the cart and orderId from the store
   const { cart, orderId, totalAmount, discountAmount, totalAfterDiscount, isCouponApplied, coupon, applyCoupon } = useCartStore();
 
   const [isProcessing, setIsProcessing] = useState(false); // Track payment processing state
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   // Format amounts to two decimal places
   const formattedTotal = totalAmount.toFixed(2);
   const formattedDiscountAmount = discountAmount.toFixed(2);
   const formattedTotalAfterDiscount = totalAfterDiscount.toFixed(2);
 
-  // Handle payment
+  // Handle payment (navigate to the payment page)
   const handlePayment = async () => {
-    setIsProcessing(true);
-    try {
-      // Initialize Stripe and proceed with the checkout
-      const stripe = await stripePromise;
-
-      // Send data to backend to create checkout session
-      const res = await axios.post("/payment/create-checkout-session", {orderId});
-
-      const sessionId = res.data.id;
-	  console.log(sessionId);
-      const result = await stripe.redirectToCheckout({
-        sessionId: sessionId,
-      });
-
-      if (result.error) {
-        console.error("Error:", result.error.message);
-        alert("There was an issue with the checkout process. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error during payment process:", error);
-      alert("There was an error during the payment process. Please try again later.");
-    } finally {
-      setIsProcessing(false); // Reset processing state
-    }
+    setIsProcessing(true); // Start processing
+    // Simulating a delay for payment processing, then navigate to payment page
+    setTimeout(() => {
+      navigate("/payment"); // Redirect to the payment page
+    }, 1500); // Simulate a 1.5s processing time
   };
 
   // Listen for cart changes and apply coupon if needed

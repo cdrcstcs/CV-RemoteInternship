@@ -7,6 +7,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PaymentController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -37,8 +38,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
 
         // Payment Routes (Authenticated users)
-        Route::post('/payment/create-checkout-session', [CheckoutController::class, 'createCheckoutSession']);
-        Route::post('/payment/checkout-success', [CheckoutController::class, 'checkoutSuccess']);
+        Route::post('/payment/process', [PaymentController::class, 'processPayment']);
 
         // Product Routes (Admin only)
         Route::get('/products', [ProductController::class, 'getAllProducts']);
