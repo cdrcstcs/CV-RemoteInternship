@@ -44,6 +44,12 @@ class DatabaseSeeder extends Seeder
         $products = Product::factory()->count(10)->create(); // Example: creating 10 products
         foreach ($users as $user) {
             // Create a coupon
+
+            $role = Role::factory()->create(); // Example: Create 5 roles
+            UserRole::create([
+                'users_id' => $user->id, 
+                'roles_id' => $role->id,  
+            ]);
             $coupons = Coupon::factory(10)->create();
             foreach($coupons as $coupon) {
                 foreach ($products as $product) {    
@@ -61,9 +67,6 @@ class DatabaseSeeder extends Seeder
             }
             
         }
-        // Seed Roles
-        Role::factory(5)->create(); // Example: Create 5 roles
-
         // Seed Permissions
         Permission::factory(5)->create(); // Example: Create 5 permissions
 
@@ -113,6 +116,5 @@ class DatabaseSeeder extends Seeder
 
 
         RolePermission::factory(5)->create();
-        UserRole::factory(5)->create();
     }
 }

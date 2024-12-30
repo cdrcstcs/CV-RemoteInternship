@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('users_roles', function (Blueprint $table) {
             $table->unsignedBigInteger('roles_id');
             $table->unsignedBigInteger('users_id');
+            $table->timestamps();
+
             $table->primary(['roles_id', 'users_id']); // Composite primary key
 
             // Foreign keys
@@ -26,6 +28,9 @@ return new class extends Migration
                 ->references('id')->on('users')
                 ->onDelete('cascade') // Cascade delete if the user is deleted
                 ->onUpdate('cascade');
+
+            $table->index('users_id');
+            $table->index('roles_id');
         });
     }
 

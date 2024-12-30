@@ -19,12 +19,12 @@ class RoleFactory extends Factory
         // List of roles with their corresponding descriptions
         $roles = [
             'Administration' => 'Responsible for overseeing all administrative functions and ensuring the organization runs smoothly.',
-            'Warehouse Manager' => 'Manages the daily operations of the warehouse, including inventory, shipping, and staff management.',
-            'Delivery Driver' => 'Ensures timely and accurate delivery of goods to customers, adhering to delivery schedules.',
+            'WarehouseManager' => 'Manages the daily operations of the warehouse, including inventory, shipping, and staff management.',
+            'DeliveryDriver' => 'Ensures timely and accurate delivery of goods to customers, adhering to delivery schedules.',
             'Customer' => 'A client or individual who purchases or uses the services offered by the company.',
-            'Customer Support Staff' => 'Provides assistance to customers by addressing inquiries, complaints, and service-related issues.',
-            'Finance Manager' => 'Oversees financial operations, budgeting, and reporting to ensure the company’s financial health.',
-            'Product Saler' => 'Create product posts, sale products, delete products',
+            'CustomerSupportStaff' => 'Provides assistance to customers by addressing inquiries, complaints, and service-related issues.',
+            'FinanceManager' => 'Oversees financial operations, budgeting, and reporting to ensure the company’s financial health.',
+            'ProductSaler' => 'Create product posts, sale products, delete products',
         ];
 
 
