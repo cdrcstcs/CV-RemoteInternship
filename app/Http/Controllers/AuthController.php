@@ -105,20 +105,12 @@ class AuthController extends Controller
     // Logout method
     public function logout(Request $request)
     {
-        Log::info('Login attempt', ['kk'=>$request->user()->id]);
         try {
-            if (!$request->user()) {
-                return response()->json(['message' => 'Unauthorized'], 401);
-            }
-
-            // Delete all tokens for the user
-            $request->user()->tokens()->delete(); // Revoke all tokens
 
             // Optionally, log out session-based authentication
             Auth::logout();
 
             // Log the logout action
-            Log::info('User logged out successfully', ['user_id' => $request->user()->id]);
 
             return response()->json(['message' => 'Logged out successfully']);
         } catch (\Exception $error) {

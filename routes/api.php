@@ -16,37 +16,28 @@ Route::middleware('custom_cors')->group(function () {
     Route::post('/signup', [AuthController::class, 'signup']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::middleware('auth:sanctum')->get('/me', [AuthController::class, 'getCurrentUser']);
+    Route::middleware(['auth:sanctum','role:Administration,Warehouse Manager,Delivery Driver,Customer,Customer Support Staff,Finance Manager,Product Saler'])->get('/me', [AuthController::class, 'getCurrentUser']);
 
-    // Public Product Routes
-    Route::get('/products/featured', [ProductController::class, 'getFeaturedProducts']);
-    Route::get('/products/category/{category}', [ProductController::class, 'getProductsByCategory']);
-    Route::get('/products/recommendations', [ProductController::class, 'getRecommendedProducts']);
+    Route::middleware(['role:Administration,Customer,Customer Support Staff,Product Saler'])->group(function () {
+        Route::get('/products/featured', [ProductController::class, 'getFeaturedProducts']);
+        Route::get('/products/category/{category}', [ProductController::class, 'getProductsByCategory']);
+        Route::get('/products/recommendations', [ProductController::class, 'getRecommendedProducts']);
+    });
 
     // Protected Routes
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum','role:Administration,Customer,Customer Support Staff,Product Saler'])->group(function () {
         Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
-        
-        // Cart Routes (Authenticated users)
         Route::post('/cart', [CartController::class, 'addToCart']);
         Route::delete('/cart', [CartController::class, 'removeCartItem']);
         Route::put('/cart/quantity', [CartController::class, 'updateOrderItemQuantity']);
-
-        // Coupon Routes (Authenticated users)
         Route::post('/coupon', [CouponController::class, 'getMyCoupon']);
         Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
-
-        // Payment Routes (Authenticated users)
         Route::post('/payment/process', [PaymentController::class, 'processPayment']);
-
-        // Product Routes (Admin only)
-        Route::get('/products', [ProductController::class, 'getAllProducts']);
-        Route::post('/products', [ProductController::class, 'createProduct']);
-        Route::delete('/products/{id}', [ProductController::class, 'deleteProduct']);
-        Route::patch('/products/{id}', [ProductController::class, 'toggleFeaturedProduct']);
-
-        // Analytics Routes (Admin only)
-        Route::get('/analytics', [AnalyticsController::class, 'getAnalyticsData']);
-
     });
+    // Product Routes (Admin only)
+    Route::get('/products', [ProductController::class, 'getAllProducts']);
+    Route::post('/products', [ProductController::class, 'createProduct']);
+    Route::delete('/products/{id}', [ProductController::class, 'deleteProduct']);
+    Route::patch('/products/{id}', [ProductController::class, 'toggleFeaturedProduct']);
+    Route::get('/analytics', [AnalyticsController::class, 'getAnalyticsData']);
 });

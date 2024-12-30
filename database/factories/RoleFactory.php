@@ -16,9 +16,25 @@ class RoleFactory extends Factory
      */
     public function definition(): array
     {
+        // List of roles with their corresponding descriptions
+        $roles = [
+            'Administration' => 'Responsible for overseeing all administrative functions and ensuring the organization runs smoothly.',
+            'Warehouse Manager' => 'Manages the daily operations of the warehouse, including inventory, shipping, and staff management.',
+            'Delivery Driver' => 'Ensures timely and accurate delivery of goods to customers, adhering to delivery schedules.',
+            'Customer' => 'A client or individual who purchases or uses the services offered by the company.',
+            'Customer Support Staff' => 'Provides assistance to customers by addressing inquiries, complaints, and service-related issues.',
+            'Finance Manager' => 'Oversees financial operations, budgeting, and reporting to ensure the company’s financial health.',
+            'Product Saler' => 'Create product posts, sale products, delete products',
+        ];
+
+
+        // Select a random role and its corresponding description
+        $role_name = $this->faker->randomElement(array_keys($roles));
+        $description = $roles[$role_name];
+
         return [
-            'role_name' => $this->faker->word, // Random role name like "Admin", "Manager", etc.
-            'description' => $this->faker->sentence, // Random description of the role
+            'role_name' => $role_name,
+            'description' => $description,
         ];
     }
 }
