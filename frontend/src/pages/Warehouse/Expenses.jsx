@@ -85,7 +85,7 @@ const Expenses = () => {
               className="mt-1 w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option value="All">All</option>
-              <option value="quia">Quia</option>
+              <option value="dolor">dolor</option>
               <option value="Professional">Professional</option>
               <option value="Salaries">Salaries</option>
             </select>

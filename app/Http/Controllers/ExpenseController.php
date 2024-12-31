@@ -1,11 +1,13 @@
 <?php
-   
+
 namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Inventory;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -42,9 +44,25 @@ class ExpenseController extends Controller
                 'category' => $categoryFilter,
             ]);
 
+            // Get the warehouse(s) managed by the current user
+            $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
+
+            if ($userWarehouses->isEmpty()) {
+                return response()->json(['error' => 'No warehouses found for this user.'], 404);
+            }
+
+            // Get all product IDs from the inventories of these warehouses
+            $productIdsInWarehouse = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
+                ->pluck('products_id')
+                ->unique(); // Get unique product IDs
+
+            // Log the product IDs from the warehouse inventory
+            Log::info('Products in the managed warehouses:', $productIdsInWarehouse->toArray());
+
             // Start by querying the orders and joining with order items
             $ordersQuery = OrderItem::query()
                 ->with(['order'])  // eager load relationships
+                ->whereIn('products_id', $productIdsInWarehouse) // Filter by product IDs in the warehouse inventory
                 ->when($startDate, function ($query) use ($startDate) {
                     return $query->whereHas('order', function ($query) use ($startDate) {
                         $query->whereDate('order_date', '>=', Carbon::parse($startDate));
@@ -98,7 +116,7 @@ class ExpenseController extends Controller
                     'item_count' => $items->count(),
                 ]);
     
-                // Check if product_name exists before accessing it
+                // Check if category_name exists before accessing it
                 if (isset($items->first()['category_name'])) {
                     $totalAmount = $items->map(function ($item) {
                         return $item['amount']; 
@@ -109,7 +127,7 @@ class ExpenseController extends Controller
                         'total_amount' => $totalAmount,
                     ];
                 } else {
-                    return null; // Handle missing product_name
+                    return null; // Handle missing category_name
                 }
             })->filter(); // Remove any null values
 
