@@ -40,81 +40,68 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         // Seed Users
-        $users = User::factory(10)->create();  // Example: Create 10 users
-        $products = Product::factory()->count(10)->create(); // Example: creating 10 products
-        foreach ($users as $user) {
-            // Create a coupon
+        $users = User::factory(20)->create();  // Example: Create 10 users
+        
+        // Seed 5 Categories
+        $categories = Category::factory(5)->create(); // Create 5 categories
 
-            $role = Role::factory()->create(); // Example: Create 5 roles
+        // Seed 20 Products
+        $products = Product::factory(20)->create(); // Create 20 products
+
+        // Associate each product with all categories
+        foreach ($products as $product) {
+            foreach ($categories as $category) {
+                ProductCategory::create([
+                    'products_id' => $product->id,
+                    'categories_id' => $category->id,
+                ]);
+            }
+        }
+
+        // Create Roles and associate them with Users
+        foreach ($users as $user) {
+            $role = Role::factory()->create();
             UserRole::create([
-                'users_id' => $user->id, 
-                'roles_id' => $role->id,  
+                'users_id' => $user->id,
+                'roles_id' => $role->id,
             ]);
+
+            // Create coupons and associate with products
             $coupons = Coupon::factory(10)->create();
             foreach($coupons as $coupon) {
                 foreach ($products as $product) {    
-                    // Link the coupon to the product via the ProductCoupon table
                     ProductCoupon::create([
-                        'products_id' => $product->id, // Link to the product
-                        'coupons_id' => $coupon->id,   // Link to the coupon
+                        'products_id' => $product->id, 
+                        'coupons_id' => $coupon->id,
                     ]);
                 }
     
                 UserCoupon::create([
-                    'users_id' => $user->id, // Link to the product
-                    'coupons_id' => $coupon->id,   // Link to the coupon
+                    'users_id' => $user->id, 
+                    'coupons_id' => $coupon->id,
                 ]);
             }
-            
         }
+
         // Seed Permissions
-        Permission::factory(5)->create(); // Example: Create 5 permissions
+        // Permission::factory(5)->create();
 
-        // Seed Warehouses
-        Warehouse::factory(5)->create(); // Example: Create 5 warehouses
-
-        // Seed Vehicle Management
-        VehicleManagement::factory(5)->create(); // Example: Create 5 vehicle management entries
-
-        // Seed Vehicles
-        Vehicle::factory(5)->create(); // Example: Create 5 vehicles
-
-        // Seed Shipments
-        Shipment::factory(10)->create(); // Example: Create 10 shipments
-
-        // Seed Routes
-        Route::factory(10)->create(); // Example: Create 10 routes
-
-        // Seed Categories
-        Category::factory(5)->create(); // Example: Create 5 categories
-
-        // Seed Invoices
-        Invoice::factory(10)->create(); // Example: Create 10 invoices
-
-        // Seed Inventory
-        Inventory::factory(20)->create(); // Example: Create 20 inventory records
-
-        // Seed Customer Support Tickets
-        CustomerSupportTicket::factory(10)->create(); // Example: Create 10 support tickets
-
-        // Seed Payments
-        Payment::factory(10)->create(); // Example: Create 10 payments
-
-        // Seed Orders
-        Order::factory(10)->create(); // Example: Create 10 orders
-
-        // Seed Order Items
-        OrderItem::factory(20)->create(); // Example: Create 20 order items
-
-        // Seed Providers
-        Provider::factory(5)->create(); // Example: Create 5 providers
-
-        // Seed Ratings
-        Rating::factory(10)->create(); // Example: Create 10 ratings
-
-        ProductCategory::factory(5)->create();
-
-
-        RolePermission::factory(5)->create();
+        // Seed other tables
+        // Warehouse::factory(5)->create();
+        // VehicleManagement::factory(5)->create();
+        // Vehicle::factory(5)->create();
+        // Shipment::factory(10)->create();
+        // Route::factory(10)->create();
+        // Invoice::factory(10)->create();
+        // Inventory::factory(20)->create();
+        // CustomerSupportTicket::factory(10)->create();
+        // Payment::factory(10)->create();
+        // Order::factory(10)->create();
+        // OrderItem::factory(20)->create();
+        Provider::factory(5)->create();
+        // Rating::factory(10)->create();
+        
+        // Create RolePermission associations
+        // RolePermission::factory(5)->create();
     }
 }

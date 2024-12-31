@@ -24,8 +24,8 @@ const SidebarLink = ({ href, icon: Icon, label, isCollapsed }) => {
         className={`cursor-pointer flex items-center ${
           isCollapsed ? "justify-center py-4" : "justify-start px-8 py-4"
         }
-        hover:text-blue-500 hover:bg-blue-100 gap-3 transition-colors ${
-          isActive ? "bg-blue-200 text-white" : ""
+        hover:text-gray-900 hover:bg-gray-900 gap-3 transition-colors ${
+          isActive ? "bg-gray-900 text-white" : ""
         }
       }`}
       >
@@ -55,7 +55,7 @@ const Sidebar = () => {
 
   const sidebarClassNames = `fixed flex flex-col ${
     isSidebarCollapsed ? "w-0 md:w-16" : "w-72 md:w-64"
-  } bg-white transition-all duration-300 overflow-hidden h-full shadow-md z-40`;
+  } bg-emerald-400 transition-all duration-300 overflow-hidden h-full shadow-md z-40`;
 
   return (
     <div className={sidebarClassNames}>
@@ -65,23 +65,9 @@ const Sidebar = () => {
           isSidebarCollapsed ? "px-5" : "px-8"
         }`}
       >
-        <img
-          src="https://s3-inventorymanagement.s3.us-east-2.amazonaws.com/logo.png" // Replaced Next.js Image with standard <img>
-          alt="edstock-logo"
-          width={27}
-          height={27}
-          className="rounded w-8"
-        />
-        <h1
-          className={`${
-            isSidebarCollapsed ? "hidden" : "block"
-          } font-extrabold text-2xl`}
-        >
-          EDSTOCK
-        </h1>
 
         <button
-          className="md:hidden px-3 py-3 bg-gray-100 rounded-full hover:bg-blue-100"
+          className="md:hidden px-3 py-3 bg-gray-100 rounded-full hover:bg-gray-900"
           onClick={toggleSidebar}
         >
           <Menu className="w-4 h-4" />
@@ -121,7 +107,7 @@ const Sidebar = () => {
           isCollapsed={isSidebarCollapsed}
         />
         <SidebarLink
-          href="/expenses"
+          href="/warehouse"
           icon={CircleDollarSign}
           label="Expenses"
           isCollapsed={isSidebarCollapsed}

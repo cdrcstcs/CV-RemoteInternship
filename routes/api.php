@@ -8,7 +8,7 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ExpensesController;
+use App\Http\Controllers\ExpenseController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -34,6 +34,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/coupon', [CouponController::class, 'getMyCoupon']);
         Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
         Route::post('/payment/process', [PaymentController::class, 'processPayment']);
+
     });
     // Product Routes (Admin only)
     Route::get('/products', [ProductController::class, 'getAllProducts']);
@@ -42,9 +43,8 @@ Route::middleware('custom_cors')->group(function () {
     Route::patch('/products/{id}', [ProductController::class, 'toggleFeaturedProduct']);
     Route::get('/analytics', [AnalyticsController::class, 'getAnalyticsData']);
 
-    // Protected Routes
-    Route::middleware(['auth:sanctum','role:Administration,WarehouseManager,FinanceManager,ProductSaler'])->group(function () {
-        Route::post('/expenses', [ExpensesController::class, 'filterExpenses']);
+    Route::middleware(['auth:sanctum','role:Administration,WarehouseManager'])->group(function () {
+        Route::post('/expense', [ExpenseController::class, 'filterExpenses']);
     });
 
 });
