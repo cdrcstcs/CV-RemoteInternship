@@ -109,5 +109,31 @@ export const useUserStore = create((set, get) => ({
       set({ user: null, checkingAuth: false }); // Set user to null and checkingAuth to false
     }
   },
+  updateProfile: async (updatedData) => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.put("/user/profile", updatedData);
+      set({ user: res.data, loading: false });
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      set({ loading: false });
+      toast.error(error.response?.data?.message || "An error occurred while updating the profile");
+    }
+  },
+  changePassword: async (currentPassword, newPassword, confirmPassword) => {
+    set({ loading: true });
+    if (newPassword !== confirmPassword) {
+      set({ loading: false });
+      return toast.error("Passwords do not match");
+    }
+    try {
+      const res = await axiosInstance.post("/user/change-password",{ currentPassword, newPassword });
+      toast.success("Password changed successfully!");
+      set({ loading: false });
+    } catch (error) {
+      set({ loading: false });
+      toast.error(error.response?.data?.message || "An error occurred while changing the password");
+    }
+  },
 }));
 

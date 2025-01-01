@@ -16,7 +16,10 @@ import PaymentPage from "./pages/PaymentPage";
 import { useUserStore } from "./stores/useUserStore";
 import Wrapper from "./pages/Warehouse/Wrapper";
 import Expenses from "./pages/Warehouse/Expenses";
-
+import ProfileLayout from "./components/Profile/ProfileLayout";
+import ProfilePage from "./pages/ProfilePage";
+import EditProfilePage from "./pages/EditProfilePage";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -67,6 +70,12 @@ function App() {
             path="/warehouse"
             element={user ? <Wrapper><Expenses /></Wrapper> : <Navigate to="/login" />}
           />
+          <Route path="/profile" element={<ProfileLayout />}>
+            <Route index element={<ProfilePage />} /> {/* This will be the default route */}
+            <Route path="edit" element={<EditProfilePage />} />
+            <Route path="change-password" element={<ChangePasswordPage />} />
+          </Route>
+
         </Routes>
       </div>
       <Toaster />
