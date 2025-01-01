@@ -14,6 +14,7 @@ export const useCartStore = create((set, get) => ({
   discountAmount: 0, // Discount applied
   totalAfterDiscount: 0, // Total after discount
   isPaymentProcessing: false, // Flag for payment processing status
+  paymentMessage: '',
 
   // Payment processing logic moved to the store
   processPayment: async (paymentMethod, paymentGateway, currency) => {
@@ -35,10 +36,9 @@ export const useCartStore = create((set, get) => ({
 
     try {
       const response = await axiosInstance.post('/payment/process', formData);
-
+      set({ paymentMessage: 'ok' });
       if (response.data.success) {
         toast.success('Payment processed successfully!');
-		window.location.href = '/purchase-success';
 	} else {
         toast.error(`Error: ${response.data.error}`);
       }
