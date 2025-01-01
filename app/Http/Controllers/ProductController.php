@@ -25,7 +25,22 @@ class ProductController extends Controller
             ]
         ]);
     }
+    
+    public function fetchProductById($id)
+    {
+        try {
+            // Fetch product along with its categories and supplier (using eager loading)
+            $product = Product::with(['categories', 'supplier'])
+                ->findOrFail($id); // This will throw a ModelNotFoundException if the product is not found
 
+            return response()->json($product, 200); // Return the product data as JSON response
+        } catch (ModelNotFoundException $e) {
+            // Return a 404 error if product not found
+            return response()->json([
+                'error' => 'Product not found'
+            ], 404);
+        }
+    }
     /**
      * Get all products
      */

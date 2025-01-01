@@ -5,8 +5,21 @@ import axiosInstance from "../lib/axios";
 export const useProductStore = create((set) => ({
 	products: [],
 	loading: false,
+	currentProduct: null, // Add a state for the current product
 
 	setProducts: (products) => set({ products }),
+
+	fetchProductById: async (id) => {
+		set({ loading: true });
+		try {
+		  const response = await axiosInstance.get(`/products/single/${id}`);
+		  set({ currentProduct: response.data, loading: false });
+		} catch (error) {
+		  set({ loading: false });
+		  toast.error(error.response?.data?.error || "Failed to fetch product details");
+		}
+	  },
+	
 	createProduct: async (productData) => {
 		set({ loading: true });
 		try {

@@ -20,6 +20,7 @@ import ProfileLayout from "./components/Profile/ProfileLayout";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
+import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -48,6 +49,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/signup" element={!user ? <SignUpPage /> : <Navigate to="/" />} />
           <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
+          <Route path="/product/:id" element={<ProductDetailPage />} /> {/* Product details page */}
           <Route
             path="/secret-dashboard"
             element={user?.role === "admin" ? <AdminPage /> : <Navigate to="/" />}

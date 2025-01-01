@@ -22,10 +22,14 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/me', [AuthController::class, 'getCurrentUser']);
         Route::put('/user/profile', [UserProfileController::class, 'updateDetails']);
         Route::post('/user/change-password', [UserProfileController::class, 'updatePassword']);
-    });
+        Route::get('/products/{productId}/ratings', [RatingController::class, 'getProductRatings']);
+        Route::post('/products/{productId}/ratings', [RatingController::class, 'storeRating']);
 
+    });
+    
     // Route::middleware(['role:Administration,Customer,Customer Support Staff,Product Saler'])->group(function () {
     // });
+    Route::get('/products/single/{id}', [ProductController::class, 'fetchProductById']);
     Route::get('/products/featured', [ProductController::class, 'getFeaturedProducts']);
     Route::get('/products/category/{category}', [ProductController::class, 'getProductsByCategory']);
     Route::get('/products/recommendations', [ProductController::class, 'getRecommendedProducts']);
@@ -39,7 +43,6 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/coupon', [CouponController::class, 'getMyCoupon']);
         Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
         Route::post('/payment/process', [PaymentController::class, 'processPayment']);
-
     });
     // Product Routes (Admin only)
     Route::get('/products', [ProductController::class, 'getAllProducts']);
