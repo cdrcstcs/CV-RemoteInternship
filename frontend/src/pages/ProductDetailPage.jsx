@@ -3,22 +3,41 @@ import { useParams } from "react-router-dom";
 import { useCartStore } from "../stores/useCartStore";
 import { useProductStore } from "../stores/useProductStore";
 import useRatingStore from "../stores/useRatingStore"; // Import the rating store
-
+import { FaStar } from "react-icons/fa"; // For Star Rating Icon
+import ProductCard from "../components/ProductCard";
 const ProductDetailPage = () => {
   const { id } = useParams(); // Getting the product ID from the URL
   const { addToCart } = useCartStore();
-  const { currentProduct, loading, fetchProductById } = useProductStore();
+  const { currentProduct, loading, fetchProductById, fetchProductsByCategory, products } = useProductStore();
   
   // Access rating store
   const { ratings, ratingLoading, fetchRatings, submitRating, isSubmitting } = useRatingStore();
   
   const [feedback, setFeedback] = useState("");
   const [ratingValue, setRatingValue] = useState(0);
+  const [relatedProducts, setRelatedProducts] = useState([]); // State for related products
 
   useEffect(() => {
     fetchProductById(id); // Fetch the product details when the component mounts
     fetchRatings(id); // Fetch ratings for the product
   }, [id, fetchProductById, fetchRatings]);
+
+  useEffect(() => {
+    if (currentProduct?.categories) {
+      // Fetch products by categories after the product details are fetched
+      const categories = currentProduct.categories.map(category => category.category_name);
+      console.log(categories)
+      fetchProductsByCategory(categories);
+    }
+  }, [currentProduct, fetchProductsByCategory]);
+
+  // Assuming fetchProductsByCategory updates the `relatedProducts` state
+  useEffect(() => {
+    console.log(products)
+    if (products.length > 0) {
+      setRelatedProducts(products); // Update related products when fetched
+    }
+  }, [products]);
 
   const handleAddToCart = () => {
     addToCart(currentProduct);
@@ -34,6 +53,20 @@ const ProductDetailPage = () => {
     await submitRating(id, ratingValue, feedback, 1); // Assuming shipmentId is 1 for now
     setFeedback(""); // Reset feedback after submission
     setRatingValue(0); // Reset rating
+  };
+
+  const renderStars = (value) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <FaStar
+          key={i}
+          className={`cursor-pointer ${i <= value ? "text-yellow-500" : "text-gray-300"}`}
+          onClick={() => setRatingValue(i)}
+        />
+      );
+    }
+    return stars;
   };
 
   if (loading || ratingLoading) {
@@ -53,7 +86,7 @@ const ProductDetailPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 bg-gradient-to-r from-zinc-600 to-zinc-400 rounded-xl shadow-xl">
+    <div className="container mx-auto px-4 py-12 rounded-xl shadow-xl">
       <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-12">
         {/* Product Image */}
         <div className="flex-shrink-0 w-full sm:w-64 lg:w-96 rounded-lg overflow-hidden shadow-lg hover:scale-105 transform transition-all">
@@ -114,7 +147,9 @@ const ProductDetailPage = () => {
             {ratings.map((rating) => (
               <div key={rating.id} className="bg-gray-700 p-4 rounded-lg shadow-md">
                 <div className="flex items-center space-x-2">
-                  <span className="text-yellow-400 font-semibold">{rating.rating_value} / 5</span>
+                  <div className="flex">
+                    {renderStars(rating.rating_value)}
+                  </div>
                   <span className="text-sm text-gray-400">- {new Date(rating.date_created).toLocaleDateString()}</span>
                 </div>
                 {rating.feedback && <p className="text-white mt-2">{rating.feedback}</p>}
@@ -127,32 +162,24 @@ const ProductDetailPage = () => {
 
         {/* Add Feedback Form */}
         <div className="mt-8">
-          <h3 className="text-xl text-white mb-4">Submit Your Feedback</h3>
           <form onSubmit={handleFeedbackSubmit} className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <label className="text-white">Rating: </label>
-              <select
-                value={ratingValue}
-                onChange={(e) => setRatingValue(Number(e.target.value))}
-                className="px-4 py-2 rounded-lg bg-gray-700 text-white"
-              >
-                <option value={0}>Select a rating</option>
-                {[1, 2, 3, 4, 5].map((value) => (
-                  <option key={value} value={value}>
-                    {value} Stars
-                  </option>
-                ))}
-              </select>
+            <div>
+              <label className="text-white font-semibold">Your Rating:</label>
+              <div className="flex space-x-2 mt-2">
+                {renderStars(ratingValue)}
+              </div>
             </div>
+
             <div>
               <textarea
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder="Your feedback..."
-                className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white"
+                className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white mt-4"
                 rows="4"
               />
             </div>
+
             <button
               type="submit"
               className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transform transition-all hover:scale-105"
@@ -161,6 +188,20 @@ const ProductDetailPage = () => {
               {isSubmitting ? "Submitting..." : "Submit Feedback"}
             </button>
           </form>
+        </div>
+      </div>
+
+      {/* Related Products */}
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold text-white mb-6">Related Products</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {relatedProducts.length > 0 ? (
+            relatedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          ) : (
+            <p className="text-gray-500">No related products found.</p>
+          )}
         </div>
       </div>
     </div>

@@ -16,7 +16,8 @@ use App\Models\{
     ProductCoupon,
     UserCoupon,
     UserRole,
-    Provider
+    Provider,
+    Rating,
 };
 
 class DatabaseSeeder extends Seeder
@@ -45,6 +46,10 @@ class DatabaseSeeder extends Seeder
                     'categories_id' => $category->id,
                 ]);
             }
+
+            Rating::factory(5)->create([
+                'products_id' => $product->id, // Associate the rating with the current product
+            ]);
         }
 
         // Create Roles and associate them with Users

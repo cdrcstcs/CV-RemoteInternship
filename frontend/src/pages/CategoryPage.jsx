@@ -10,7 +10,7 @@ const CategoryPage = () => {
 	const { category } = useParams();
 
 	useEffect(() => {
-		fetchProductsByCategory(category);
+		fetchProductsByCategory([category]);
 	}, [fetchProductsByCategory, category]);
 
 	console.log("products:", products);

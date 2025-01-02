@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\RatingController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -31,7 +32,7 @@ Route::middleware('custom_cors')->group(function () {
     // });
     Route::get('/products/single/{id}', [ProductController::class, 'fetchProductById']);
     Route::get('/products/featured', [ProductController::class, 'getFeaturedProducts']);
-    Route::get('/products/category/{category}', [ProductController::class, 'getProductsByCategory']);
+    Route::post('/products/categories', [ProductController::class, 'getProductsByCategory']);
     Route::get('/products/recommendations', [ProductController::class, 'getRecommendedProducts']);
 
     // Protected Routes
