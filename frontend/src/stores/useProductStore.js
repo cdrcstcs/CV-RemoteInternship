@@ -6,7 +6,7 @@ export const useProductStore = create((set) => ({
 	products: [],
 	loading: false,
 	currentProduct: null, // Add a state for the current product
-	warehouseProducts: [],
+	inventories: [],
 	setProducts: (products) => set({ products }),
 
 	fetchProductById: async (id) => {
@@ -43,16 +43,55 @@ export const useProductStore = create((set) => ({
 			toast.error(error.response.data.error || "Failed to fetch products");
 		}
 	},
-	getProductsForWarehouse: async () => {
+	getInventoriesForWarehouse: async () => {
 		set({ loading: true });
 		try {
-			const response = await axiosInstance.get("/warehouse/products");
-			set({ warehouseProducts: response.data, loading: false });
+			const response = await axiosInstance.get("/warehouse/inventories");
+			set({ inventories: response.data, loading: false });
 		} catch (error) {
 			set({ error: "Failed to fetch products", loading: false });
 			toast.error(error.response.data.error || "Failed to fetch products");
 		}
 	},
+	updateInventoriesForWarehouse: async (inventoryUpdates) => {
+		set({ loading: true });
+		try {
+			const response = await axiosInstance.put("/warehouse/inventories", {
+				inventory_updates: inventoryUpdates,
+			});
+	
+			// Update the inventories by replacing the updated ones
+			set((state) => {
+				const updatedInventories = [...state.inventories];
+	
+				// Loop through the updated inventories from the server response
+				response.data.updated_inventories.forEach((updatedInventory) => {
+					// Find the index of the inventory that matches the updated inventory ID
+					const index = updatedInventories.findIndex(
+						(inventory) => inventory.id === updatedInventory.id
+					);
+	
+					// If a match is found, replace the inventory with the updated one
+					if (index !== -1) {
+						updatedInventories[index] = updatedInventory;
+					}
+				});
+	
+				// Return updated state with the updated inventories
+				return {
+					inventories: updatedInventories,
+					loading: false,
+				};
+			});
+	
+			toast.success("Inventory updated successfully!");
+		} catch (error) {
+			set({ loading: false });
+			toast.error(error.response?.data?.error || "Failed to update inventories");
+		}
+	},
+	
+	  
 	fetchProductsByCategory: async (categories) => {
 		set({ loading: true });
 		try {

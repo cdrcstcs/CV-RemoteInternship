@@ -54,7 +54,8 @@ Route::middleware('custom_cors')->group(function () {
 
     Route::middleware(['auth:sanctum','role:Administration,WarehouseManager'])->group(function () {
         Route::post('/expense', [WarehouseController::class, 'filterExpenses']);
-        Route::get('/warehouse/products', [WarehouseController::class, 'getProductsForWarehouse']);
+        Route::get('/warehouse/inventories', [WarehouseController::class, 'getInventoriesForWarehouse']);
+        Route::put('/warehouse/inventories', [WarehouseController::class, 'updateInventory']);
     });
 
 });

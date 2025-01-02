@@ -158,7 +158,7 @@ class WarehouseController extends Controller
             return response()->json(['error' => 'An error occurred while processing your request.'], 500);
         }
     }
-    public function getProductsForWarehouse(Request $request)
+    public function getInventoriesForWarehouse(Request $request)
     {
         try {
             // Get the warehouses managed by the current user
@@ -191,5 +191,75 @@ class WarehouseController extends Controller
             return response()->json(['error' => 'An error occurred while processing your request.'], 500);
         }
     }
+    public function updateInventory(Request $request)
+    {
+        try {
+            // Validate incoming data to ensure we have required fields
+            $validated = $request->validate([
+                'inventory_updates' => 'required|array',
+                'inventory_updates.*.inventory_id' => 'required|exists:inventory,id',
+                'inventory_updates.*.stock' => 'nullable|integer|min:0',
+                'inventory_updates.*.weight_per_unit' => 'nullable|numeric|min:0',
+            ]);
+
+            // Loop through the updates and apply them
+            $updatedInventories = [];
+
+            foreach ($validated['inventory_updates'] as $update) {
+                // Find the inventory by its ID and eager load the product
+                $inventory = Inventory::with('product')->find($update['inventory_id']);
+
+                if (!$inventory) {
+                    return response()->json(['error' => 'Inventory not found.'], 404);
+                }
+
+                // Update the fields that are provided (stock and/or weight_per_unit)
+                if (isset($update['stock'])) {
+                    $inventory->stock = $update['stock'];
+                }
+
+                if (isset($update['weight_per_unit'])) {
+                    $inventory->weight_per_unit = $update['weight_per_unit'];
+                }
+
+                // Update the 'last_updated' timestamp
+                $inventory->last_updated = now();
+                $inventory->save(); // Save the updated inventory
+
+                // The product data is already eager loaded, so we can directly access it
+                $product = $inventory->product;
+
+                // Add the updated inventory and product details to the response
+                $updatedInventories[] = [
+                    'inventory_id' => $inventory->id,
+                    'stock' => $inventory->stock,
+                    'weight_per_unit' => $inventory->weight_per_unit,
+                    'last_updated' => $inventory->last_updated,
+                    'product' => [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'sku' => $product->sku, // If SKU is needed, otherwise remove
+                        'price' => $product->price, // If price is needed, otherwise remove
+                    ]
+                ];
+            }
+
+            return response()->json([
+                'message' => 'Inventory updated successfully.',
+                'updated_inventories' => $updatedInventories
+            ]);
+
+        } catch (\Exception $e) {
+            // Log any exceptions that occur during the execution
+            Log::error('Error occurred in updateInventory method:', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString(),
+            ]);
+
+            // Return a generic error response
+            return response()->json(['error' => 'An error occurred while updating the inventory.'], 500);
+        }
+    }
+
 
 }
