@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
-class ExpenseController extends Controller
+class WarehouseController extends Controller
 {
     /**
     * Get aggregated expense data (total cost by category or product).
@@ -158,4 +158,38 @@ class ExpenseController extends Controller
             return response()->json(['error' => 'An error occurred while processing your request.'], 500);
         }
     }
+    public function getProductsForWarehouse(Request $request)
+    {
+        try {
+            // Get the warehouses managed by the current user
+            $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
+
+            if ($userWarehouses->isEmpty()) {
+                return response()->json(['error' => 'No warehouses found for this user.'], 404);
+            }
+
+            // Get all product IDs from the inventories of these warehouses, ensuring uniqueness
+            $productsInWarehouse = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
+                ->with('product')
+                ->distinct('products_id') // Get unique products by product_id
+                ->get();
+
+            // If no products found, return a 404 response
+            if ($productsInWarehouse->isEmpty()) {
+                return response()->json(['error' => 'No products found for the warehouses.'], 404);
+            }
+
+            return response()->json($productsInWarehouse);
+        } catch (\Exception $e) {
+            // Log any exceptions that occur during the execution
+            Log::error('Error occurred in getProductsForWarehouse method:', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString(),
+            ]);
+
+            // Return a generic error response
+            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
+        }
+    }
+
 }

@@ -6,7 +6,7 @@ export const useProductStore = create((set) => ({
 	products: [],
 	loading: false,
 	currentProduct: null, // Add a state for the current product
-
+	warehouseProducts: [],
 	setProducts: (products) => set({ products }),
 
 	fetchProductById: async (id) => {
@@ -38,6 +38,16 @@ export const useProductStore = create((set) => ({
 		try {
 			const response = await axiosInstance.get("/products");
 			set({ products: response.data.products, loading: false });
+		} catch (error) {
+			set({ error: "Failed to fetch products", loading: false });
+			toast.error(error.response.data.error || "Failed to fetch products");
+		}
+	},
+	getProductsForWarehouse: async () => {
+		set({ loading: true });
+		try {
+			const response = await axiosInstance.get("/warehouse/products");
+			set({ warehouseProducts: response.data, loading: false });
 		} catch (error) {
 			set({ error: "Failed to fetch products", loading: false });
 			toast.error(error.response.data.error || "Failed to fetch products");

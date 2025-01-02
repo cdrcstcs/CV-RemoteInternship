@@ -1,13 +1,9 @@
 import { useAppDispatch, useAppSelector } from "../../pages/Warehouse/State/Redux";
 import { setIsSidebarCollapsed } from "../../pages/Warehouse/State/State";
 import {
-  Archive,
   CircleDollarSign,
   Clipboard,
-  Layout,
   Menu,
-  SlidersHorizontal,
-  User,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom"; // Use React Router's Link and useLocation
 import React from "react";
@@ -15,8 +11,7 @@ import React from "react";
 // SidebarLink Component
 const SidebarLink = ({ href, icon: Icon, label, isCollapsed }) => {
   const location = useLocation(); // Use React Router's useLocation hook to get the current pathname
-  const isActive =
-    location.pathname === href || (location.pathname === "/" && href === "/dashboard");
+  const isActive = location.pathname == href;
 
   return (
     <Link to={href}> {/* Use React Router's Link component */}
@@ -77,39 +72,15 @@ const Sidebar = () => {
       {/* LINKS */}
       <div className="flex-grow mt-8">
         <SidebarLink
-          href="/dashboard"
-          icon={Layout}
-          label="Dashboard"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/inventory"
-          icon={Archive}
-          label="Inventory"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/products"
-          icon={Clipboard}
-          label="Products"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/users"
-          icon={User}
-          label="Users"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/settings"
-          icon={SlidersHorizontal}
-          label="Settings"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
           href="/warehouse"
           icon={CircleDollarSign}
           label="Expenses"
+          isCollapsed={isSidebarCollapsed}
+        />
+        <SidebarLink
+          href="/warehouse/products"
+          icon={Clipboard}
+          label="Products"
           isCollapsed={isSidebarCollapsed}
         />
       </div>

@@ -4,7 +4,9 @@ import React, { useEffect } from "react";
 import Navbar from "../../components/Warehouse/Navbar";
 import Sidebar from "../../components/Warehouse/Sidebar";
 import StoreProvider, { useAppSelector } from "./State/Redux";
-const DashboardLayout = ({ children }) => {
+import { Outlet } from "react-router-dom"; // Import Outlet for nested routes
+
+const DashboardLayout = () => {
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed
   );
@@ -14,9 +16,9 @@ const DashboardLayout = ({ children }) => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.add("light");
+      document.documentElement.classList.remove("dark");
     }
-  });
+  }, [isDarkMode]); // Add dependency array to avoid unnecessary re-renders
 
   return (
     <div
@@ -31,7 +33,8 @@ const DashboardLayout = ({ children }) => {
         }`}
       >
         <Navbar />
-        {children}
+        {/* Render child components inside Outlet */}
+        <Outlet />
       </main>
     </div>
   );

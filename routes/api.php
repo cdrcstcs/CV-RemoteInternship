@@ -8,7 +8,7 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\RatingController;
 
@@ -53,7 +53,8 @@ Route::middleware('custom_cors')->group(function () {
     Route::get('/analytics', [AnalyticsController::class, 'getAnalyticsData']);
 
     Route::middleware(['auth:sanctum','role:Administration,WarehouseManager'])->group(function () {
-        Route::post('/expense', [ExpenseController::class, 'filterExpenses']);
+        Route::post('/expense', [WarehouseController::class, 'filterExpenses']);
+        Route::get('/warehouse/products', [WarehouseController::class, 'getProductsForWarehouse']);
     });
 
 });

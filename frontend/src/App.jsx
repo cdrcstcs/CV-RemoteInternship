@@ -21,6 +21,7 @@ import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import ProductDetailPage from "./pages/ProductDetailPage.jsx";
+import WarehouseProducts from "./pages/Warehouse/WarehouseProducts.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -68,11 +69,13 @@ function App() {
             path="/payment"
             element={user ? <PaymentPage /> : <Navigate to="/login" />}
           />
-          <Route
-            path="/warehouse"
-            element={user ? <Wrapper><Expenses /></Wrapper> : <Navigate to="/login" />}
-          />
-          <Route path="/profile" element={<ProfileLayout />}>
+          <Route path="/warehouse" element={user ? <Wrapper/> : <Navigate to="/login" />}>
+            <Route index element={<Expenses />} />
+            <Route path="products" element={<WarehouseProducts />} />
+          </Route>
+
+
+          <Route path="/profile" element={user ? <ProfileLayout/> : <Navigate to="/login"/> }>
             <Route index element={<ProfilePage />} /> {/* This will be the default route */}
             <Route path="edit" element={<EditProfilePage />} />
             <Route path="change-password" element={<ChangePasswordPage />} />
