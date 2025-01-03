@@ -83,6 +83,12 @@ const Sidebar = () => {
           label="Products"
           isCollapsed={isSidebarCollapsed}
         />
+        <SidebarLink
+          href="/warehouse/linechart"
+          icon={Clipboard}
+          label="Line Chart"
+          isCollapsed={isSidebarCollapsed}
+        />
       </div>
 
       {/* FOOTER */}

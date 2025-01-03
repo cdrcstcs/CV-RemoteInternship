@@ -8,6 +8,11 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Inventory;
 use App\Models\Warehouse;
+use App\Models\Vehicle;
+use App\Models\VehicleManagement;
+use App\Models\Shipment;
+use App\Models\Route;
+
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -21,143 +26,131 @@ class WarehouseController extends Controller
     * @return \Illuminate\Http\JsonResponse
     */
     public function filterExpenses(Request $request)
-    {
-        try {
-            // Log incoming request parameters
-            Log::info('Incoming request data:', $request->all());
+{
+    try {
+        // Log incoming request parameters
+        Log::info('Incoming request data:', $request->all());
 
-            // Validate the incoming request for date filters and category
-            $validated = $request->validate([
-                'start_date' => 'nullable|date',
-                'end_date' => 'nullable|date',
-                'category' => 'nullable|string',
-            ]);
+        // Validate the incoming request for date filters (removed category validation)
+        $validated = $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+        ]);
 
-            $startDate = $validated['start_date'] ?? null;
-            $endDate = $validated['end_date'] ?? null;
-            $categoryFilter = $validated['category'] ?? null;
+        $startDate = $validated['start_date'] ?? null;
+        $endDate = $validated['end_date'] ?? null;
 
-            // Log the validated filter values
-            Log::info('Validated filter values:', [
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'category' => $categoryFilter,
-            ]);
+        // Log the validated filter values (category has been removed)
+        Log::info('Validated filter values:', [
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ]);
 
-            // Get the warehouse(s) managed by the current user
-            $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
+        // Get the warehouses managed by the current user
+        $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
 
-            if ($userWarehouses->isEmpty()) {
-                return response()->json(['error' => 'No warehouses found for this user.'], 404);
-            }
+        if ($userWarehouses->isEmpty()) {
+            return response()->json(['error' => 'No warehouses found for this user.'], 404);
+        }
 
-            // Get all product IDs from the inventories of these warehouses
-            $productIdsInWarehouse = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
-                ->pluck('products_id')
-                ->unique(); // Get unique product IDs
+        // Get all product IDs from the inventories of these warehouses
+        $productIdsInWarehouse = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
+            ->pluck('products_id')
+            ->unique(); // Get unique product IDs
 
-            // Log the product IDs from the warehouse inventory
-            Log::info('Products in the managed warehouses:', $productIdsInWarehouse->toArray());
+        // Log the product IDs from the warehouse inventory
+        Log::info('Products in the managed warehouses:', $productIdsInWarehouse->toArray());
 
-            // Start by querying the orders and joining with order items
-            $ordersQuery = OrderItem::query()
-                ->with(['order'])  // eager load relationships
-                ->whereIn('products_id', $productIdsInWarehouse) // Filter by product IDs in the warehouse inventory
-                ->when($startDate, function ($query) use ($startDate) {
-                    return $query->whereHas('order', function ($query) use ($startDate) {
-                        $query->whereDate('order_date', '>=', Carbon::parse($startDate));
-                    });
-                })
-                ->when($endDate, function ($query) use ($endDate) {
-                    return $query->whereHas('order', function ($query) use ($endDate) {
-                        $query->whereDate('order_date', '<=', Carbon::parse($endDate));
-                    });
+        // Start by querying the orders and joining with order items
+        $ordersQuery = OrderItem::query()
+            ->with(['order'])  // eager load relationships
+            ->whereIn('products_id', $productIdsInWarehouse) // Filter by product IDs in the warehouse inventory
+            ->when($startDate, function ($query) use ($startDate) {
+                return $query->whereHas('order', function ($query) use ($startDate) {
+                    $query->whereDate('order_date', '>=', Carbon::parse($startDate));
                 });
-
-            // Log the SQL query before executing
-            Log::info('Executing query for order items:', [
-                'query' => $ordersQuery->toSql(),
-                'bindings' => $ordersQuery->getBindings(),
-            ]);
-
-            // Get the order items
-            $orderItems = $ordersQuery->get();
-            Log::info('Fetched order items:', ['count' => $orderItems->count()]);
-
-            // Aggregate the data by category, filtering by category if needed
-            $aggregatedData = collect($orderItems)->flatMap(function ($orderItem) use ($categoryFilter) {
-                $product = $orderItem->product;
-                $categoryNames = $product->categories->pluck('category_name')->toArray();
-
-                // If there's a category filter, check if the product belongs to the selected category
-                if ($categoryFilter && !in_array($categoryFilter, $categoryNames)) {
-                    return null; // Skip this item if it doesn't belong to the selected category
-                }
-
-                // Aggregate by product and category
-                return collect($categoryNames)->map(function ($categoryName) use ($orderItem, $product) {
-                    return [
-                        'category_name' => $categoryName,
-                        'product_id' => $product->id,
-                        'product_name' => $product->name,
-                        'amount' => $orderItem->total_amount,
-                        'order_date' => $orderItem->order->order_date,  // Using the order's date here
-                    ];
+            })
+            ->when($endDate, function ($query) use ($endDate) {
+                return $query->whereHas('order', function ($query) use ($endDate) {
+                    $query->whereDate('order_date', '<=', Carbon::parse($endDate));
                 });
-            })->filter();
-
-            // Log the structure of aggregatedData before processing further
-            Log::info('Aggregated Data Structure:', $aggregatedData->toArray());
-
-            // Group by category and product, then sum the amounts
-            $aggregatedData = $aggregatedData->groupBy(['category_name'])->map(function ($items) {
-                Log::info('Processing group:', [
-                    'category_name' => $items->first()['category_name'] ?? 'N/A',
-                    'item_count' => $items->count(),
-                ]);
-    
-                // Check if category_name exists before accessing it
-                if (isset($items->first()['category_name'])) {
-                    $totalAmount = $items->map(function ($item) {
-                        return $item['amount']; 
-                    })->sum(); 
-                    
-                    return [
-                        'category_name' => $items->first()['category_name'],
-                        'total_amount' => $totalAmount,
-                    ];
-                } else {
-                    return null; // Handle missing category_name
-                }
-            })->filter(); // Remove any null values
-
-            // Log the aggregated data before returning
-            Log::info('Aggregated data after grouping and summing:', $aggregatedData->toArray());
-
-            // Prepare the response format
-            $response = $aggregatedData->map(function ($item) {
-                return [
-                    'name' => $item['category_name'],
-                    'amount' => $item['total_amount'],
-                ];
             });
 
-            // Log the final response data
-            Log::info('Response data:', $response->toArray());
+        // Log the SQL query before executing
+        Log::info('Executing query for order items:', [
+            'query' => $ordersQuery->toSql(),
+            'bindings' => $ordersQuery->getBindings(),
+        ]);
 
-            return response()->json($response);
+        // Get the order items
+        $orderItems = $ordersQuery->get();
+        Log::info('Fetched order items:', ['count' => $orderItems->count()]);
 
-        } catch (\Exception $e) {
-            // Log any exceptions that occur during the execution
-            Log::error('Error occurred in filterExpenses method:', [
-                'message' => $e->getMessage(),
-                'stack' => $e->getTraceAsString(),
+        // Aggregate the data without filtering by category
+        $aggregatedData = collect($orderItems)->map(function ($orderItem) {
+            $product = $orderItem->product;
+
+            return [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'amount' => $orderItem->total_amount,
+                'order_date' => $orderItem->order->order_date,  // Using the order's date here
+            ];
+        });
+
+        // Log the structure of aggregatedData before processing further
+        Log::info('Aggregated Data Structure:', $aggregatedData->toArray());
+
+        // Now we can sum the amounts by product (instead of category) if needed
+        $aggregatedData = $aggregatedData->groupBy('product_name')->map(function ($items) {
+            Log::info('Processing group:', [
+                'product_name' => $items->first()['product_name'] ?? 'N/A',
+                'item_count' => $items->count(),
             ]);
 
-            // Return a generic error response
-            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
-        }
+            // Check if product_name exists before accessing it
+            if (isset($items->first()['product_name'])) {
+                $totalAmount = $items->map(function ($item) {
+                    return $item['amount']; 
+                })->sum(); 
+
+                return [
+                    'product_name' => $items->first()['product_name'],
+                    'total_amount' => $totalAmount,
+                ];
+            } else {
+                return null; // Handle missing product_name
+            }
+        })->filter(); // Remove any null values
+
+        // Log the aggregated data before returning
+        Log::info('Aggregated data after grouping and summing:', $aggregatedData->toArray());
+
+        // Prepare the response format
+        $response = $aggregatedData->map(function ($item) {
+            return [
+                'name' => $item['product_name'],
+                'amount' => $item['total_amount'],
+            ];
+        });
+
+        // Log the final response data
+        Log::info('Response data:', $response->toArray());
+
+        return response()->json($response);
+
+    } catch (\Exception $e) {
+        // Log any exceptions that occur during the execution
+        Log::error('Error occurred in filterExpenses method:', [
+            'message' => $e->getMessage(),
+            'stack' => $e->getTraceAsString(),
+        ]);
+
+        // Return a generic error response
+        return response()->json(['error' => 'An error occurred while processing your request.'], 500);
     }
+}
+
     public function getInventoriesForWarehouse(Request $request)
     {
         try {
@@ -261,5 +254,213 @@ class WarehouseController extends Controller
         }
     }
 
+    /**
+     * Get an aggregated expense report with total shipment amounts, 
+     * total maintenance costs, and total product expenses grouped by day.
+     *
+     * @param  Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function lineChart(Request $request)
+    {
+        try {
+            Log::info('Incoming expense report request data:', $request->all());
+            $validated = $request->validate([
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+            ]);
+            $startDate = $validated['start_date'] ?? null;
+            $endDate = $validated['end_date'] ?? null;
+            Log::info('Validated filter values:', [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ]);
 
+            // Get the warehouses managed by the current user
+            $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
+            if ($userWarehouses->isEmpty()) {
+                return response()->json(['error' => 'No warehouses found for this user.'], 404);
+            }
+
+            // Get all product IDs from the inventories of these warehouses
+            $productIdsInWarehouse = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
+                ->pluck('products_id')
+                ->unique();
+
+            Log::info('Products in the managed warehouses:', $productIdsInWarehouse->toArray());
+
+            // Query order items
+            $orderItemsQuery = OrderItem::query()->with(['order'])
+                ->whereIn('products_id', $productIdsInWarehouse)
+                ->when($startDate, function ($query) use ($startDate) {
+                    return $query->whereHas('order', function ($query) use ($startDate) {
+                        $query->whereDate('order_date', '>=', Carbon::parse($startDate));
+                    });
+                })
+                ->when($endDate, function ($query) use ($endDate) {
+                    return $query->whereHas('order', function ($query) use ($endDate) {
+                        $query->whereDate('order_date', '<=', Carbon::parse($endDate));
+                    });
+                });
+
+            Log::info('Executing query for order items:', [
+                'query' => $orderItemsQuery->toSql(),
+                'bindings' => $orderItemsQuery->getBindings(),
+            ]);
+
+            $orderItems = $orderItemsQuery->get();
+            Log::info('Fetched order items:', ['count' => $orderItems->count()]);
+
+            // Aggregate product data (group by order date)
+            $aggregatedProductData = collect($orderItems)->flatMap(function ($orderItem) {
+                $product = $orderItem->product;
+                $categoryNames = $product->categories->pluck('category_name')->toArray();
+                return collect($categoryNames)->map(function ($categoryName) use ($orderItem, $product) {
+                    return [
+                        'category_name' => $categoryName,
+                        'product_id' => $product->id,
+                        'product_name' => $product->name,
+                        'amount' => $orderItem->total_amount,
+                        'order_date' => $orderItem->order->order_date, // This is the date to group by
+                    ];
+                });
+            })->filter();
+
+            // Aggregate the product data by order date and sum the amounts per date
+            $aggregatedProductData = $aggregatedProductData->groupBy('order_date')->map(function ($items) {
+                return [
+                    'date' => $items->first()['order_date'],  // Use the order_date as the "date" key
+                    'total_product_expenses' => $items->sum('amount'),
+                ];
+            });
+
+            Log::info('Aggregated product expenses data:', $aggregatedProductData->toArray());
+
+            // Query maintenance costs by date
+            $maintenanceCostsQuery = VehicleManagement::query()
+                ->selectRaw('DATE(last_maintenance_date) as date, SUM(maintenance_cost) as total_maintenance_cost')
+                ->when($startDate, function ($query) use ($startDate) {
+                    return $query->whereDate('last_maintenance_date', '>=', Carbon::parse($startDate));
+                })
+                ->when($endDate, function ($query) use ($endDate) {
+                    return $query->whereDate('last_maintenance_date', '<=', Carbon::parse($endDate));
+                })
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+
+            Log::info('Maintenance cost data:', $maintenanceCostsQuery->toArray());
+
+            // Query shipments by date
+            $shipmentsQuery = Shipment::query()
+                ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total_shipment_amount')
+                ->when($startDate, function ($query) use ($startDate) {
+                    return $query->whereDate('created_at', '>=', Carbon::parse($startDate));
+                })
+                ->when($endDate, function ($query) use ($endDate) {
+                    return $query->whereDate('created_at', '<=', Carbon::parse($endDate));
+                })
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+
+            Log::info('Shipment data:', $shipmentsQuery->toArray());
+
+            // Combine the data from product expenses, maintenance costs, and shipment amounts
+            $combinedData = collect();
+
+            // Add shipments data
+            $shipmentsQuery->each(function ($shipment) use ($combinedData) {
+                $combinedData->put($shipment->date, [
+                    'date' => $shipment->date,
+                    'total_shipment_amount' => $shipment->total_shipment_amount,
+                    'total_maintenance_cost' => 0,
+                    'total_product_expenses' => 0,
+                ]);
+            });
+
+            // Add maintenance data
+            $maintenanceCostsQuery->each(function ($maintenance) use ($combinedData) {
+                $combinedData->put($maintenance->date, [
+                    'date' => $maintenance->date,
+                    'total_shipment_amount' => $combinedData->get($maintenance->date)['total_shipment_amount'] ?? 0,
+                    'total_maintenance_cost' => $maintenance->total_maintenance_cost,
+                    'total_product_expenses' => $combinedData->get($maintenance->date)['total_product_expenses'] ?? 0,
+                ]);
+            });
+
+            // Add product expense data
+            $aggregatedProductData->each(function ($item) use ($combinedData) {
+                $combinedData->put($item['date'], [
+                    'date' => $item['date'],
+                    'total_shipment_amount' => $combinedData->get($item['date'])['total_shipment_amount'] ?? 0,
+                    'total_maintenance_cost' => $combinedData->get($item['date'])['total_maintenance_cost'] ?? 0,
+                    'total_product_expenses' => $item['total_product_expenses'],
+                ]);
+            });
+
+            // Format the response
+            $response = $combinedData->values();
+
+            // Return the aggregated data as a JSON response
+            return response()->json($response);
+        } catch (\Exception $e) {
+            Log::error('Error occurred in lineChart method:', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
+        }
+    }
+
+
+    /**
+     * Get aggregated warehouse count by country.
+     *
+     * @param  Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getGeography(Request $request)
+    {
+        try {
+            // Log the incoming request (optional)
+            Log::info('Incoming geography request data:', $request->all());
+
+            // Fetch warehouses and group by country
+            $warehouses = Warehouse::all(); // Retrieve all warehouses
+            $mappedLocations = $warehouses->reduce(function ($acc, $warehouse) {
+                $countryISO3 = $warehouse->country; // Assuming 'country' is the field representing the country code
+
+                // Initialize country if it doesn't exist in accumulator
+                if (!isset($acc[$countryISO3])) {
+                    $acc[$countryISO3] = 0;
+                }
+
+                // Increment the count for the country
+                $acc[$countryISO3]++;
+                return $acc;
+            }, []);
+
+            // Format the result into an array of objects with 'id' as country and 'value' as count
+            $formattedLocations = collect($mappedLocations)->map(function ($count, $country) {
+                return [
+                    'id' => $country, // Country code
+                    'value' => $count  // Number of warehouses in this country
+                ];
+            })->values(); // Reset array keys
+
+            // Return the formatted response
+            return response()->json($formattedLocations, 200);
+
+        } catch (\Exception $e) {
+            // Log the exception error
+            Log::error('Error occurred in getGeography method:', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString(),
+            ]);
+
+            // Return a generic error response
+            return response()->json(['message' => $e->getMessage()], 404);
+        }
+    }
 }

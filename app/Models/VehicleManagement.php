@@ -22,6 +22,7 @@ class VehicleManagement extends Model
         'maintenance_status',
         'last_maintenance_date',
         'maintenance_schedule',
+        'maintenance_cost',
         'users_id',
     ];
 

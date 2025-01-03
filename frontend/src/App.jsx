@@ -22,6 +22,7 @@ import EditProfilePage from "./pages/EditProfilePage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import WarehouseInventories from "./pages/Warehouse/WarehouseInventories.jsx";
+import Daily from "./pages/Warehouse/Daily.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -72,6 +73,7 @@ function App() {
           <Route path="/warehouse" element={user ? <Wrapper/> : <Navigate to="/login" />}>
             <Route index element={<Expenses />} />
             <Route path="products" element={<WarehouseInventories />} />
+            <Route path="linechart" element={<Daily />} />
           </Route>
 
 

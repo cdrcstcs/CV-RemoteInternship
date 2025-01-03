@@ -25,6 +25,7 @@ class VehicleManagementFactory extends Factory
             'maintenance_status' => $this->faker->randomElement(['Pending', 'Completed', 'In Progress']), // Random maintenance status
             'last_maintenance_date' => $this->faker->dateTimeThisYear(), // Random date for last maintenance
             'maintenance_schedule' => $this->faker->dateTimeBetween('+1 week', '+1 year'), // Random next maintenance date
+            'maintenance_cost' => $this->faker->numberBetween(5, 20), // Random fuel consumption (L per 100km)
             'users_id' => User::factory(), // Associate a user with the vehicle (create a new user if needed)
         ];
     }

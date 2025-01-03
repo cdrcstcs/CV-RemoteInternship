@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('maintenance_status', 50)->nullable()->default(null);
             $table->timestamp('last_maintenance_date')->nullable()->default(null);
             $table->timestamp('maintenance_schedule')->nullable()->default(null);
+            $table->decimal('maintenance_cost', 18, 2)->nullable()->default(null);
             $table->foreignId('users_id')->constrained('users')->onDelete('restrict')->onUpdate('cascade'); // Foreign key for the user
             $table->timestamps(); // CreatedAt and UpdatedAt
 

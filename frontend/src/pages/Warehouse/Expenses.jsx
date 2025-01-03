@@ -16,20 +16,18 @@ const Expenses = () => {
     isLoading,
     isError,
     fetchExpenses,
-    selectedCategory,
-    setSelectedCategory,
     startDate,
     endDate,
     setStartDate,
     setEndDate,
   } = useExpensesStore();
 
-  // Fetch expenses only when all filters (startDate, endDate, category) are not null
+  // Fetch expenses whenever the startDate or endDate changes
   useEffect(() => {
-    if (startDate && endDate && selectedCategory && selectedCategory !== "All") {
-      fetchExpenses(); // Fetch expenses whenever all filters are set
+    if (startDate && endDate) {
+      fetchExpenses(); // Fetch expenses whenever the filters are set
     }
-  }, [selectedCategory, startDate, endDate, fetchExpenses]);
+  }, [startDate, endDate, fetchExpenses]);
 
   const aggregatedData = useMemo(() => {
     // The expenses are now in the correct format, an array with name and amount
@@ -38,10 +36,6 @@ const Expenses = () => {
       amount: item.amount,
     }));
   }, [expenses]);
-
-  const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
-  };
 
   const handleStartDateChange = (e) => {
     setStartDate(e.target.value);
@@ -69,28 +63,10 @@ const Expenses = () => {
 
   return (
     <div className="bg-gradient-to-r from-teal-500 via-green-500 to-emerald-500 p-8 rounded-2xl shadow-lg">
-      {/* Filters for category and date range */}
+      {/* Filters for date range */}
       <div className="mb-6 space-y-4 bg-gray-900 p-6 rounded-xl shadow-lg">
         <h2 className="text-xl font-semibold text-white">Filter Expenses</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Category Select */}
-          <div>
-            <label htmlFor="category" className="block text-sm font-medium text-white">
-              Category
-            </label>
-            <select
-              id="category"
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-              className="mt-1 w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-            >
-              <option value="All">All</option>
-              <option value="dolor">dolor</option>
-              <option value="Professional">Professional</option>
-              <option value="Salaries">Salaries</option>
-            </select>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Start Date */}
           <div>
             <label htmlFor="startDate" className="block text-sm font-medium text-white">
