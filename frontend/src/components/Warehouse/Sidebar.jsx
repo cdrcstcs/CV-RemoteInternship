@@ -4,6 +4,8 @@ import {
   CircleDollarSign,
   Clipboard,
   Menu,
+  LineChart,
+  Map,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom"; // Use React Router's Link and useLocation
 import React from "react";
@@ -85,8 +87,14 @@ const Sidebar = () => {
         />
         <SidebarLink
           href="/warehouse/linechart"
-          icon={Clipboard}
+          icon={LineChart}
           label="Line Chart"
+          isCollapsed={isSidebarCollapsed}
+        />
+        <SidebarLink
+          href="/warehouse/geography"
+          icon={Map}
+          label="Geography"
           isCollapsed={isSidebarCollapsed}
         />
       </div>

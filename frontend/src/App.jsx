@@ -23,6 +23,7 @@ import ChangePasswordPage from "./pages/ChangePasswordPage";
 import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import WarehouseInventories from "./pages/Warehouse/WarehouseInventories.jsx";
 import Daily from "./pages/Warehouse/Daily.jsx";
+import Geography from "./pages/Warehouse/Geography.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -74,6 +75,7 @@ function App() {
             <Route index element={<Expenses />} />
             <Route path="products" element={<WarehouseInventories />} />
             <Route path="linechart" element={<Daily />} />
+            <Route path="geography" element={<Geography />} />
           </Route>
 
 

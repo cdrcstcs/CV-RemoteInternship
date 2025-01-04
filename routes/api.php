@@ -57,6 +57,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/warehouse/inventories', [WarehouseController::class, 'getInventoriesForWarehouse']);
         Route::put('/warehouse/inventories', [WarehouseController::class, 'updateInventory']);
         Route::post('/warehouse/line-chart', [WarehouseController::class, 'lineChart']);
+        Route::get('/warehouse/geography', [WarehouseController::class, 'getGeography']);
     });
 
 });

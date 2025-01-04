@@ -426,25 +426,31 @@ class WarehouseController extends Controller
             // Log the incoming request (optional)
             Log::info('Incoming geography request data:', $request->all());
 
-            // Fetch warehouses and group by country
-            $warehouses = Warehouse::all(); // Retrieve all warehouses
+            // Fetch all warehouses and their locations
+            $warehouses = Warehouse::all();
+
+            // Aggregate warehouse count by country (extracted from the location field)
             $mappedLocations = $warehouses->reduce(function ($acc, $warehouse) {
-                $countryISO3 = $warehouse->country; // Assuming 'country' is the field representing the country code
+                // Extract the country from the location field
+                $location = $warehouse->location;
+
+                // Assume the country is the part after the last comma
+                $country = $this->extractCountryFromLocation($location);
 
                 // Initialize country if it doesn't exist in accumulator
-                if (!isset($acc[$countryISO3])) {
-                    $acc[$countryISO3] = 0;
+                if (!isset($acc[$country])) {
+                    $acc[$country] = 0;
                 }
 
                 // Increment the count for the country
-                $acc[$countryISO3]++;
+                $acc[$country]++;
                 return $acc;
             }, []);
 
             // Format the result into an array of objects with 'id' as country and 'value' as count
             $formattedLocations = collect($mappedLocations)->map(function ($count, $country) {
                 return [
-                    'id' => $country, // Country code
+                    'id' => $country,  // Country name (or code)
                     'value' => $count  // Number of warehouses in this country
                 ];
             })->values(); // Reset array keys
@@ -460,7 +466,25 @@ class WarehouseController extends Controller
             ]);
 
             // Return a generic error response
-            return response()->json(['message' => $e->getMessage()], 404);
+            return response()->json(['message' => 'An error occurred while fetching data.'], 500);
         }
+    }
+
+    /**
+     * Extract country from a location string.
+     *
+     * @param  string  $location
+     * @return string
+     */
+    private function extractCountryFromLocation($location)
+    {
+        // Split the location by commas
+        $parts = explode(',', $location);
+
+        // The country should be the last part of the array
+        $country = trim(end($parts));
+
+        // Return the country
+        return $country;
     }
 }

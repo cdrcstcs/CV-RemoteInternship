@@ -18,9 +18,19 @@ class WarehouseFactory extends Factory
      */
     public function definition(): array
     {
+        // List of ISO3 country codes (You can expand this list as needed)
+        $countriesISO3 = [
+            'USA', 'CAN', 'GBR', 'DEU', 'FRA', 'AUS', 'IND', 'BRA', 'CHN', 'JPN',
+            'MEX', 'ITA', 'ESP', 'RUS', 'ZAF', 'ARG', 'KOR', 'SAU', 'SWE', 'NLD'
+        ];
+
+        // Pick a random country ISO3 code
+        $countryISO3 = $this->faker->randomElement($countriesISO3);
+
+        // Generate a random address with the country code appended at the end
         return [
             'warehouse_name' => $this->faker->company . ' Warehouse', // Generate a warehouse name
-            'location' => $this->faker->address, // Generate a random address for the location
+            'location' => $this->faker->address . ', ' . $countryISO3, // Append the country code at the end
             'capacity' => $this->faker->numberBetween(100, 10000), // Random capacity between 100 and 10,000
             'available_space' => $this->faker->numberBetween(0, 10000), // Random available space
             'users_id' => User::factory(), // Associate a user with the warehouse (create a new user if needed)

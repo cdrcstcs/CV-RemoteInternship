@@ -82,7 +82,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // Seed Warehouses and associate warehouse managers
-        $warehouses = Warehouse::factory(5)->create(); // Create 5 warehouses
+        $warehouses = Warehouse::factory(20)->create(); // Create 5 warehouses
         foreach ($warehouses as $warehouse) {
             // Get a warehouse manager role user (if exists)
             $warehouseManager = UserRole::whereHas('role', function ($query) {
