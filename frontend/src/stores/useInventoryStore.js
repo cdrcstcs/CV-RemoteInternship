@@ -13,12 +13,18 @@ export const useInventoryStore = create((set, get) => ({
     price: '',
     image: null,
     category: '',
-    isFeatured: false
+    isFeatured: false,
+  },
+  warehouse: {
+    totalWeight: 0,
+    capacity: 0,
   },
   setProductDetails: (details) => set({ productDetails: { ...get().productDetails, ...details } }),
   setInventoryDetails: (details) => set({ ...details }),
+
+  // Function to create inventory
   createInventory: async () => {
-    set({ isSubmitting: true});
+    set({ isSubmitting: true });
     const { productDetails, stock, weightPerUnit } = get();
 
     const formData = new FormData();
@@ -36,7 +42,9 @@ export const useInventoryStore = create((set, get) => ({
       set({
         stock: 0,
         weightPerUnit: 0,
-        productDetails: { ...productDetails, name: '', description: '', price: '', image: null, category: '', isFeatured: false },
+        productDetails: { 
+          name: '', description: '', price: '', image: null, category: '', isFeatured: false 
+        },
       });
       toast.success('Product and inventory created successfully!');
     } catch (err) {
@@ -46,10 +54,36 @@ export const useInventoryStore = create((set, get) => ({
       set({ isSubmitting: false });
     }
   },
+
+  // Function to get the total inventory weight and warehouse capacity
+  getTotalInventoryWeightForUserWarehouse: async () => {
+    set({ isSubmitting: true });
+    try {
+      const response = await axiosInstance.get('/warehouse/capacity');
+      const { total_weight, capacity } = response.data;
+
+      // Update the store with the fetched warehouse data
+      set({
+        warehouse: {
+          totalWeight: total_weight,
+          capacity: capacity,
+        },
+      });
+
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Error fetching warehouse data.';
+      toast.error(errorMessage);
+    } finally {
+      set({ isSubmitting: false });
+    }
+  },
+
+  // Function to reset store values
   reset: () => set({
     productDetails: { name: '', description: '', price: '', image: null, category: '', isFeatured: false },
     stock: 0,
     weightPerUnit: 0,
+    warehouse: { totalWeight: 0, capacity: 0 },
   }),
 }));
 

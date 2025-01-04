@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import ProductCard from "../../components/ProductCard";
 import { Search } from "lucide-react";
 import { ClipLoader } from "react-spinners"; // Optional spinner library, you can choose another one
+import useInventoryStore from "../../stores/useInventoryStore";
 
 const WarehouseInventories = () => {
   const { inventories, getInventoriesForWarehouse, updateInventoriesForWarehouse, loading } = useProductStore();
+  const { getTotalInventoryWeightForUserWarehouse, warehouse, loadingWarehouseData } = useInventoryStore(); // Ensure loadingWarehouseData is available if needed
   const [inventoryUpdates, setInventoryUpdates] = useState([]);
   
   // State for search filters
@@ -15,6 +17,9 @@ const WarehouseInventories = () => {
 
   // Called once when component mounts
   useEffect(() => {
+    // Fetch the warehouse data (total weight and capacity)
+    getTotalInventoryWeightForUserWarehouse();
+
     // Perform an initial search when the page is first loaded
     getInventoriesForWarehouse(productName, category);
   }, []); // Empty dependency array ensures this runs only on initial load
@@ -52,7 +57,46 @@ const WarehouseInventories = () => {
   return (
     <div className="min-h-screen">
       <div className="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        
+	  <div className="p-6 rounded-lg shadow-xl border border-gray-200 max-w-4xl mx-auto mb-5">
+			{/* Warehouse Overview Title */}
+			<h2 className="text-2xl font-semibold text-emerald-500 text-center mb-6">
+				Warehouse Overview
+			</h2>
+
+			<div className="flex justify-between items-center gap-6 text-center">
+				{/* Total Inventory Weight */}
+				<div className="flex-1 min-w-[240px]">
+				<div className="text-lg font-semibold text-emerald-500 mb-2">Total Inventory Weight</div>
+				<div className="text-3xl text-green-600 font-bold">
+					{warehouse?.totalWeight || 0} kg
+				</div>
+				</div>
+
+				{/* Vertical Divider */}
+				<div className="w-[1px] h-16 bg-gray-300" />
+
+				{/* Warehouse Capacity */}
+				<div className="flex-1 min-w-[240px]">
+				<div className="text-lg font-semibold text-emerald-500 mb-2">Warehouse Capacity</div>
+				<div className="text-3xl text-orange-600 font-bold">
+					{warehouse?.capacity || 0} kg
+				</div>
+				</div>
+				
+				{/* Vertical Divider */}
+				<div className="w-[1px] h-16 bg-gray-300" />
+
+				{/* Remaining Capacity */}
+				<div className="flex-1 min-w-[240px]">
+				<div className="text-lg font-semibold text-emerald-500 mb-2">Remaining Capacity</div>
+				<div className="text-3xl text-blue-600 font-bold">
+					{(warehouse?.capacity - warehouse?.totalWeight) || 0} kg
+				</div>
+				</div>
+			</div>
+		</div>
+
+
         {/* Search Fields */}
         <div className="flex space-x-4 mb-8">
           {/* Product Name Search */}
@@ -112,7 +156,7 @@ const WarehouseInventories = () => {
                 product={inventory.product}
                 stock={inventory.stock}
                 weight_per_unit={inventory.weight_per_unit}
-				categories = {inventory.categories}
+				categories={inventory.categories}
                 onUpdate={(stock, weight) => handleInventoryUpdate(inventory.id, stock, weight)}
               />
             ))}

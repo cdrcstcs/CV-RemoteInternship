@@ -59,6 +59,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/warehouse/line-chart', [WarehouseController::class, 'lineChart']);
         Route::get('/warehouse/geography', [WarehouseController::class, 'getGeography']);
         Route::post('/warehouse/create-inventory', [WarehouseController::class, 'createInventory']);
+        Route::get('/warehouse/capacity', [WarehouseController::class, 'getTotalInventoryWeightForUserWarehouse']);
     });
 
 });

@@ -134,7 +134,52 @@ class WarehouseController extends Controller
         }
     }
 
+    /**
+     * Get the total weight of inventory and capacity for the warehouse owned by the authenticated user.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTotalInventoryWeightForUserWarehouse(Request $request)
+    {
+        try {
+            // Get the warehouse managed by the current user (assuming only one warehouse)
+            $warehouse = Warehouse::where('users_id', $request->user()->id)->first();
 
+            // Check if the user has a warehouse
+            if (!$warehouse) {
+                return response()->json(['error' => 'No warehouse found for this user.'], 404);
+            }
+
+            // Get all inventories for the user's warehouse
+            $inventories = Inventory::where('warehouses_id', $warehouse->id)
+                ->with('product') // Eager load product to get weight_per_unit
+                ->get();
+
+            // Calculate total weight for the warehouse
+            $totalWeight = 0;
+            foreach ($inventories as $inventory) {
+                // Calculate weight for this inventory (stock * weight_per_unit)
+                $totalWeight += $inventory->stock * $inventory->weight_per_unit;
+            }
+
+            // Prepare the response data
+            $responseData = [
+                'warehouse_name' => $warehouse->warehouse_name,
+                'total_weight' => $totalWeight,
+                'capacity' => $warehouse->capacity // Include warehouse capacity in the response
+            ];
+
+            // Return the total weight and warehouse capacity
+            return response()->json($responseData);
+
+        } catch (\Exception $e) {
+            // Log the exception and return a generic error message
+            \Log::error('Error occurred while calculating total inventory weight: ' . $e->getMessage());
+
+            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
+        }
+    }
 
     /**
     * Get aggregated expense data (total cost by category or product).
