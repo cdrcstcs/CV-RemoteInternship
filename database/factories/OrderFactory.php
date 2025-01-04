@@ -18,7 +18,7 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'status' => $this->faker->randomElement(['pending', 'shipped', 'delivered', 'cancelled']), // Random status
+            'status' => $this->faker->randomElement(['Paid','Pending', 'Confirmed', 'Packed', 'Delivery Maintenance Checked','On Delivery', 'Delivered']), // Random status
             'order_date' => $this->faker->dateTimeThisYear(), // Random date within this year
             'user_id' => User::factory(), // Associate with a user using the User factory
             'tracking_number' => $this->faker->unique()->numerify('TRACK-#######'), // Random tracking number

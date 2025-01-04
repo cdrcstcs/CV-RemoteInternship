@@ -7,6 +7,7 @@ import {
   LineChart,
   Map,
   FormInputIcon,
+  ListOrdered
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom"; // Use React Router's Link and useLocation
 import React from "react";
@@ -102,6 +103,12 @@ const Sidebar = () => {
           href="/warehouse/create-inventory"
           icon={FormInputIcon}
           label="Create Inventory"
+          isCollapsed={isSidebarCollapsed}
+        />
+        <SidebarLink
+          href="/warehouse/orders"
+          icon={ListOrdered}
+          label="Orders"
           isCollapsed={isSidebarCollapsed}
         />
       </div>

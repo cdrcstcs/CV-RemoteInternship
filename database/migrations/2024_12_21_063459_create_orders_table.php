@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id(); // Auto-incrementing primary key
-            $table->string('status', 20)->nullable()->default(null);
+            $table->string('status', 30)->nullable()->default(null);
             $table->timestamp('order_date')->nullable()->default(null);
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // Foreign key for the user
             $table->string('tracking_number', 100)->nullable()->unique();

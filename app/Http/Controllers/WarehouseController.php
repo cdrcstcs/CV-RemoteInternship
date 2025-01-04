@@ -703,4 +703,138 @@ class WarehouseController extends Controller
         // Return the country
         return $country;
     }
+
+    public function getOrdersByUserWarehouse(Request $request)
+    {
+        try {
+            // Log incoming request parameters
+            Log::info('Incoming request data:', $request->all());
+
+            // Get the warehouses managed by the current user
+            $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
+
+            if ($userWarehouses->isEmpty()) {
+                return response()->json(['error' => 'No warehouses found for this user.'], 404);
+            }
+
+            // Get all product IDs from the inventories of these warehouses
+            $productIdsInWarehouse = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
+                ->pluck('products_id')
+                ->unique(); // Get unique product IDs
+
+            // Log the product IDs from the warehouse inventory
+            Log::info('Products in the managed warehouses:', $productIdsInWarehouse->toArray());
+
+            // Start by querying the orders and joining with order items
+            $ordersQuery = OrderItem::query()
+                ->with(['order'])  // eager load relationships
+                ->whereIn('products_id', $productIdsInWarehouse) // Filter by product IDs in the warehouse inventory
+                ->whereHas('order', function ($query) {
+                    // Filter orders that are marked as 'Paid'
+                    $query->where('status', 'Paid');
+                });
+
+            // Log the SQL query before executing
+            Log::info('Executing query for order items:', [
+                'query' => $ordersQuery->toSql(),
+                'bindings' => $ordersQuery->getBindings(),
+            ]);
+
+            // Get the order items
+            $orderItems = $ordersQuery->get();
+            Log::info('Fetched order items:', ['count' => $orderItems->count()]);
+
+            // Aggregate the data without filtering by category
+            $response = collect($orderItems)->map(function ($orderItem) {
+                return $orderItem->order;  // Return the entire order associated with the order item
+            });
+
+            // Log the response data before returning
+            Log::info('Response data:', $response->toArray());
+
+            return response()->json($response);
+
+        } catch (\Exception $e) {
+            // Log any exceptions that occur during the execution
+            Log::error('Error occurred in getOrdersByUserWarehouse method:', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString(),
+            ]);
+
+            // Return a generic error response
+            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
+        }
+    }
+
+    public function updateOrderStatus(Request $request, $orderId)
+    {
+        try {
+            // Log incoming request parameters
+            Log::info('Incoming request data for updating order status:', $request->all());
+
+            // Validate the incoming request to ensure the new status is provided
+            $validated = $request->validate([
+                'status' => 'required|string', // List the possible statuses
+            ]);
+
+            $newStatus = $validated['status'];
+
+            // Get the order by ID
+            $order = Order::find($orderId);
+
+            if (!$order) {
+                return response()->json(['error' => 'Order not found.'], 404);
+            }
+
+            // Get the warehouses that belong to the user
+            $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
+            if ($userWarehouses->isEmpty()) {
+                return response()->json(['error' => 'No warehouses found for this user.'], 404);
+            }
+
+            // Get all product IDs from the inventories of these warehouses
+            $productIdsInWarehouse = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
+                ->pluck('products_id')
+                ->unique();
+
+            Log::info('Products in the managed warehouses:', $productIdsInWarehouse->toArray());
+
+            // Query order items for the given order to ensure they belong to this order and their products exist in the managed warehouses
+            $orderItems = OrderItem::where('orders_id', $orderId) // Ensure these items are for the correct order
+                ->whereIn('products_id', $productIdsInWarehouse) // Ensure the products are available in the user's warehouses
+                ->get();
+
+            if ($orderItems->isEmpty()) {
+                return response()->json(['error' => 'No valid order items found in the managed warehouses for this order.'], 404);
+            }
+
+            // Update the status of the order
+            $order->status = $newStatus;
+            $order->save();
+
+            // Log the status update
+            Log::info('Order status updated successfully:', [
+                'order_id' => $orderId,
+                'new_status' => $newStatus,
+            ]);
+
+            // Return the updated order details
+            return response()->json([
+                'message' => 'Order status updated successfully.',
+                'order' => $order,
+            ]);
+
+        } catch (\Exception $e) {
+            // Log any exceptions that occur during the execution
+            Log::error('Error occurred in updateOrderStatus method:', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString(),
+            ]);
+
+            // Return a generic error response
+            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
+        }
+    }
+
+
 }
