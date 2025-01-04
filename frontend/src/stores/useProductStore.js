@@ -43,16 +43,28 @@ export const useProductStore = create((set) => ({
 			toast.error(error.response.data.error || "Failed to fetch products");
 		}
 	},
-	getInventoriesForWarehouse: async () => {
+	getInventoriesForWarehouse: async (product_name, category) => {
 		set({ loading: true });
 		try {
-			const response = await axiosInstance.get("/warehouse/inventories");
+			// Prepare the filters object to be sent in the POST request
+			const filters = {
+				product_name,
+				category
+			};
+	
+			// Make the API call with the filters in the request body
+			const response = await axiosInstance.post("/warehouse/inventories", filters);
+	
+			// Set the response data in the store
 			set({ inventories: response.data, loading: false });
+			console.log(inventories);
 		} catch (error) {
+			// Handle errors and show appropriate message
 			set({ error: "Failed to fetch products", loading: false });
-			toast.error(error.response.data.error || "Failed to fetch products");
 		}
 	},
+	
+	
 	updateInventoriesForWarehouse: async (inventoryUpdates) => {
 		set({ loading: true });
 		try {

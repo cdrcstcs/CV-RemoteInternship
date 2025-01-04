@@ -2,14 +2,27 @@ import { useEffect, useState } from "react";
 import { useProductStore } from "../../stores/useProductStore";
 import { motion } from "framer-motion";
 import ProductCard from "../../components/ProductCard";
+import { Search } from "lucide-react";
+import { ClipLoader } from "react-spinners"; // Optional spinner library, you can choose another one
 
 const WarehouseInventories = () => {
-  const { inventories, getInventoriesForWarehouse, updateInventoriesForWarehouse } = useProductStore();
+  const { inventories, getInventoriesForWarehouse, updateInventoriesForWarehouse, loading } = useProductStore();
   const [inventoryUpdates, setInventoryUpdates] = useState([]);
+  
+  // State for search filters
+  const [productName, setProductName] = useState("");
+  const [category, setCategory] = useState("");
 
+  // Called once when component mounts
   useEffect(() => {
-    getInventoriesForWarehouse();
-  }, [getInventoriesForWarehouse]);
+    // Perform an initial search when the page is first loaded
+    getInventoriesForWarehouse(productName, category);
+  }, []); // Empty dependency array ensures this runs only on initial load
+
+  // Function to trigger the search
+  const triggerSearch = () => {
+    getInventoriesForWarehouse(productName, category);
+  };
 
   const handleInventoryUpdate = (inventoryId, stock, weight) => {
     setInventoryUpdates((prev) => [
@@ -25,33 +38,86 @@ const WarehouseInventories = () => {
     }
   };
 
+  // Handle changes to search fields
+  const handleProductNameChange = (e) => {
+    setProductName(e.target.value);
+  };
+
+  const handleCategoryChange = (e) => {
+    setCategory(e.target.value);
+  };
+
   console.log("inventories:", inventories);
 
   return (
     <div className="min-h-screen">
       <div className="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          {inventories?.length === 0 && (
-            <h2 className="text-3xl font-semibold text-gray-300 text-center col-span-full">
-              No products found
-            </h2>
-          )}
-
-          {inventories?.map((inventory) => (
-            <ProductCard
-              key={inventory.product.id}
-              product={inventory.product}
-              stock={inventory.stock}
-              weight_per_unit={inventory.weight_per_unit}
-              onUpdate={(stock, weight) => handleInventoryUpdate(inventory.id, stock, weight)}
+        
+        {/* Search Fields */}
+        <div className="flex space-x-4 mb-8">
+          {/* Product Name Search */}
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={productName}
+              onChange={handleProductNameChange}
+              placeholder="Search by product name"
+              className="p-2 w-full border border-gray-300 rounded-md focus:ring-indigo-500 pl-10" // Added padding for the icon
             />
-          ))}
-        </motion.div>
+            {/* Search Icon */}
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-emerald-400 cursor-pointer"
+              onClick={triggerSearch} // Trigger search on icon click
+            />
+          </div>
+
+          {/* Category Search */}
+          <div className="flex-1 relative">
+            <input
+              type="text"
+              value={category}
+              onChange={handleCategoryChange}
+              placeholder="Search by category"
+              className="p-2 w-full border border-gray-300 rounded-md focus:ring-indigo-500 pl-10" // Added padding for the icon
+            />
+            {/* Search Icon */}
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-emerald-400 cursor-pointer"
+              onClick={triggerSearch} // Trigger search on icon click
+            />
+          </div>
+        </div>
+
+        {/* Loading Spinner */}
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <ClipLoader size={50} color="#10B981" />
+          </div>
+        ) : (
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            {inventories?.length === 0 && (
+              <h2 className="text-3xl font-semibold text-gray-300 text-center col-span-full">
+                No products found
+              </h2>
+            )}
+
+            {inventories?.map((inventory) => (
+              <ProductCard
+                key={inventory.product.id}
+                product={inventory.product}
+                stock={inventory.stock}
+                weight_per_unit={inventory.weight_per_unit}
+				categories = {inventory.categories}
+                onUpdate={(stock, weight) => handleInventoryUpdate(inventory.id, stock, weight)}
+              />
+            ))}
+          </motion.div>
+        )}
 
         <div className="mt-4 text-center">
           <button

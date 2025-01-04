@@ -271,28 +271,79 @@ class WarehouseController extends Controller
     public function getInventoriesForWarehouse(Request $request)
     {
         try {
+            // Log incoming request parameters
+            Log::info('Request received in getInventoriesForWarehouse', [
+                'user_id' => $request->user()->id,
+                'product_name' => $request->input('product_name'),
+                'category' => $request->input('category')
+            ]);
+
             // Get the warehouses managed by the current user
             $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
+
+            // Log the warehouses fetched
+            Log::info('Warehouses fetched for user', [
+                'user_warehouses_count' => $userWarehouses->count(),
+                'warehouses' => $userWarehouses->pluck('id')->toArray()
+            ]);
 
             if ($userWarehouses->isEmpty()) {
                 return response()->json(['error' => 'No warehouses found for this user.'], 404);
             }
 
-            // Get all product IDs from the inventories of these warehouses, ensuring uniqueness
-            $productsInWarehouse = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
-                ->with('product')
-                ->distinct('products_id') // Get unique products by product_id
-                ->get();
+            // Start building the query to get inventories
+            $query = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
+                ->with(['product', 'product.categories'])  // Eager load product and its categories
+                ->distinct('products_id'); // Get unique products by product_id
+
+            // Apply filters if provided in the request
+            if ($request->has('product_name')) {
+                $query->whereHas('product', function ($query) use ($request) {
+                    $query->where('name', 'like', '%' . $request->input('product_name') . '%');
+                });
+            }
+
+            // Filter by category if provided
+            if ($request->has('category')) {
+                $query->whereHas('product.categories', function ($query) use ($request) {
+                    $query->where('category_name', 'like', '%' . $request->input('category') . '%');
+                });
+            }
+
+            // Log the final query before executing
+            Log::info('Query built for fetching products in warehouse', [
+                'query' => $query->toSql(),
+                'bindings' => $query->getBindings()
+            ]);
+
+            // Execute the query
+            $productsInWarehouse = $query->get();
+
+            // Log the result of the query
+            Log::info('Products fetched from warehouse', [
+                'products_count' => $productsInWarehouse->count(),
+                'products' => $productsInWarehouse->pluck('product.name')->toArray()
+            ]);
 
             // If no products found, return a 404 response
             if ($productsInWarehouse->isEmpty()) {
-                return response()->json(['error' => 'No products found for the warehouses.'], 404);
+                return response()->json(['error' => 'No products found for the warehouses with the given filters.'], 404);
             }
 
-            return response()->json($productsInWarehouse);
+            // Return the products with their categories
+            return response()->json($productsInWarehouse->map(function ($inventory) {
+                return [
+                    'product' => $inventory->product,
+                    'categories' => $inventory->product->categories, // Add product categories to the response
+                    'stock' => $inventory->stock,
+                    'weight_per_unit' => $inventory->weight_per_unit,
+                    'warehouse_id' => $inventory->warehouses_id
+                ];
+            }));
+
         } catch (\Exception $e) {
             // Log any exceptions that occur during the execution
-            Log::error('Error occurred in getProductsForWarehouse method:', [
+            Log::error('Error occurred in getInventoriesForWarehouse method:', [
                 'message' => $e->getMessage(),
                 'stack' => $e->getTraceAsString(),
             ]);
@@ -301,6 +352,9 @@ class WarehouseController extends Controller
             return response()->json(['error' => 'An error occurred while processing your request.'], 500);
         }
     }
+
+    
+
     public function updateInventory(Request $request)
     {
         try {

@@ -3,7 +3,7 @@ import { ShoppingCart } from "lucide-react";
 import { useCartStore } from "../stores/useCartStore";
 import { useState, useEffect } from "react";
 
-const ProductCard = ({ product, stock, weight_per_unit, onUpdate }) => {
+const ProductCard = ({ product, stock, weight_per_unit, categories, onUpdate }) => {
   const { addToCart } = useCartStore();
 
   const [newStock, setNewStock] = useState(stock);
@@ -103,6 +103,24 @@ const ProductCard = ({ product, stock, weight_per_unit, onUpdate }) => {
         {/* Editable fields for inventory update */}
         {isInWareHousePage && (
           <div className="mt-4">
+            {/* Categories Section */}
+            {categories && categories.length > 0 && (
+              <div className="mb-4">
+                <label className="text-sm text-gray-300">Categories:</label>
+                <div className="flex flex-wrap space-x-2 mt-2">
+                  {categories.map((category) => (
+                    <span
+                      key={category.id}
+                      className="text-xs text-emerald-400 bg-gray-800 rounded-full px-3 py-1 mt-4"
+                    >
+                      {category.category_name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Editable fields for stock and weight */}
             <div className="mb-4">
               <label className="text-sm text-gray-300">Stock:</label>
               <input
