@@ -8,17 +8,134 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Inventory;
 use App\Models\Warehouse;
-use App\Models\Vehicle;
 use App\Models\VehicleManagement;
 use App\Models\Shipment;
 use App\Models\Route;
 
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Integrations\files\CloudinaryImageClient; // Use the custom Cloudinary client
 
 class WarehouseController extends Controller
 {
+    protected $cloudinaryClient;
+
+    public function __construct()
+    {
+        // Initialize custom Cloudinary image client
+        $this->cloudinaryClient = new CloudinaryImageClient();
+    }
+
+    public function createInventory(Request $request)
+    {
+        // Log the incoming request data
+        Log::info('Create Inventory request received', [
+            'user_id' => $request->user()->id,
+            'product_details' => $request->input('product'),
+            'inventory_details' => $request->input('inventory')
+        ]);
+
+        // Get the user's warehouses
+        $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
+
+        // If no warehouses are found for the user, return an error
+        if ($userWarehouses->isEmpty()) {
+            Log::warning('No warehouses found for the user', ['user_id' => $request->user()->id]);
+            return response()->json(['message' => 'No warehouses found for this user.'], 400);
+        }
+
+        // Select the first warehouse (default)
+        $defaultWarehouse = $userWarehouses->first();
+        Log::info('Selected default warehouse', ['warehouse_id' => $defaultWarehouse->id]);
+
+        try {
+            // Validate the incoming request
+            $validated = $request->validate([
+                'product' => [
+                    'name' => ['required', 'string'],
+                    'description' => ['required', 'string'],
+                    'price' => ['required', 'numeric'],
+                    'image' => ['nullable', 'image'],
+                    'category' => ['nullable', 'string'],
+                    'isFeatured' => ['nullable', 'boolean'],  // Default to false if not provided
+                ],
+                'inventory' => [
+                    'stock' => ['required', 'numeric'],
+                    'weightPerUnit' => ['required', 'numeric'],
+                ]
+            ]);
+
+            // Log the validated product and inventory data
+            Log::info('Validated product and inventory data', [
+                'product' => $validated['product'],
+                'inventory' => $validated['inventory']
+            ]);
+
+            // Handle image upload to Cloudinary
+            $imageUrl = '';
+            if ($request->hasFile('product.image')) {
+                try {
+                    // Retrieve the image file
+                    $uploadedFile = $request->file('product.image');
+                    $mimeType = $uploadedFile->getClientMimeType();
+                    $base64Contents = base64_encode($uploadedFile->getContent());
+
+                    // Upload image using custom Cloudinary client
+                    $uploadResult = $this->cloudinaryClient->uploadImage($mimeType, $base64Contents);
+                    
+                    // If the upload is successful, we get the secure URL
+                    if ($uploadResult->isSuccess) {
+                        $imageUrl = $uploadResult->secureUrl;
+                        Log::info('Product image uploaded to Cloudinary', ['image_url' => $imageUrl]);
+                    } else {
+                        throw new \Exception("Cloudinary image upload failed: " . $uploadResult->msg);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Error uploading image to Cloudinary', [
+                        'error_message' => $e->getMessage(),
+                        'image' => $uploadedFile->getClientOriginalName()
+                    ]);
+                    throw $e;  // Re-throw the exception after logging it
+                }
+            }
+
+            // Create Product (First, handle the product)
+            $product = Product::create([
+                'name' => $validated['product']['name'],
+                'description' => $validated['product']['description'],
+                'price' => $validated['product']['price'],
+                'image' => $imageUrl,
+                'category' => $validated['product']['category'],
+                'isFeatured' => $validated['product']['isFeatured'] == true,
+            ]);
+            Log::info('Product created successfully', ['product_id' => $product->id, 'product_name' => $product->name]);
+
+            // Create Inventory (After creating the product)
+            $inventory = Inventory::create([
+                'stock' => $validated['inventory']['stock'],
+                'last_updated' => Carbon::now(),
+                'weight_per_unit' => $validated['inventory']['weightPerUnit'],
+                'products_id' => $product->id,  // Link inventory to the newly created product
+                'warehouses_id' => $defaultWarehouse->id,  // Use the first warehouse from the user's warehouses
+            ]);
+            Log::info('Inventory created and linked to product', ['inventory_id' => $inventory->id, 'product_id' => $product->id]);
+
+            // Return both the created product and inventory
+            return response()->json(['product' => $product, 'inventory' => $inventory], 201);
+        } catch (\Exception $e) {
+            // Log any exception that occurs during the process
+            Log::error('Error creating product and inventory', [
+                'user_id' => $request->user()->id,
+                'error_message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
+
     /**
     * Get aggregated expense data (total cost by category or product).
     *
@@ -26,130 +143,130 @@ class WarehouseController extends Controller
     * @return \Illuminate\Http\JsonResponse
     */
     public function filterExpenses(Request $request)
-{
-    try {
-        // Log incoming request parameters
-        Log::info('Incoming request data:', $request->all());
+    {
+        try {
+            // Log incoming request parameters
+            Log::info('Incoming request data:', $request->all());
 
-        // Validate the incoming request for date filters (removed category validation)
-        $validated = $request->validate([
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-        ]);
-
-        $startDate = $validated['start_date'] ?? null;
-        $endDate = $validated['end_date'] ?? null;
-
-        // Log the validated filter values (category has been removed)
-        Log::info('Validated filter values:', [
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-        ]);
-
-        // Get the warehouses managed by the current user
-        $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
-
-        if ($userWarehouses->isEmpty()) {
-            return response()->json(['error' => 'No warehouses found for this user.'], 404);
-        }
-
-        // Get all product IDs from the inventories of these warehouses
-        $productIdsInWarehouse = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
-            ->pluck('products_id')
-            ->unique(); // Get unique product IDs
-
-        // Log the product IDs from the warehouse inventory
-        Log::info('Products in the managed warehouses:', $productIdsInWarehouse->toArray());
-
-        // Start by querying the orders and joining with order items
-        $ordersQuery = OrderItem::query()
-            ->with(['order'])  // eager load relationships
-            ->whereIn('products_id', $productIdsInWarehouse) // Filter by product IDs in the warehouse inventory
-            ->when($startDate, function ($query) use ($startDate) {
-                return $query->whereHas('order', function ($query) use ($startDate) {
-                    $query->whereDate('order_date', '>=', Carbon::parse($startDate));
-                });
-            })
-            ->when($endDate, function ($query) use ($endDate) {
-                return $query->whereHas('order', function ($query) use ($endDate) {
-                    $query->whereDate('order_date', '<=', Carbon::parse($endDate));
-                });
-            });
-
-        // Log the SQL query before executing
-        Log::info('Executing query for order items:', [
-            'query' => $ordersQuery->toSql(),
-            'bindings' => $ordersQuery->getBindings(),
-        ]);
-
-        // Get the order items
-        $orderItems = $ordersQuery->get();
-        Log::info('Fetched order items:', ['count' => $orderItems->count()]);
-
-        // Aggregate the data without filtering by category
-        $aggregatedData = collect($orderItems)->map(function ($orderItem) {
-            $product = $orderItem->product;
-
-            return [
-                'product_id' => $product->id,
-                'product_name' => $product->name,
-                'amount' => $orderItem->total_amount,
-                'order_date' => $orderItem->order->order_date,  // Using the order's date here
-            ];
-        });
-
-        // Log the structure of aggregatedData before processing further
-        Log::info('Aggregated Data Structure:', $aggregatedData->toArray());
-
-        // Now we can sum the amounts by product (instead of category) if needed
-        $aggregatedData = $aggregatedData->groupBy('product_name')->map(function ($items) {
-            Log::info('Processing group:', [
-                'product_name' => $items->first()['product_name'] ?? 'N/A',
-                'item_count' => $items->count(),
+            // Validate the incoming request for date filters (removed category validation)
+            $validated = $request->validate([
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date',
             ]);
 
-            // Check if product_name exists before accessing it
-            if (isset($items->first()['product_name'])) {
-                $totalAmount = $items->map(function ($item) {
-                    return $item['amount']; 
-                })->sum(); 
+            $startDate = $validated['start_date'] ?? null;
+            $endDate = $validated['end_date'] ?? null;
+
+            // Log the validated filter values (category has been removed)
+            Log::info('Validated filter values:', [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ]);
+
+            // Get the warehouses managed by the current user
+            $userWarehouses = Warehouse::where('users_id', $request->user()->id)->get();
+
+            if ($userWarehouses->isEmpty()) {
+                return response()->json(['error' => 'No warehouses found for this user.'], 404);
+            }
+
+            // Get all product IDs from the inventories of these warehouses
+            $productIdsInWarehouse = Inventory::whereIn('warehouses_id', $userWarehouses->pluck('id'))
+                ->pluck('products_id')
+                ->unique(); // Get unique product IDs
+
+            // Log the product IDs from the warehouse inventory
+            Log::info('Products in the managed warehouses:', $productIdsInWarehouse->toArray());
+
+            // Start by querying the orders and joining with order items
+            $ordersQuery = OrderItem::query()
+                ->with(['order'])  // eager load relationships
+                ->whereIn('products_id', $productIdsInWarehouse) // Filter by product IDs in the warehouse inventory
+                ->when($startDate, function ($query) use ($startDate) {
+                    return $query->whereHas('order', function ($query) use ($startDate) {
+                        $query->whereDate('order_date', '>=', Carbon::parse($startDate));
+                    });
+                })
+                ->when($endDate, function ($query) use ($endDate) {
+                    return $query->whereHas('order', function ($query) use ($endDate) {
+                        $query->whereDate('order_date', '<=', Carbon::parse($endDate));
+                    });
+                });
+
+            // Log the SQL query before executing
+            Log::info('Executing query for order items:', [
+                'query' => $ordersQuery->toSql(),
+                'bindings' => $ordersQuery->getBindings(),
+            ]);
+
+            // Get the order items
+            $orderItems = $ordersQuery->get();
+            Log::info('Fetched order items:', ['count' => $orderItems->count()]);
+
+            // Aggregate the data without filtering by category
+            $aggregatedData = collect($orderItems)->map(function ($orderItem) {
+                $product = $orderItem->product;
 
                 return [
-                    'product_name' => $items->first()['product_name'],
-                    'total_amount' => $totalAmount,
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'amount' => $orderItem->total_amount,
+                    'order_date' => $orderItem->order->order_date,  // Using the order's date here
                 ];
-            } else {
-                return null; // Handle missing product_name
-            }
-        })->filter(); // Remove any null values
+            });
 
-        // Log the aggregated data before returning
-        Log::info('Aggregated data after grouping and summing:', $aggregatedData->toArray());
+            // Log the structure of aggregatedData before processing further
+            Log::info('Aggregated Data Structure:', $aggregatedData->toArray());
 
-        // Prepare the response format
-        $response = $aggregatedData->map(function ($item) {
-            return [
-                'name' => $item['product_name'],
-                'amount' => $item['total_amount'],
-            ];
-        });
+            // Now we can sum the amounts by product (instead of category) if needed
+            $aggregatedData = $aggregatedData->groupBy('product_name')->map(function ($items) {
+                Log::info('Processing group:', [
+                    'product_name' => $items->first()['product_name'] ?? 'N/A',
+                    'item_count' => $items->count(),
+                ]);
 
-        // Log the final response data
-        Log::info('Response data:', $response->toArray());
+                // Check if product_name exists before accessing it
+                if (isset($items->first()['product_name'])) {
+                    $totalAmount = $items->map(function ($item) {
+                        return $item['amount']; 
+                    })->sum(); 
 
-        return response()->json($response);
+                    return [
+                        'product_name' => $items->first()['product_name'],
+                        'total_amount' => $totalAmount,
+                    ];
+                } else {
+                    return null; // Handle missing product_name
+                }
+            })->filter(); // Remove any null values
 
-    } catch (\Exception $e) {
-        // Log any exceptions that occur during the execution
-        Log::error('Error occurred in filterExpenses method:', [
-            'message' => $e->getMessage(),
-            'stack' => $e->getTraceAsString(),
-        ]);
+            // Log the aggregated data before returning
+            Log::info('Aggregated data after grouping and summing:', $aggregatedData->toArray());
 
-        // Return a generic error response
-        return response()->json(['error' => 'An error occurred while processing your request.'], 500);
+            // Prepare the response format
+            $response = $aggregatedData->map(function ($item) {
+                return [
+                    'name' => $item['product_name'],
+                    'amount' => $item['total_amount'],
+                ];
+            });
+
+            // Log the final response data
+            Log::info('Response data:', $response->toArray());
+
+            return response()->json($response);
+
+        } catch (\Exception $e) {
+            // Log any exceptions that occur during the execution
+            Log::error('Error occurred in filterExpenses method:', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString(),
+            ]);
+
+            // Return a generic error response
+            return response()->json(['error' => 'An error occurred while processing your request.'], 500);
+        }
     }
-}
 
     public function getInventoriesForWarehouse(Request $request)
     {

@@ -24,6 +24,7 @@ import ProductDetailPage from "./pages/ProductDetailPage.jsx";
 import WarehouseInventories from "./pages/Warehouse/WarehouseInventories.jsx";
 import Daily from "./pages/Warehouse/Daily.jsx";
 import Geography from "./pages/Warehouse/Geography.jsx";
+import CreateInventory from "./pages/Warehouse/CreateInventory.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -76,6 +77,7 @@ function App() {
             <Route path="products" element={<WarehouseInventories />} />
             <Route path="linechart" element={<Daily />} />
             <Route path="geography" element={<Geography />} />
+            <Route path="create-inventory" element={<CreateInventory />} />
           </Route>
 
 
