@@ -26,6 +26,7 @@ import Daily from "./pages/Warehouse/Daily.jsx";
 import Geography from "./pages/Warehouse/Geography.jsx";
 import CreateInventory from "./pages/Warehouse/CreateInventory.jsx";
 import WarehouseOrders from "./pages/Warehouse/WarehouseOrders.jsx";
+import './echo.js'
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   

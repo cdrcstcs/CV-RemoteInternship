@@ -11,6 +11,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\OrderController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -44,6 +45,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/coupon', [CouponController::class, 'getMyCoupon']);
         Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
         Route::post('/payment/process', [PaymentController::class, 'processPayment']);
+        Route::get('/orders/{orderId}/status', [OrderController::class, 'getOrderStatusById']);
     });
     // Product Routes (Admin only)
     Route::get('/products', [ProductController::class, 'getAllProducts']);

@@ -1,19 +1,26 @@
-import { ArrowRight, CheckCircle, HandHeart, Package, Truck, Home, NotebookPenIcon } from "lucide-react";
+import { ArrowRight, CheckCircle, HandHeart, Package, Truck, Home, NotebookPenIcon, Factory, Receipt } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useCartStore } from "../stores/useCartStore";
+import { useOrderStore } from "../stores/useOrderStore"; // Assuming you have this store for fetching orders
 import Confetti from "react-confetti";
 
 const PurchaseSuccessPage = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const { cart, orderId, clearCart } = useCartStore();
-  const [error, setError] = useState(null);
-  const [orderStatus, setOrderStatus] = useState('Confirmed'); // Placeholder value for order status
+  const { orderStatus, getOrderStatusById, listenForOrderStatusUpdates, isLoading, errorMessage } = useOrderStore(state => ({
+    orderStatus: state.orderStatus,
+    getOrderStatusById: state.getOrderStatusById,
+    listenForOrderStatusUpdates: state.listenForOrderStatusUpdates,
+    isLoading: state.isLoading,
+    errorMessage: state.errorMessage
+  }));
 
-  // Define the order statuses
-  const statuses = ['Pending', 'Confirmed', 'Packed', 'On Delivery', 'Delivered'];
+  const { orderIdFromURL } = useParams(); // Use if you pass the orderId in the URL, i.e., '/order/:orderId'
 
-  // Order Status Timeline - Add Icons and Styling
+  const statuses = ['Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered'];
+
+  // Get status class
   const getStatusClass = (status) => {
     const index = statuses.indexOf(status);
     const currentIndex = statuses.indexOf(orderStatus);
@@ -23,8 +30,11 @@ const PurchaseSuccessPage = () => {
       : "bg-gray-500 text-gray-300";
   };
 
+  // Get corresponding icon for each order status
   const getStatusIcon = (status) => {
     switch (status) {
+      case 'Paid':
+        return <Receipt size={24} />;
       case 'Pending':
         return <NotebookPenIcon size={24} />;
       case 'Confirmed':
@@ -33,23 +43,38 @@ const PurchaseSuccessPage = () => {
         return <Package size={24} />;
       case 'On Delivery':
         return <Truck size={24} />;
-	case 'Delivered':
-		return <Home size={24} />;
+      case 'Delivered':
+        return <Home size={24} />;
       default:
-        return <Package size={24} />;
+        return <Factory size={24} />;
     }
   };
 
   useEffect(() => {
+    const id = orderId || orderIdFromURL;
+
+    if (id) {
+      const fetchOrderStatus = async () => {
+        try {
+          await getOrderStatusById(id); // Fetch status using store
+          listenForOrderStatusUpdates(id); // Start listening for real-time updates
+        } catch (err) {
+          console.error('Error fetching order status:', err);
+        }
+      };
+
+      fetchOrderStatus();
+    }
+
     // Simulate a delay or processing state if needed
     setTimeout(() => {
       setIsProcessing(false); // Once processing is done, hide loading state
     }, 2000);
-  }, []);
+  }, [orderId, orderIdFromURL, getOrderStatusById, listenForOrderStatusUpdates]); // Re-run if orderId or orderIdFromURL changes
 
-  if (isProcessing) return <div>Processing...</div>;
+  if (isProcessing || isLoading) return <div>Processing...</div>;
 
-  if (error) return <div>{`Error: ${error}`}</div>;
+  if (errorMessage) return <div>{`Error: ${errorMessage}`}</div>;
 
   return (
     <div className="h-full flex items-center justify-center">
@@ -84,7 +109,6 @@ const PurchaseSuccessPage = () => {
           <div className="flex items-center justify-center space-x-8 mb-8">
             {statuses.map((status, index) => (
               <div key={status} className="flex items-center justify-center space-x-2">
-                {/* Circle with status */}
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 
                     ${getStatusClass(status)} shadow-lg transform hover:scale-110`}
@@ -92,9 +116,13 @@ const PurchaseSuccessPage = () => {
                   {getStatusIcon(status)}
                 </div>
 
-                {/* Line between status circles */}
-                {index < statuses.length - 1 && (
+                {/* Line between status circles - only show if orderStatus has reached or passed the current status */}
+                {index < statuses.length - 1 && statuses.indexOf(orderStatus) >= index && (
                   <div className="w-16 h-1 bg-emerald-400"></div>
+                )}
+
+                {(index >= statuses.length - 1 || statuses.indexOf(orderStatus) < index) && (
+                  <div className="w-16 h-1 bg-white"></div>
                 )}
 
                 {/* Status Text */}

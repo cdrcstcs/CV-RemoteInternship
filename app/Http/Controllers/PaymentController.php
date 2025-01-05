@@ -47,7 +47,7 @@ class PaymentController extends Controller
         $payment->providers_id = 1; // Use the current date and time
         $payment->save();
 
-        $order->status = 'paid';
+        $order->status = 'Paid';
         $order->save();
 
         // Return a successful response with the payment details

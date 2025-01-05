@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Integrations\files\CloudinaryImageClient; // Use the custom Cloudinary client
+use App\Events\OrderStatusUpdated;
 
 class WarehouseController extends Controller
 {
@@ -817,6 +818,7 @@ class WarehouseController extends Controller
                 'order_id' => $orderId,
                 'new_status' => $newStatus,
             ]);
+            event(new OrderStatusUpdated($order));
 
             // Return the updated order details
             return response()->json([
