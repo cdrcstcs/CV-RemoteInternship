@@ -4,10 +4,11 @@ import { Link, useParams } from "react-router-dom";
 import { useCartStore } from "../stores/useCartStore";
 import { useOrderStore } from "../stores/useOrderStore"; // Assuming you have this store for fetching orders
 import Confetti from "react-confetti";
-
-const PurchaseSuccessPage = () => {
+import { Inertia } from "@inertiajs/inertia";
+const PurchaseSuccessPage = ({orderIdFromBackend}) => {
+  const { orderId } = useParams();  // Get orderId from URL
   const [isProcessing, setIsProcessing] = useState(true);
-  const { cart, orderId, clearCart } = useCartStore();
+  const { cart, getCartByOrderId, clearCart, fetchPaymentOrderId } = useCartStore();
   const { orderStatus, getOrderStatusById, listenForOrderStatusUpdates, isLoading, errorMessage } = useOrderStore(state => ({
     orderStatus: state.orderStatus,
     getOrderStatusById: state.getOrderStatusById,
@@ -15,8 +16,6 @@ const PurchaseSuccessPage = () => {
     isLoading: state.isLoading,
     errorMessage: state.errorMessage
   }));
-
-  const { orderIdFromURL } = useParams(); // Use if you pass the orderId in the URL, i.e., '/order/:orderId'
 
   const statuses = ['Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered'];
 
@@ -51,17 +50,34 @@ const PurchaseSuccessPage = () => {
   };
 
   useEffect(() => {
-    const id = orderId || orderIdFromURL;
-
-    if (id) {
-      const fetchOrderStatus = async () => {
+	if(!orderId) {
+		orderId = orderIdFromBackend
+	}
+    if (!orderId) {
+      // If no orderId is found, try fetching it from the payment store
+      const fetchOrderCart = async () => {
         try {
-          await getOrderStatusById(id); // Fetch status using store
-          listenForOrderStatusUpdates(id); // Start listening for real-time updates
+          await fetchPaymentOrderId(); // Fetch the orderId based on payment verification
         } catch (err) {
           console.error('Error fetching order status:', err);
         }
       };
+
+      fetchOrderCart();
+    }
+
+    if (orderId) {
+      // Fetch cart and order status
+      const fetchOrderStatus = async () => {
+        try {
+          await getOrderStatusById(orderId); // Fetch status using store
+          listenForOrderStatusUpdates(orderId); // Start listening for real-time updates
+        } catch (err) {
+          console.error('Error fetching order status:', err);
+        }
+      };
+
+      getCartByOrderId(orderId); // Fetch cart by orderId
 
       fetchOrderStatus();
     }
@@ -70,7 +86,7 @@ const PurchaseSuccessPage = () => {
     setTimeout(() => {
       setIsProcessing(false); // Once processing is done, hide loading state
     }, 2000);
-  }, [orderId, orderIdFromURL, getOrderStatusById, listenForOrderStatusUpdates]); // Re-run if orderId or orderIdFromURL changes
+  }, [orderId, getOrderStatusById, listenForOrderStatusUpdates, fetchPaymentOrderId, getCartByOrderId]);
 
   if (isProcessing || isLoading) return <div>Processing...</div>;
 

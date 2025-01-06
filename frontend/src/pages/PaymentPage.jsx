@@ -10,28 +10,17 @@ const PaymentPage = () => {
     totalAfterDiscount,
     processPayment,
     isPaymentProcessing,
-    paymentMessage,
   } = useCartStore();
 
   const [paymentMethod, setPaymentMethod] = useState('credit_card');
   const [paymentGateway, setPaymentGateway] = useState('stripe');
   const [currency, setCurrency] = useState('USD');
-  const navigate = useNavigate();
-  const [isPaid, setIsPaid] = useState(false);
   // Handle payment form submission
   const handlePaymentSubmit = (e) => {
     e.preventDefault();
-    setIsPaid(false);
     processPayment(paymentMethod, paymentGateway, currency); // Call the store method to process the payment
-    setIsPaid(true);
   };
 
-  useEffect(() => {
-    console.log(paymentMessage);
-    if (paymentMessage === 'ok' && isPaid) {
-      navigate('/purchase-success');
-    }
-  }, [paymentMessage]);
 
   return (
     <div className="w-full h-full p-8">

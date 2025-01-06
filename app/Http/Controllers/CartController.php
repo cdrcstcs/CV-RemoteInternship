@@ -101,6 +101,18 @@ class CartController extends Controller
         }
     }
 
+    public function getCartByOrderId(Request $request)
+    {
+        try {
+            $orderId = $request->input('orderId');
+            $order = Order::find($orderId);
+            $allOrderItems = OrderItem::where('orders_id', $order->id)->with('product')->get();
+            return response()->json($allOrderItems);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
+        }
+    }
+
 
     public function removeCartItem(Request $request)
     {
