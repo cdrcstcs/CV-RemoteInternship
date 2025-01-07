@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-import Navbar from "../../components/Warehouse/Navbar";
-import Sidebar from "../../components/Warehouse/Sidebar";
+import Navbar from "../../components/Vehicle/Navbar";
+import Sidebar from "../../components/Vehicle/Sidebar";
 import StoreProvider, { useAppSelector } from "../State/Redux";
 import { Outlet } from "react-router-dom"; // Import Outlet for nested routes
 
@@ -40,7 +40,7 @@ const DashboardLayout = () => {
   );
 };
 
-const Wrapper = ({ children }) => {
+const WrapperVehicle = ({ children }) => {
   return (
     <StoreProvider>
       <DashboardLayout>{children}</DashboardLayout>
@@ -48,4 +48,4 @@ const Wrapper = ({ children }) => {
   );
 };
 
-export default Wrapper;
+export default WrapperVehicle;

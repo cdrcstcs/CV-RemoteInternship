@@ -31,8 +31,8 @@ class WarehouseFactory extends Factory
         return [
             'warehouse_name' => $this->faker->company . ' Warehouse', // Generate a warehouse name
             'location' => $this->faker->address . ', ' . $countryISO3, // Append the country code at the end
-            'capacity' => $this->faker->numberBetween(100, 10000), // Random capacity between 100 and 10,000
-            'available_space' => $this->faker->numberBetween(0, 10000), // Random available space
+            'capacity' => $this->faker->numberBetween(100, 1000), // Random capacity between 100 and 10,000
+            'available_space' => $this->faker->numberBetween(0, 1000), // Random available space
             'users_id' => User::factory(), // Associate a user with the warehouse (create a new user if needed)
         ];
     }

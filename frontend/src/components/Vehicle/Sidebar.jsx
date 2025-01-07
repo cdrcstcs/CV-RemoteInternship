@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "../../pages/State/Redux";
 import { setIsSidebarCollapsed } from "../../pages/State/State";
 import {
-  CircleDollarSign,
+  Car,
   Clipboard,
   Menu,
   LineChart,
@@ -76,39 +76,9 @@ const Sidebar = () => {
       {/* LINKS */}
       <div className="flex-grow mt-8">
         <SidebarLink
-          href="/warehouse"
-          icon={CircleDollarSign}
-          label="Expenses"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/warehouse/products"
-          icon={Clipboard}
-          label="Products"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/warehouse/linechart"
-          icon={LineChart}
-          label="Line Chart"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/warehouse/geography"
-          icon={Map}
-          label="Geography"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/warehouse/create-inventory"
-          icon={FormInputIcon}
-          label="Create Inventory"
-          isCollapsed={isSidebarCollapsed}
-        />
-        <SidebarLink
-          href="/warehouse/orders"
-          icon={ListOrdered}
-          label="Orders"
+          href="/vehicle"
+          icon={Car}
+          label="Vehicles"
           isCollapsed={isSidebarCollapsed}
         />
       </div>

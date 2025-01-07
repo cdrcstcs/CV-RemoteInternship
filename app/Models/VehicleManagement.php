@@ -16,7 +16,6 @@ class VehicleManagement extends Model
     public $timestamps = true; // Indicates if the model should manage created_at and updated_at timestamps
 
     protected $fillable = [
-        'location_history',
         'fuel_consumption',
         'distance_traveled',
         'maintenance_status',

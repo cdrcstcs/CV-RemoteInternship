@@ -26,7 +26,17 @@ return new class extends Migration
             $table->decimal('mileage', 18, 2)->nullable(); // Mileage of the vehicle
             $table->string('maintenance_logs', 500)->nullable(); // Maintenance logs
             $table->foreignId('vehicle_management_id')->constrained('vehicle_management'); // Foreign key to VehicleManagement table
-            
+
+            // New fields
+            $table->integer('fuel_interval')->default(0); // Fuel interval (e.g., distance before next refill/service)
+            $table->string('fuel_type', 50)->nullable(); // Fuel type (e.g., Petrol, Diesel, Electric, Hybrid)
+            $table->string('vin', 50)->nullable(); // VIN (Vehicle Identification Number)
+
+            // New fields for brand, model, and year of manufacture
+            $table->string('brand', 100)->nullable(); // Vehicle brand
+            $table->string('model', 100)->nullable(); // Vehicle model
+            $table->integer('year_of_manufacture')->nullable(); // Year of manufacture
+
             $table->timestamps(); // CreatedAt and UpdatedAt
         });
     }

@@ -33,6 +33,16 @@ class VehicleFactory extends Factory
             'mileage' => $this->faker->numberBetween(1000, 200000), // Random mileage (between 1,000 and 200,000 km)
             'maintenance_logs' => $this->faker->text(100), // Random maintenance logs (brief text)
             'vehicle_management_id' => VehicleManagement::factory(), // Associate a vehicle management record
+
+            // New fields
+            'fuel_interval' => $this->faker->numberBetween(0, 1000), // Random fuel interval (e.g., between 0 and 1000 km)
+            'fuel_type' => $this->faker->randomElement(['Petrol', 'Diesel', 'Electric', 'Hybrid']), // Random fuel type
+            'vin' => $this->faker->bothify('??###??#####????'), // Random VIN (Vehicle Identification Number)
+
+            // New fields for brand, model, and year of manufacture
+            'brand' => $this->faker->company, // Random brand (could be any company name)
+            'model' => $this->faker->word, // Random model (random word)
+            'year_of_manufacture' => $this->faker->year(), // Random year of manufacture (current year or a random one)
         ];
     }
 
@@ -47,6 +57,14 @@ class VehicleFactory extends Factory
             'status' => 'Under Maintenance',
             'last_serviced' => null, // No last serviced date
             'maintenance_logs' => 'Vehicle is under maintenance.',
+            'fuel_interval' => 0, // Optionally set to 0 when under maintenance
+            'fuel_type' => $this->faker->randomElement(['Petrol', 'Diesel', 'Electric', 'Hybrid']), // Random fuel type
+            'vin' => $this->faker->bothify('??###??#####????'), // Random VIN
+
+            // New fields for brand, model, and year of manufacture
+            'brand' => $this->faker->company, // Random brand
+            'model' => $this->faker->word, // Random model
+            'year_of_manufacture' => $this->faker->year(), // Random year of manufacture
         ]);
     }
 
@@ -61,6 +79,14 @@ class VehicleFactory extends Factory
             'status' => 'Active',
             'last_serviced' => $this->faker->dateTimeThisYear(),
             'maintenance_logs' => 'Vehicle is in good condition.',
+            'fuel_interval' => $this->faker->numberBetween(0, 1000), // Random fuel interval
+            'fuel_type' => $this->faker->randomElement(['Petrol', 'Diesel', 'Electric', 'Hybrid']), // Random fuel type
+            'vin' => $this->faker->bothify('??###??#####????'), // Random VIN
+
+            // New fields for brand, model, and year of manufacture
+            'brand' => $this->faker->company, // Random brand
+            'model' => $this->faker->word, // Random model
+            'year_of_manufacture' => $this->faker->year(), // Random year of manufacture
         ]);
     }
 }

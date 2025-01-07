@@ -19,7 +19,6 @@ class VehicleManagementFactory extends Factory
     public function definition(): array
     {
         return [
-            'location_history' => $this->faker->address, // Random location
             'fuel_consumption' => $this->faker->numberBetween(5, 20), // Random fuel consumption (L per 100km)
             'distance_traveled' => $this->faker->numberBetween(1000, 100000), // Random distance traveled in km
             'maintenance_status' => $this->faker->randomElement(['Pending', 'Completed', 'In Progress']), // Random maintenance status

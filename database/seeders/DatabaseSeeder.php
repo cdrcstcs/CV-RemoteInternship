@@ -22,6 +22,7 @@ use App\Models\{
     Route,
     Vehicle,
     VehicleManagement,
+    LocationHistory,
 };
 
 class DatabaseSeeder extends Seeder
@@ -54,7 +55,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // Seed Users and their roles
-        $users = User::factory(20)->create();  // Create 20 users
+        $users = User::factory(100)->create();  // Create 20 users
         foreach ($users as $user) {
             $role = Role::factory()->create();
             UserRole::create([
@@ -86,7 +87,7 @@ class DatabaseSeeder extends Seeder
         foreach ($warehouses as $warehouse) {
             // Get a warehouse manager role user (if exists)
             $warehouseManager = UserRole::whereHas('role', function ($query) {
-                $query->where('role_name', 'warehousemanager');
+                $query->where('role_name', 'WarehouseManager');
             })->first();
 
             if ($warehouseManager) {
@@ -159,7 +160,9 @@ class DatabaseSeeder extends Seeder
         foreach (Route::all() as $route) {
             // Create a Vehicle
             $vehicle = Vehicle::factory()->create();
-
+            LocationHistory::factory()->create([
+                'vehicle_id' => $vehicle->id, // Assign a random user
+            ]);
             // Assign deterministic vehicle status
             $vehicle->status = ['Active', 'Under Maintenance'][$route->id % 2];  // Alternate between statuses
             $vehicle->save();
@@ -167,10 +170,12 @@ class DatabaseSeeder extends Seeder
             // Now associate the vehicle with the route (since Route has `vehicles_id`)
             $route->vehicles_id = $vehicle->id;
             $route->save();
-
+            $vehicleManager = UserRole::whereHas('role', function ($query) {
+                $query->where('role_name', 'VehicleManager');
+            })->first();
             // Create Vehicle Management for each Vehicle
             $vehicleManagement = VehicleManagement::factory()->create([
-                'users_id' => User::inRandomOrder()->first()->id, // Assign a random user
+                'users_id' => $vehicleManager->user->id, // Assign a random user
             ]);
 
             // Assign deterministic maintenance status

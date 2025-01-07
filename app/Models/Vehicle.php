@@ -18,7 +18,9 @@ class Vehicle extends Model
     protected $fillable = [
         'license_plate', 'type', 'driver_id', 'capacity', 'fuel_capacity', 
         'current_location', 'last_serviced', 'status', 'last_fuel_refill', 
-        'last_location_update', 'mileage', 'maintenance_logs', 'vehicle_management_id'
+        'last_location_update', 'mileage', 'maintenance_logs', 'vehicle_management_id',
+        'fuel_interval', 'fuel_type', 'vin', // Existing fields
+        'brand', 'model', 'year_of_manufacture' // New fields
     ];
 
     // Relationships

@@ -2,7 +2,6 @@ import React from "react";
 import { useAppDispatch, useAppSelector } from "../../pages/State/Redux";
 import { setIsSidebarCollapsed } from "../../pages/State/State";
 import { Menu } from "lucide-react";
-
 const Navbar = () => {
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector(

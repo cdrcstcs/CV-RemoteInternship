@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('warehouses', function (Blueprint $table) {
             $table->id(); // Auto-incrementing primary key
-            $table->string('warehouse_name', 45)->nullable()->default(null);
+            $table->string('warehouse_name', 500)->nullable()->default(null);
             $table->string('location', 500)->nullable()->default(null);
             $table->decimal('capacity', 18, 2)->nullable()->default(null);
             $table->decimal('available_space', 18, 2)->nullable()->default(null);

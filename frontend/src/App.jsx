@@ -26,6 +26,8 @@ import Daily from "./pages/Warehouse/Daily.jsx";
 import Geography from "./pages/Warehouse/Geography.jsx";
 import CreateInventory from "./pages/Warehouse/CreateInventory.jsx";
 import WarehouseOrders from "./pages/Warehouse/WarehouseOrders.jsx";
+import VehicleListPage from "./pages/VehicleManagement/VehicleListPage.jsx";
+import WrapperVehicle from "./pages/VehicleManagement/WrapperVehicle.jsx";
 import './echo.js'
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
@@ -83,6 +85,9 @@ function App() {
             <Route path="orders" element={<WarehouseOrders />} />
           </Route>
 
+          <Route path="/vehicle" element={user ? <WrapperVehicle/> : <Navigate to="/login" />}>
+            <Route index element={<VehicleListPage />} />
+          </Route>
 
           <Route path="/profile" element={user ? <ProfileLayout/> : <Navigate to="/login"/> }>
             <Route index element={<ProfilePage />} /> {/* This will be the default route */}
