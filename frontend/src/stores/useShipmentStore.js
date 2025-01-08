@@ -117,7 +117,7 @@ export const useShipmentStore = create((set, get) => ({
     set({ isLoading: true, isError: false, errorMessage: "" });
 
     try {
-      const response = await axiosInstance.post(`/create-route`, routeData);
+      const response = await axiosInstance.post(`/createroute`, routeData);
       console.log("Create Route Response:", response); // Log the response for debugging
 
       if (response.data) {

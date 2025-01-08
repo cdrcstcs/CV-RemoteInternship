@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use App\Events\OrderStatusUpdated;
 
 class DeliveryManagerController extends Controller
 {
@@ -133,6 +134,9 @@ class DeliveryManagerController extends Controller
      */
     public function createRoute(Request $request)
     {
+        Log::info('route', [
+            'request_data' => $request->all(),
+        ]);
         // Validation of incoming request data
         $validator = Validator::make($request->all(), [
             'route_name' => 'required|string|max:255',
@@ -154,7 +158,6 @@ class DeliveryManagerController extends Controller
                 'errors' => $validator->errors()
             ], 400);
         }
-
         // Retrieve the shipment
         $shipment = Shipment::find($request->shipments_id);
 
@@ -315,6 +318,20 @@ class DeliveryManagerController extends Controller
             $route->vehicle()->associate($vehicle);
             $route->save();
 
+            $shipmentId = $route->shipments_id;
+            $allRoutesForTheShipment = Route::where('shipments_id', $shipmentId)->get();  // Corrected this line
+            $isAllRouteScheduledWithDelivery = true;
+            foreach ($allRoutesForTheShipment as $route) {
+                $isAllRouteScheduledWithDelivery = $isAllRouteScheduledWithDelivery && ($route->vehicles_id != null);
+            }
+
+            if ($isAllRouteScheduledWithDelivery) {
+                $order = Order::find(Shipment::find($shipmentId)->orders_id);
+                $order->status = 'Delivery Scheduled';
+                $order->save();
+                event(new OrderStatusUpdated($order));
+            }
+
             // Log the successful assignment
             Log::info('Vehicle assigned to route successfully', [
                 'route_id' => $routeId,
@@ -338,4 +355,5 @@ class DeliveryManagerController extends Controller
             return response()->json(['message' => 'An error occurred while assigning the vehicle to the route'], 500);
         }
     }
+
 }

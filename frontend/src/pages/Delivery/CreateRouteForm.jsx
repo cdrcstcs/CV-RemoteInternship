@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
-
+import { useShipmentStore } from "../../stores/useShipmentStore";
 const CreateRouteForm = ({ shipmentId, onRouteCreated, onCancel }) => {
   const [routeName, setRouteName] = useState("");
   const [startLocation, setStartLocation] = useState("");
@@ -10,7 +10,8 @@ const CreateRouteForm = ({ shipmentId, onRouteCreated, onCancel }) => {
   const [routeType, setRouteType] = useState("");
   const [trafficCondition, setTrafficCondition] = useState("");
   const [routeStatus, setRouteStatus] = useState("");
-
+  const {createRoute} = useShipmentStore();
+  console.log(shipmentId)
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -18,14 +19,14 @@ const CreateRouteForm = ({ shipmentId, onRouteCreated, onCancel }) => {
       route_name: routeName,
       start_location: startLocation,
       end_location: endLocation,
-      estimated_time: estimatedTime,
+      estimated_time: estimatedTime + " 00:00:00",
       distance,
       route_type: routeType,
       traffic_condition: trafficCondition,
       route_status: routeStatus,
       shipments_id: shipmentId,
     };
-
+    createRoute(routeData);
     // Simulate route creation
     // Replace this with your actual route creation logic
     toast.success("Route created successfully!");

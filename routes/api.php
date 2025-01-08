@@ -78,7 +78,7 @@ Route::middleware('custom_cors')->group(function () {
     Route::middleware(['auth:sanctum','role:Administration,ShipmentManager'])->group(function () {
         Route::get('/orders', [DeliveryManagerController::class, 'getAllOrders']);
         Route::post('/shipment/{orderId}', [DeliveryManagerController::class, 'createShipment']);
-        Route::post('/create-route', [DeliveryManagerController::class, 'createRoute']);
+        Route::post('/createroute', [DeliveryManagerController::class, 'createRoute']);
         Route::get('/shipments', [DeliveryManagerController::class, 'getShipments']); 
         Route::get('/shipment/vehicles', [DeliveryManagerController::class, 'getAllVehicles']);
         Route::get('/shipment/routes', [DeliveryManagerController::class, 'getAllRoutes']);

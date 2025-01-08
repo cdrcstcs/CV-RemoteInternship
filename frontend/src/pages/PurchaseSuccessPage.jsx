@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle, HandHeart, Package, Truck, Home, NotebookPenIcon, Factory, Receipt } from "lucide-react";
+import { ArrowRight, CheckCircle, HandHeart, Package, Truck, Home, NotebookPenIcon, Factory, Receipt, Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCartStore } from "../stores/useCartStore";
@@ -18,7 +18,7 @@ const PurchaseSuccessPage = () => {
 
   const { orderIdFromURL } = useParams(); // Use if you pass the orderId in the URL, i.e., '/order/:orderId'
 
-  const statuses = ['Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered'];
+  const statuses = ['Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Scheduled', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered'];
 
   // Get status class
   const getStatusClass = (status) => {
@@ -45,6 +45,10 @@ const PurchaseSuccessPage = () => {
         return <Truck size={24} />;
       case 'Delivered':
         return <Home size={24} />;
+	  case 'Delivery Scheduled':
+		return <Calendar size={24} />;
+	  case 'Delivery Maintenance Checked':
+		return <Factory size={24} />;
       default:
         return <Factory size={24} />;
     }
