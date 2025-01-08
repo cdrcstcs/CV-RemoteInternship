@@ -87,6 +87,12 @@ const Sidebar = () => {
           label="Route"
           isCollapsed={isSidebarCollapsed}
         />
+        <SidebarLink
+          href="/shipment/selection"
+          icon={Car}
+          label="Selection"
+          isCollapsed={isSidebarCollapsed}
+        />
       </div>
 
       {/* FOOTER */}

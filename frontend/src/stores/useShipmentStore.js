@@ -5,8 +5,8 @@ import { toast } from "react-hot-toast";
 export const useShipmentStore = create((set, get) => ({
   shipments: [],          // To store the list of shipments
   orders: [],             // To store the list of orders
-  routes: [],             // To store the list of routes (newly added)
-  vehicles: [],           // To store the list of vehicles (newly added)
+  routes: [],             // To store the list of routes
+  vehicles: [],           // To store the list of vehicles
   isLoading: false,       // To track the loading state for fetching data
   isError: false,         // To track if an error occurs
   errorMessage: "",       // To store the error message
@@ -37,11 +37,9 @@ export const useShipmentStore = create((set, get) => ({
       const response = await axiosInstance.get("/shipments");
       console.log("Shipments Response:", response); // Log the raw response for debugging
 
-      // If the response has a data field which contains an array of shipments
       if (response.data && Array.isArray(response.data)) {
         set({ shipments: response.data, isLoading: false });
       } else if (response.data && Array.isArray(response.data.data)) {
-        // Handle nested data (e.g., response.data.data)
         set({ shipments: response.data.data, isLoading: false });
       } else {
         throw new Error("Invalid data format received from server");
@@ -56,7 +54,7 @@ export const useShipmentStore = create((set, get) => ({
     set({ isLoading: true, isError: false, errorMessage: "" });
 
     try {
-      const response = await axiosInstance.post(`/shipment/${orderId}`, shipmentData); // Corrected the endpoint
+      const response = await axiosInstance.post(`/shipment/${orderId}`, shipmentData);
       console.log("Create Shipment Response:", response); // Log the response
 
       if (response.data) {
@@ -74,18 +72,17 @@ export const useShipmentStore = create((set, get) => ({
     }
   },
 
-  // Fetch available vehicles (newly added to support route creation)
+  // Fetch available vehicles
   fetchVehicles: async () => {
     set({ isLoading: true, isError: false, errorMessage: "" });
 
     try {
-      const response = await axiosInstance.get("/vehicles");  // Adjust the endpoint as needed
+      const response = await axiosInstance.get("/shipment/vehicles");
       console.log("Vehicles Response:", response); // Log the response for debugging
 
       if (response.data && Array.isArray(response.data)) {
         set({ vehicles: response.data, isLoading: false });
       } else if (response.data && Array.isArray(response.data.data)) {
-        // Handle nested data
         set({ vehicles: response.data.data, isLoading: false });
       } else {
         throw new Error("Invalid data format received from server");
@@ -95,12 +92,32 @@ export const useShipmentStore = create((set, get) => ({
     }
   },
 
+  // Fetch all routes
+  fetchRoutes: async () => {
+    set({ isLoading: true, isError: false, errorMessage: "" });
+
+    try {
+      const response = await axiosInstance.get("/shipment/routes");
+      console.log("Routes Response:", response);
+
+      if (response.data && Array.isArray(response.data)) {
+        set({ routes: response.data, isLoading: false });
+      } else if (response.data && Array.isArray(response.data.data)) {
+        set({ routes: response.data.data, isLoading: false });
+      } else {
+        throw new Error("Invalid data format received from server");
+      }
+    } catch (error) {
+      handleError(set, error, "Failed to fetch routes data");
+    }
+  },
+
   // Create a new route and link it to the shipment
   createRoute: async (routeData) => {
     set({ isLoading: true, isError: false, errorMessage: "" });
-    console.log(routeData);
+
     try {
-      const response = await axiosInstance.post(`/create-route`, routeData);  // Send the raw data directly
+      const response = await axiosInstance.post(`/create-route`, routeData);
       console.log("Create Route Response:", response); // Log the response for debugging
 
       if (response.data) {
@@ -117,6 +134,24 @@ export const useShipmentStore = create((set, get) => ({
       handleError(set, error, "Failed to create route");
     }
   },
+
+  // Assign a vehicle to a route
+  assignVehicleToRoute: async (routeId, vehicleId) => {
+    set({ isLoading: true, isError: false, errorMessage: "" });
+
+    try {
+      const response = await axiosInstance.post(`/shipment/${routeId}/assign-vehicle`, { vehicle_id: vehicleId });
+      console.log("Assign Vehicle Response:", response); // Log the response
+      set({ isLoading: false });
+      if (response.data) {
+        toast.success("Vehicle assigned to route successfully!");
+      } else {
+        throw new Error("Failed to assign vehicle to route");
+      }
+    } catch (error) {
+      handleError(set, error, "Failed to assign vehicle to route");
+    }
+  }
 }));
 
 // Helper function to handle errors

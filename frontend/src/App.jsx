@@ -31,6 +31,7 @@ import WrapperVehicle from "./pages/VehicleManagement/WrapperVehicle.jsx";
 import WrapperDelivery from "./pages/Delivery/WrapperDelivery.jsx";
 import DeliveryMain from "./pages/Delivery/DeliveryMain.jsx";
 import RouteMain from "./pages/Delivery/RouteMain.jsx";
+import VehiclesRoutesSelectionPage from "./pages/Delivery/VehiclesRoutesSelectionPage.jsx";
 import './echo.js'
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
@@ -95,6 +96,7 @@ function App() {
           <Route path="/shipment" element={user ? <WrapperDelivery/> : <Navigate to="/login" />}>
             <Route index element={<DeliveryMain />} />
             <Route path="route" element={<RouteMain />} />
+            <Route path="selection" element={<VehiclesRoutesSelectionPage />} />
           </Route>
 
           <Route path="/profile" element={user ? <ProfileLayout/> : <Navigate to="/login"/> }>

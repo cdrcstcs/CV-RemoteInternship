@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Shipment;
 use App\Models\Route;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -201,5 +202,140 @@ class DeliveryManagerController extends Controller
             'success' => true,
             'data' => $shipments
         ], 200);
+    }
+
+    /**
+     * Display a listing of all vehicles.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getAllVehicles()
+    {
+        try {
+            // Retrieve all vehicles from the database
+            $vehicles = Vehicle::all();
+
+            // Log the action of fetching all vehicles
+            Log::info('Fetched all vehicles', [
+                'vehicles_count' => $vehicles->count(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            // Return vehicles as a JSON response
+            return response()->json($vehicles);
+        } catch (Exception $e) {
+            // Log the error
+            Log::error('Error fetching all vehicles', [
+                'error_message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            return response()->json(['message' => 'An error occurred while fetching vehicles'], 500);
+        }
+    }
+
+    /**
+     * Display a listing of all routes.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getAllRoutes()
+    {
+        try {
+            // Retrieve all routes from the database
+            $routes = Route::all();
+
+            // Log the action of fetching all routes
+            Log::info('Fetched all routes', [
+                'routes_count' => $routes->count(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            // Return routes as a JSON response
+            return response()->json($routes);
+        } catch (Exception $e) {
+            // Log the error
+            Log::error('Error fetching all routes', [
+                'error_message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            return response()->json(['message' => 'An error occurred while fetching routes'], 500);
+        }
+    }
+
+    /**
+     * Assign a vehicle to a route.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $routeId
+     * @return \Illuminate\Http\Response
+     */
+    public function assignVehicleToRoute(Request $request, $routeId)
+    {
+        try {
+            // Log the incoming request data
+            Log::info('Assigning vehicle to route', [
+                'route_id' => $routeId,
+                'vehicle_id' => $request->vehicle_id,
+                'request_data' => $request->all(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            // Validate the incoming request
+            $request->validate([
+                'vehicle_id' => 'required|exists:vehicles,id', // Ensure the vehicle exists
+            ]);
+
+            // Find the route by ID
+            $route = Route::find($routeId);
+
+            if (!$route) {
+                Log::warning('Route not found', [
+                    'route_id' => $routeId,
+                    'timestamp' => now()->toDateTimeString()
+                ]);
+                return response()->json(['message' => 'Route not found'], 404);
+            }
+
+            // Find the vehicle by ID
+            $vehicle = Vehicle::find($request->vehicle_id);
+
+            if (!$vehicle) {
+                Log::warning('Vehicle not found', [
+                    'vehicle_id' => $request->vehicle_id,
+                    'timestamp' => now()->toDateTimeString()
+                ]);
+                return response()->json(['message' => 'Vehicle not found'], 404);
+            }
+
+            // Assign the vehicle to the route
+            $route->vehicle()->associate($vehicle);
+            $route->save();
+
+            // Log the successful assignment
+            Log::info('Vehicle assigned to route successfully', [
+                'route_id' => $routeId,
+                'vehicle_id' => $request->vehicle_id,
+                'vehicle_license_plate' => $vehicle->license_plate,
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            // Return a success response
+            return response()->json();
+        } catch (Exception $e) {
+            // Log the error in case of any exception
+            Log::error('Error assigning vehicle to route', [
+                'error_message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString(),
+                'route_id' => $routeId,
+                'vehicle_id' => $request->vehicle_id,
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            return response()->json(['message' => 'An error occurred while assigning the vehicle to the route'], 500);
+        }
     }
 }

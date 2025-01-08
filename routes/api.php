@@ -80,6 +80,10 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/shipment/{orderId}', [DeliveryManagerController::class, 'createShipment']);
         Route::post('/create-route', [DeliveryManagerController::class, 'createRoute']);
         Route::get('/shipments', [DeliveryManagerController::class, 'getShipments']); 
+        Route::get('/shipment/vehicles', [DeliveryManagerController::class, 'getAllVehicles']);
+        Route::get('/shipment/routes', [DeliveryManagerController::class, 'getAllRoutes']);
+        Route::post('/shipment/{routeId}/assign-vehicle', [DeliveryManagerController::class, 'assignVehicleToRoute']);
+
     });
 
 });
