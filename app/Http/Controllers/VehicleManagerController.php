@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
+use App\Models\Order;
+use App\Models\Shipment;
+use App\Models\Route;
+use App\Events\OrderStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -205,6 +209,32 @@ class VehicleManagerController extends Controller
                     'maintenance_schedule' => $request->vehicle_management['maintenance_schedule'] ?? $vehicleManagement->maintenance_schedule,
                     'maintenance_cost' => $request->vehicle_management['maintenance_cost'] ?? $vehicleManagement->maintenance_cost,
                 ]);
+            }
+
+            // Handle orders and shipment maintenance check
+            $orders = Order::all();
+            foreach ($orders as $order) {
+                $shipment = Shipment::where('orders_id', $order->id)->first();
+                if ($shipment) {
+                    $routes = Route::where('shipments_id', $shipment->id)->get();
+                    $isAllMaintenance = true;
+                    $vehicle = null;
+                    foreach ($routes as $route) {
+                        $vehicle = Vehicle::find($route->vehicles_id);
+                        $vehicleManagement = $vehicle->vehicleManagement;
+                        $isAllMaintenance = $isAllMaintenance && ($vehicleManagement->maintenance_status === 'Delivery Maintenance Checked');
+                        if($vehicleManagement->maintenance_status === 'Delivery Maintenance Checked'){
+                            $vehicle->status = 'Delivery Maintenance Checked';
+                            $vehicle->save();
+                        }
+                    }
+
+                    if ($isAllMaintenance) {
+                        $order->status = 'Delivery Maintenance Checked';
+                        $order->save();
+                        event(new OrderStatusUpdated($order));
+                    }
+                }
             }
 
             // Log the successful update

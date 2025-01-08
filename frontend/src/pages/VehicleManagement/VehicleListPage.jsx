@@ -10,6 +10,10 @@ const VehicleListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  // For sorting
+  const [sortField, setSortField] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc"); // "asc" or "desc"
+
   // For editing vehicle
   const [editVehicle, setEditVehicle] = useState(null);
   const [updatedVehicleData, setUpdatedVehicleData] = useState({
@@ -50,19 +54,43 @@ const VehicleListPage = () => {
   }, [vehicles]);
 
   const handleSort = (field) => {
-    const sorted = [...sortedVehicles].sort((a, b) => {
-      if (a[field] > b[field]) return 1;
-      if (a[field] < b[field]) return -1;
-      return 0;
-    });
-    setSortedVehicles(sorted);
+    if (sortField === field) {
+      // If the same field is clicked again, toggle the sort order
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // If a new field is clicked, set the field to sort by and default to ascending order
+      setSortField(field);
+      setSortOrder("asc");
+    }
   };
 
-  const filteredVehicles = sortedVehicles.filter((vehicle) => {
+  // Sorting vehicles based on selected field and order
+  const sortedAndFilteredVehicles = [...vehicles].sort((a, b) => {
+    if (!sortField) return 0; // No sorting if no field is selected
+
+    const aValue = a[sortField];
+    const bValue = b[sortField];
+
+    if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+    if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+    return 0;
+  });
+
+  // Filtering vehicles by search across multiple fields
+  const filteredVehicles = sortedAndFilteredVehicles.filter((vehicle) => {
     return (
-      vehicle.brand.toLowerCase().includes(search.toLowerCase()) ||
-      vehicle.model.toLowerCase().includes(search.toLowerCase()) ||
-      vehicle.license_plate.toLowerCase().includes(search.toLowerCase())
+      Object.keys(vehicle).some((key) => {
+        if (typeof vehicle[key] === "string") {
+          return vehicle[key].toLowerCase().includes(search.toLowerCase());
+        }
+        return false;
+      }) ||
+      Object.keys(vehicle.vehicle_management || {}).some((key) => {
+        if (typeof vehicle.vehicle_management[key] === "string") {
+          return vehicle.vehicle_management[key].toLowerCase().includes(search.toLowerCase());
+        }
+        return false;
+      })
     );
   });
 
@@ -153,35 +181,29 @@ const VehicleListPage = () => {
 
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 rounded-lg shadow-md">
+      {/* Search bar */}
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search vehicles by brand, model, or license plate"
+          placeholder="Search vehicles by any field (brand, model, vin, etc.)"
           className="p-4 rounded-lg border border-gray-300 bg-gray-900 w-full text-emerald-400 shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
+      {/* Sort buttons */}
       <div className="flex space-x-4 mb-6">
-        <button
-          onClick={() => handleSort("year_of_manufacture")}
-          className="text-sm font-semibold text-emerald-400 hover:text-emerald-900 transition duration-200"
-        >
-          Sort by Year
-        </button>
-        <button
-          onClick={() => handleSort("mileage")}
-          className="text-sm font-semibold text-emerald-400 hover:text-emerald-900 transition duration-200"
-        >
-          Sort by Mileage
-        </button>
-        <button
-          onClick={() => handleSort("brand")}
-          className="text-sm font-semibold text-emerald-400 hover:text-emerald-900 transition duration-200"
-        >
-          Sort by Brand
-        </button>
+        {["year_of_manufacture", "mileage", "brand", "model", "license_plate", "vin"].map((field) => (
+          <button
+            key={field}
+            onClick={() => handleSort(field)}
+            className={`text-sm font-semibold ${sortField === field ? "text-emerald-900" : "text-emerald-400"} hover:text-emerald-900 transition duration-200`}
+          >
+            Sort by {field.replace(/_/g, " ")}
+            {sortField === field && (sortOrder === "asc" ? " ↑" : " ↓")}
+          </button>
+        ))}
       </div>
 
       <div className="space-y-6">
@@ -193,35 +215,55 @@ const VehicleListPage = () => {
                 onClick={() => setExpandedVehicleId(expandedVehicleId === vehicle.id ? null : vehicle.id)}
                 className="text-emerald-400 hover:text-emerald-400"
               >
-                {expandedVehicleId === vehicle.id ? <IoIosArrowUp /> : <IoIosArrowDown />}
+                {expandedVehicleId === vehicle.id ? <IoIosArrowDown /> : <IoIosArrowUp />}
               </button>
             </h3>
 
-            {/* Render Vehicle Details or Editable Form */}
+            {/* Editable or Display Mode */}
             {editVehicle?.id === vehicle.id ? (
-              <div className="mt-4 space-y-2">
-                <h4 className="text-lg text-emerald-400">Edit Vehicle</h4>
+              <div className="mt-4 space-y-4 bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-md">
+                <h4 className="text-lg text-emerald-400 font-bold">Edit Vehicle Details</h4>
                 <form onSubmit={handleUpdateSubmit}>
-                  {Object.keys(updatedVehicleData).map((key) => (
-                    key !== "vehicle_management" && (
-                      <div key={key}>
+                  {/* Vehicle Details Editing */}
+                  {Object.keys(updatedVehicleData).map((key) => {
+                    if (key !== "vehicle_management") {
+                      return (
+                        <div key={key} className="space-y-2">
+                          <label className="text-emerald-400 font-semibold">{key.replace(/_/g, " ").toUpperCase()}:</label>
+                          <input
+                            type="text"
+                            name={key}
+                            value={updatedVehicleData[key]}
+                            onChange={handleEditChange}
+                            className="w-full p-3 border border-gray-500 rounded-lg bg-gray-900 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                          />
+                        </div>
+                      );
+                    }
+                  })}
+
+                  {/* Vehicle Management Editing */}
+                  <div className="mt-4 space-y-4">
+                    <h4 className="text-lg text-emerald-400 font-bold">Edit Vehicle Management</h4>
+                    {Object.keys(updatedVehicleData.vehicle_management).map((key) => (
+                      <div key={key} className="space-y-2">
                         <label className="text-emerald-400 font-semibold">{key.replace(/_/g, " ").toUpperCase()}:</label>
                         <input
                           type="text"
-                          name={key}
-                          value={updatedVehicleData[key]}
+                          name={`vehicle_management.${key}`}
+                          value={updatedVehicleData.vehicle_management[key]}
                           onChange={handleEditChange}
-                          className="p-2 border border-gray-300 rounded-lg bg-gray-900 text-white"
+                          className="w-full p-3 border border-gray-500 rounded-lg bg-gray-900 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
                         />
                       </div>
-                    )
-                  ))}
+                    ))}
+                  </div>
 
                   {/* Save Changes Button */}
-                  <div className="mt-4">
+                  <div className="mt-6">
                     <button
                       type="submit"
-                      className="w-full py-2 bg-emerald-400 text-white rounded-lg"
+                      className="w-full py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition duration-200"
                     >
                       Save Changes
                     </button>
@@ -229,11 +271,11 @@ const VehicleListPage = () => {
                 </form>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {/* Display Vehicle Information */}
                 {Object.keys(vehicle).map((key) => (
                   key !== "vehicle_management" && (
-                    <div key={key}>
+                    <div key={key} className="space-y-2">
                       <label className="text-emerald-400 font-semibold">{key.replace(/_/g, " ").toUpperCase()}:</label>
                       <p className="text-white">{vehicle[key]}</p>
                     </div>
@@ -242,10 +284,10 @@ const VehicleListPage = () => {
 
                 {/* Vehicle Management Information */}
                 {expandedVehicleId === vehicle.id && vehicle.vehicle_management && (
-                  <div className="mt-4 space-y-2">
-                    <h4 className="text-lg text-emerald-400">Vehicle Management</h4>
+                  <div className="mt-4 space-y-4 p-4 border-2 border-white rounded-xl">
+                    <h4 className="text-lg text-emerald-400 font-bold">Vehicle Management</h4>
                     {Object.keys(vehicle.vehicle_management).map((key) => (
-                      <div key={key}>
+                      <div key={key} className="space-y-2">
                         <label className="text-emerald-400 font-semibold">{key.replace(/_/g, " ").toUpperCase()}:</label>
                         <p className="text-white">{vehicle.vehicle_management[key]}</p>
                       </div>
