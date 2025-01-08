@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('route_status', 50)->nullable(); // Current status of the route (e.g., active, closed)
             $table->dateTime('last_optimized')->nullable(); // When the route was last optimized
             $table->foreignId('shipments_id')->constrained('shipments'); // Foreign key to Shipments table
-            $table->foreignId('vehicles_id')->constrained('vehicles'); // Foreign key to Vehicles table
+            $table->foreignId('vehicles_id')->nullable()->constrained('vehicles'); // Foreign key to Vehicles table
 
             $table->timestamps(); // CreatedAt and UpdatedAt
         });

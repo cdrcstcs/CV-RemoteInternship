@@ -28,6 +28,9 @@ import CreateInventory from "./pages/Warehouse/CreateInventory.jsx";
 import WarehouseOrders from "./pages/Warehouse/WarehouseOrders.jsx";
 import VehicleListPage from "./pages/VehicleManagement/VehicleListPage.jsx";
 import WrapperVehicle from "./pages/VehicleManagement/WrapperVehicle.jsx";
+import WrapperDelivery from "./pages/Delivery/WrapperDelivery.jsx";
+import DeliveryMain from "./pages/Delivery/DeliveryMain.jsx";
+import RouteMain from "./pages/Delivery/RouteMain.jsx";
 import './echo.js'
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
@@ -87,6 +90,11 @@ function App() {
 
           <Route path="/vehicle" element={user ? <WrapperVehicle/> : <Navigate to="/login" />}>
             <Route index element={<VehicleListPage />} />
+          </Route>
+
+          <Route path="/shipment" element={user ? <WrapperDelivery/> : <Navigate to="/login" />}>
+            <Route index element={<DeliveryMain />} />
+            <Route path="route" element={<RouteMain />} />
           </Route>
 
           <Route path="/profile" element={user ? <ProfileLayout/> : <Navigate to="/login"/> }>

@@ -13,6 +13,7 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\VehicleManagerController;
+use App\Http\Controllers\DeliveryManagerController;
 
 
 // Apply CORS middleware globally on all routes in this file
@@ -22,7 +23,7 @@ Route::middleware('custom_cors')->group(function () {
     Route::post('/signup', [AuthController::class, 'signup']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::middleware(['auth:sanctum', 'role:Administration,WarehouseManager,DeliveryDriver,Customer,CustomerSupportStaff,FinanceManager,ProductSaler,VehicleManager'])->group(function () {
+    Route::middleware(['auth:sanctum', 'role:Administration,WarehouseManager,DeliveryDriver,Customer,CustomerSupportStaff,FinanceManager,ProductSaler,VehicleManager,ShipmentManager'])->group(function () {
         Route::get('/me', [AuthController::class, 'getCurrentUser']);
         Route::put('/user/profile', [UserProfileController::class, 'updateDetails']);
         Route::post('/user/change-password', [UserProfileController::class, 'updatePassword']);
@@ -72,6 +73,13 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/vehicles', [VehicleManagerController::class, 'getVehiclesWithVehicleManagement']);
         Route::put('/vehicles/{vehicleId}', [VehicleManagerController::class, 'updateVehicleWithManagement']);
 
+    });
+
+    Route::middleware(['auth:sanctum','role:Administration,ShipmentManager'])->group(function () {
+        Route::get('/orders', [DeliveryManagerController::class, 'getAllOrders']);
+        Route::post('/shipment/{orderId}', [DeliveryManagerController::class, 'createShipment']);
+        Route::post('/create-route', [DeliveryManagerController::class, 'createRoute']);
+        Route::get('/shipments', [DeliveryManagerController::class, 'getShipments']); 
     });
 
 });

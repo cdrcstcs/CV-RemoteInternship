@@ -25,7 +25,8 @@ class RoleFactory extends Factory
             'CustomerSupportStaff' => 'Provides assistance to customers by addressing inquiries, complaints, and service-related issues.',
             'FinanceManager' => 'Oversees financial operations, budgeting, and reporting to ensure the company’s financial health.',
             'ProductSaler' => 'Create product posts, sale products, delete products',
-            'VehicleManager' => 'Manage Vehicle Maintenance'
+            'VehicleManager' => 'Manage Vehicle Maintenance',
+            'ShipmentManager' => 'Manage and schedule shipment for orders',
         ];
 
 

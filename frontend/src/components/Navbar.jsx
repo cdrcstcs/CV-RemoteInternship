@@ -26,6 +26,9 @@ const Navbar = () => {
 			<Link to={"/vehicle"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Vehicle
             </Link>
+			<Link to={"/shipment"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+              Shipment
+            </Link>
             {user && (
               <Link
                 to={"/cart"}
