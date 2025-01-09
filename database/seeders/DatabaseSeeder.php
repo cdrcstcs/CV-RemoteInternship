@@ -23,6 +23,7 @@ use App\Models\{
     Vehicle,
     VehicleManagement,
     LocationHistory,
+    UserAddress,
 };
 
 class DatabaseSeeder extends Seeder
@@ -66,21 +67,41 @@ class DatabaseSeeder extends Seeder
 
         // Create Coupons and associate with products and users
         $coupons = Coupon::factory(10)->create();
-        foreach ($coupons as $index => $coupon) {
-            foreach ($products as $productIndex => $product) {
-                ProductCoupon::create([
-                    'products_id' => $product->id, 
-                    'coupons_id' => $coupon->id,
-                ]);
+        foreach ($users as $user) {
+            UserAddress::factory(5)->create(['users_id' => $user->id]);
+            foreach ($coupons as $coupon) {
+                foreach ($products as $product) {
+                    // Check if the combination of product and coupon exists
+                    $existingProductCoupon = ProductCoupon::where('products_id', $product->id)
+                                                          ->where('coupons_id', $coupon->id)
+                                                          ->first();
+        
+                    if (!$existingProductCoupon) {
+                        // If the combination does not exist, create a new record
+                        ProductCoupon::create([
+                            'products_id' => $product->id,
+                            'coupons_id' => $coupon->id,
+                        ]);
+                    }
+                }
+        
+                // Check if the user-coupon relationship exists
+                $existingUserCoupon = UserCoupon::where('users_id', $user->id)
+                                               ->where('coupons_id', $coupon->id)
+                                               ->first();
+        
+                if (!$existingUserCoupon) {
+                    // If the combination does not exist, create a new record
+                    UserCoupon::create([
+                        'users_id' => $user->id,
+                        'coupons_id' => $coupon->id,
+                    ]);
+                }
             }
-
-            // Instead of random, use a deterministic approach to assign a user
-            $userIndex = $index % count($users);  // Cycle through users
-            UserCoupon::create([
-                'users_id' => $users[$userIndex]->id, 
-                'coupons_id' => $coupon->id,
-            ]);
         }
+        
+        
+        
 
         // Seed Warehouses and associate warehouse managers
         $warehouses = Warehouse::factory(20)->create(); // Create 5 warehouses
