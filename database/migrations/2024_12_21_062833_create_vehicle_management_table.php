@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id(); // Auto-incrementing primary key
             $table->decimal('fuel_consumption', 18, 2)->nullable()->default(null);
             $table->decimal('distance_traveled', 18, 2)->nullable()->default(null);
-            $table->string('maintenance_status', 50)->nullable()->default(null);
+            $table->string('maintenance_status', 100)->nullable()->default(null);
             $table->timestamp('last_maintenance_date')->nullable()->default(null);
             $table->timestamp('maintenance_schedule')->nullable()->default(null);
             $table->decimal('maintenance_cost', 18, 2)->nullable()->default(null);

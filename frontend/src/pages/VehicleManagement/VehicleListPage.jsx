@@ -55,18 +55,16 @@ const VehicleListPage = () => {
 
   const handleSort = (field) => {
     if (sortField === field) {
-      // If the same field is clicked again, toggle the sort order
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      // If a new field is clicked, set the field to sort by and default to ascending order
       setSortField(field);
       setSortOrder("asc");
     }
   };
 
-  // Sorting vehicles based on selected field and order
+  // Sorting vehicles
   const sortedAndFilteredVehicles = [...vehicles].sort((a, b) => {
-    if (!sortField) return 0; // No sorting if no field is selected
+    if (!sortField) return 0;
 
     const aValue = a[sortField];
     const bValue = b[sortField];
@@ -76,7 +74,7 @@ const VehicleListPage = () => {
     return 0;
   });
 
-  // Filtering vehicles by search across multiple fields
+  // Filtering vehicles by search
   const filteredVehicles = sortedAndFilteredVehicles.filter((vehicle) => {
     return (
       Object.keys(vehicle).some((key) => {
@@ -105,19 +103,32 @@ const VehicleListPage = () => {
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-    setUpdatedVehicleData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    // If it's a vehicle management field, update that section
+    if (name.startsWith("vehicle_management.")) {
+      const field = name.split(".")[1];
+      setUpdatedVehicleData((prevData) => ({
+        ...prevData,
+        vehicle_management: {
+          ...prevData.vehicle_management,
+          [field]: value,
+        },
+      }));
+    } else {
+      // Update the top-level fields
+      setUpdatedVehicleData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
     if (!editVehicle) return;
 
-    // Update the vehicle details and vehicle management details
     await updateVehicle(editVehicle.id, updatedVehicleData);
-    setEditVehicle(null); // Close the edit form after submission
+    setEditVehicle(null);
   };
 
   const handleEdit = (vehicle) => {
@@ -250,8 +261,8 @@ const VehicleListPage = () => {
                         <label className="text-emerald-400 font-semibold">{key.replace(/_/g, " ").toUpperCase()}:</label>
                         <input
                           type="text"
-                          name={`vehicle_management.${key}`}
-                          value={updatedVehicleData.vehicle_management[key]}
+                          name={`vehicle_management.${key}`}  // Name includes the vehicle_management prefix
+                          value={updatedVehicleData.vehicle_management[key]}  // Use the vehicle_management value
                           onChange={handleEditChange}
                           className="w-full p-3 border border-gray-500 rounded-lg bg-gray-900 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
                         />

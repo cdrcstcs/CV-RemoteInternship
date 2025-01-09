@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('fuel_capacity', 18, 2)->nullable(); // Fuel capacity
             $table->string('current_location', 500)->nullable(); // Current location
             $table->dateTime('last_serviced')->nullable(); // Last serviced date
-            $table->string('status', 20)->nullable(); // Status (e.g., active, maintenance)
+            $table->string('status', 100)->nullable(); // Status (e.g., active, maintenance)
             $table->dateTime('last_fuel_refill')->nullable(); // Last fuel refill date
             $table->dateTime('last_location_update')->nullable(); // Last location update
             $table->decimal('mileage', 18, 2)->nullable(); // Mileage of the vehicle

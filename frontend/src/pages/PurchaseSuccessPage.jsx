@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle, HandHeart, Package, Truck, Home, NotebookPenIcon, Factory, Receipt, Calendar } from "lucide-react";
+import { ArrowRight, CheckCircle, HandHeart, Package, Truck, Home, NotebookPenIcon, Factory, Receipt, Calendar, XCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCartStore } from "../stores/useCartStore";
@@ -18,7 +18,7 @@ const PurchaseSuccessPage = () => {
 
   const { orderIdFromURL } = useParams(); // Use if you pass the orderId in the URL, i.e., '/order/:orderId'
 
-  const statuses = ['Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Scheduled', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered'];
+  const statuses = ['Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Scheduled', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered','Canceled'];
 
   // Get status class
   const getStatusClass = (status) => {
@@ -49,6 +49,8 @@ const PurchaseSuccessPage = () => {
 		return <Calendar size={24} />;
 	  case 'Delivery Maintenance Checked':
 		return <Factory size={24} />;
+	  case 'Canceled':
+		return <XCircleIcon size={24} />;
       default:
         return <Factory size={24} />;
     }
@@ -110,9 +112,9 @@ const PurchaseSuccessPage = () => {
           </p>
 
           {/* Order Timeline */}
-          <div className="flex items-center justify-center space-x-8 mb-8">
+          <div className="flex items-center justify-center space-x-8 mb-8 flex-wrap">
             {statuses.map((status, index) => (
-              <div key={status} className="flex items-center justify-center space-x-2">
+              <div key={status} className="flex items-center justify-center space-x-2 mt-8">
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 
                     ${getStatusClass(status)} shadow-lg transform hover:scale-110`}
@@ -123,6 +125,10 @@ const PurchaseSuccessPage = () => {
                 {/* Line between status circles - only show if orderStatus has reached or passed the current status */}
                 {index < statuses.length - 1 && statuses.indexOf(orderStatus) >= index && (
                   <div className="w-16 h-1 bg-emerald-400"></div>
+                )}
+
+				{index < statuses.length - 1 && statuses.indexOf(orderStatus) >= index && (orderStatus == 'Canceled') && (
+                  <div className="w-16 h-1 bg-red-600"></div>
                 )}
 
                 {(index >= statuses.length - 1 || statuses.indexOf(orderStatus) < index) && (

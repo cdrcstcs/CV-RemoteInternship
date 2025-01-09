@@ -45,13 +45,13 @@ const VehiclesRoutesSelectionPage = () => {
   };
 
   // Filtered vehicles based on search query
-  const filteredVehicles = vehicles.filter((vehicle) => {
+  const filteredVehicles = !vehicles ? []: vehicles.filter((vehicle) => {
     return vehicle.license_plate.toLowerCase().includes(vehicleSearch.toLowerCase()) || 
            `${vehicle.brand} ${vehicle.model}`.toLowerCase().includes(vehicleSearch.toLowerCase());
   });
 
   // Filtered routes based on search query
-  const filteredRoutes = routes.filter((route) => {
+  const filteredRoutes = !routes ? []:routes.filter((route) => {
     return route.route_name.toLowerCase().includes(routeSearch.toLowerCase()) ||
            `${route.origin} to ${route.destination}`.toLowerCase().includes(routeSearch.toLowerCase());
   });
