@@ -15,7 +15,7 @@ class UserAddressFactory extends Factory
         return [
             'users_id' => User::factory(), // Creates a new User instance for the address
             'address_line1' => $this->faker->streetAddress,
-            'address_line2' => $this->faker->optional()->secondaryAddress, // Optional address line 2
+            'address_line2' => $this->faker->secondaryAddress, // Optional address line 2
             'city' => $this->faker->city,
             'state' => $this->faker->state,
             'postal_code' => $this->faker->postcode,

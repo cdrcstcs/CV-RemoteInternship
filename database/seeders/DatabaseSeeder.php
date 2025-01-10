@@ -24,6 +24,8 @@ use App\Models\{
     VehicleManagement,
     LocationHistory,
     UserAddress,
+    Permission,
+    RolePermission,
 };
 
 class DatabaseSeeder extends Seeder
@@ -61,6 +63,9 @@ class DatabaseSeeder extends Seeder
             $role = Role::factory()->create();
             UserRole::create([
                 'users_id' => $user->id,
+                'roles_id' => $role->id,
+            ]);
+            RolePermission::factory()->create([
                 'roles_id' => $role->id,
             ]);
         }

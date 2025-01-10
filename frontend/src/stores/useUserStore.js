@@ -5,8 +5,13 @@ import { toast } from "react-hot-toast";
 export const useUserStore = create((set, get) => ({
   user: null,
   loading: false,
-  checkingAuth:true,
-
+  checkingAuth: true,
+  userAddresses: [], // Store user addresses
+  userAddresses: [],
+  userRoles: [],  // Add userRoles to the state
+  userPermissions: [],  // Add userPermissions to the state
+  userOrders: [],  // Add userOrders to the state
+  userInvoices: [],
   // Signup user
   signup: async ({ first_name, last_name, phone_number, email, password, confirmPassword, language = "en" }) => {
     set({ loading: true });
@@ -89,26 +94,37 @@ export const useUserStore = create((set, get) => ({
       toast.error(error.response?.data?.message || "An error occurred during logout");
     }
   },
-  
 
   checkAuth: async () => {
     set({ checkingAuth: true }); // Set checkingAuth to true when checking authentication
-
+  
     const token = localStorage.getItem("access_token");
-
+  
     if (!token) {
       set({ checkingAuth: false }); // Set checkingAuth to false if no token exists
       return; // No token, can't check auth
     }
-
+  
     try {
+      // Fetch the user data, including roles, permissions, and orders
       const res = await axiosInstance.get("/me");
-      set({ user: res.data, checkingAuth: false }); // Set user data and checkingAuth to false
+      console.log(res.data)
+      // Assuming the API response includes user roles, permissions, and orders
+      set({
+        user: res.data.user,             // Set the user data
+        userRoles: res.data.roles,       // Set the user roles
+        userPermissions: res.data.permissions, // Set the user permissions
+        userOrders: res.data.orders,     // Set the user orders
+        userInvoices: res.data.invoices, // Set the user invoices (if provided)
+        checkingAuth: false,             // Set checkingAuth to false
+      });
     } catch (error) {
       localStorage.removeItem("access_token");
       set({ user: null, checkingAuth: false }); // Set user to null and checkingAuth to false
     }
   },
+  
+
   updateProfile: async (updatedData) => {
     set({ loading: true });
     try {
@@ -120,6 +136,7 @@ export const useUserStore = create((set, get) => ({
       toast.error(error.response?.data?.message || "An error occurred while updating the profile");
     }
   },
+
   changePassword: async (currentPassword, newPassword, confirmPassword) => {
     set({ loading: true });
     if (newPassword !== confirmPassword) {
@@ -127,7 +144,7 @@ export const useUserStore = create((set, get) => ({
       return toast.error("Passwords do not match");
     }
     try {
-      const res = await axiosInstance.post("/user/change-password",{ currentPassword, newPassword });
+      const res = await axiosInstance.post("/user/change-password", { currentPassword, newPassword });
       toast.success("Password changed successfully!");
       set({ loading: false });
     } catch (error) {
@@ -135,5 +152,50 @@ export const useUserStore = create((set, get) => ({
       toast.error(error.response?.data?.message || "An error occurred while changing the password");
     }
   },
-}));
 
+  // Get user addresses
+  getUserAddresses: async () => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.get("/user/addresses");
+      set({ userAddresses: res.data, loading: false });
+    } catch (error) {
+      set({ loading: false });
+      toast.error(error.response?.data?.message || "An error occurred while fetching addresses");
+    }
+  },
+
+  // Store user address
+  storeUserAddress: async (addressData) => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.post("/user/addresses", addressData);
+      set((state) => ({
+        userAddresses: [...state.userAddresses, res.data], // Add the new address to the state
+        loading: false
+      }));
+      toast.success("Address added successfully!");
+    } catch (error) {
+      set({ loading: false });
+      toast.error(error.response?.data?.message || "An error occurred while adding the address");
+    }
+  },
+
+  // Update user address
+  updateUserAddress: async (addressId, updatedData) => {
+    set({ loading: true });
+    try {
+      const res = await axiosInstance.put(`/user/addresses/${addressId}`, updatedData);
+      set((state) => ({
+        userAddresses: state.userAddresses.map((address) =>
+          address.id === addressId ? res.data : address // Replace the updated address in the list
+        ),
+        loading: false
+      }));
+      toast.success("Address updated successfully!");
+    } catch (error) {
+      set({ loading: false });
+      toast.error(error.response?.data?.message || "An error occurred while updating the address");
+    }
+  },
+}));

@@ -42,9 +42,20 @@ class User extends Authenticatable  // Extend Authenticatable
         return $this->belongsToMany(Role::class, 'users_roles', 'users_id', 'roles_id');
     }
 
+    // User can have many orders
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
     public function coupons()
     {
         return $this->belongsToMany(Coupon::class, 'users_coupons', 'users_id', 'coupons_id')->withTimestamps();
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(UserAddress::class, 'users_id');
     }
 
 }

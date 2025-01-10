@@ -24,12 +24,14 @@ Route::middleware('custom_cors')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::middleware(['auth:sanctum', 'role:Administration,WarehouseManager,DeliveryDriver,Customer,CustomerSupportStaff,FinanceManager,ProductSaler,VehicleManager,ShipmentManager'])->group(function () {
-        Route::get('/me', [AuthController::class, 'getCurrentUser']);
+        Route::get('/me', [UserProfileController::class, 'getCurrentUser']);
         Route::put('/user/profile', [UserProfileController::class, 'updateDetails']);
         Route::post('/user/change-password', [UserProfileController::class, 'updatePassword']);
         Route::get('/products/{productId}/ratings', [RatingController::class, 'getProductRatings']);
         Route::post('/products/{productId}/ratings', [RatingController::class, 'storeRating']);
-
+        Route::get('/user/addresses', [UserProfileController::class, 'getUserAddresses']);  // Get all addresses
+        Route::post('/user/addresses', [UserProfileController::class, 'storeUserAddress']); // Create a new address
+        Route::put('/user/addresses/{id}', [UserProfileController::class, 'updateUserAddress']); // Update an existing address
     });
     
     // Route::middleware(['role:Administration,Customer,Customer Support Staff,Product Saler'])->group(function () {

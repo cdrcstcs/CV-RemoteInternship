@@ -33,6 +33,7 @@ import DeliveryMain from "./pages/Delivery/DeliveryMain.jsx";
 import RouteMain from "./pages/Delivery/RouteMain.jsx";
 import VehiclesRoutesSelectionPage from "./pages/Delivery/VehiclesRoutesSelectionPage.jsx";
 import './echo.js'
+import UserAddressesPage from "./pages/UserAddressPage.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -103,6 +104,7 @@ function App() {
             <Route index element={<ProfilePage />} /> {/* This will be the default route */}
             <Route path="edit" element={<EditProfilePage />} />
             <Route path="change-password" element={<ChangePasswordPage />} />
+            <Route path="address" element={<UserAddressesPage />} />
           </Route>
 
         </Routes>

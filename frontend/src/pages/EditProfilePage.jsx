@@ -33,11 +33,11 @@ const EditProfilePage = () => {
     updateProfile(formData);
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="text-center text-gray-500">Loading...</div>;
 
   return (
-    <div className="w-full rounded-lg shadow-lg">
-      <h2 className="text-3xl font-bold text-center text-white mb-6">Edit Profile</h2>
+    <div className="w-full bg-transparent text-emerald-400 rounded-lg shadow-lg">
+      <h2 className="text-3xl font-bold text-center mb-6">Edit Profile</h2>
       <form onSubmit={handleSubmit} className="space-y-5">
         {Object.keys(formData).map((key) => (
           <div key={key}>
@@ -48,7 +48,7 @@ const EditProfilePage = () => {
               id={key}
               name={key}
               type={key === 'email' ? 'email' : 'text'}
-              className="w-full p-4 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full p-4 bg-transparent text-emerald-400 border-2 border-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
               value={formData[key]}
               onChange={handleChange}
               required
