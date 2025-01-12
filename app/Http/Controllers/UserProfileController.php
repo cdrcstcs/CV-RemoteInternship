@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\Payment;
 use App\Models\Invoice;
+use App\Models\OrderItem;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;

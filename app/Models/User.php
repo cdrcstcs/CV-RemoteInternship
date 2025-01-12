@@ -58,4 +58,35 @@ class User extends Authenticatable  // Extend Authenticatable
         return $this->hasMany(UserAddress::class, 'users_id');
     }
 
+    public function primaryAddress()
+    {
+        // Corrected: Return a relationship instance
+        return $this->hasOne(UserAddress::class, 'users_id')->where('is_primary', true);
+    }
+
+
+    // Get the user's primary address as a concatenated string
+    public function getPrimaryAddress()
+    {
+        $address = $this->primaryAddress;
+
+        if ($address) {
+            // Combine the address components into a single string
+            $addressString = $address->address_line1;
+
+            if ($address->address_line2) {
+                $addressString .= ', ' . $address->address_line2;
+            }
+
+            $addressString .= ', ' . $address->city;
+            $addressString .= ', ' . $address->state;
+            $addressString .= ' ' . $address->postal_code;
+            $addressString .= ', ' . $address->country;
+
+            return $addressString; // Return the combined address string
+        }
+
+        return null;  // No address found
+    }
+
 }

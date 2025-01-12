@@ -27,29 +27,4 @@ class LocationHistoryFactory extends Factory
         ];
     }
 
-    /**
-     * Indicate a custom timestamp.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
-     */
-    public function customTimestamp($timestamp): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'timestamp' => $timestamp,
-        ]);
-    }
-
-    /**
-     * Indicate the location is in a specific city.
-     *
-     * @return \Illuminate\Database\Eloquent\Factories\Factory
-     */
-    public function inCity(string $city): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'location' => $city,
-            'latitude' => $this->faker->latitude(40, 45), // Latitude for city range
-            'longitude' => $this->faker->longitude(-75, -70), // Longitude for city range
-        ]);
-    }
 }

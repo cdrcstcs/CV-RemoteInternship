@@ -73,7 +73,6 @@ class DatabaseSeeder extends Seeder
         // Create Coupons and associate with products and users
         $coupons = Coupon::factory(10)->create();
         foreach ($users as $user) {
-            UserAddress::factory(5)->create(['users_id' => $user->id]);
             foreach ($coupons as $coupon) {
                 foreach ($products as $product) {
                     // Check if the combination of product and coupon exists
@@ -212,5 +211,12 @@ class DatabaseSeeder extends Seeder
             $vehicle->vehicle_management_id = $vehicleManagement->id;
             $vehicle->save();  // Save the vehicle with the correct relationship
         }
+
+        $allUsers = User::all();
+
+        foreach ($allUsers as $user) {
+            UserAddress::factory(5)->create(['users_id' => $user->id]);
+        }
+
     }
 }

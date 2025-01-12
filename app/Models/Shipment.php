@@ -38,4 +38,11 @@ class Shipment extends Model
     {
         return $this->belongsTo(Order::class, 'orders_id');
     }
+    /**
+     * Define the relationship with the RouteOptimization model.
+     */
+    public function routeOptimizations()
+    {
+        return $this->hasMany(RouteOptimization::class);
+    }
 }

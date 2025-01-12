@@ -15,8 +15,37 @@ export const useCartStore = create((set, get) => ({
   totalAfterDiscount: 0, // Total after discount
   isPaymentProcessing: false, // Flag for payment processing status
   paymentMessage: '',
-
+  routeDetails: [], // Stores the route details for delivery
+  totalDistance: 0, // Total distance for the delivery
   // Payment processing logic moved to the store
+  resetRouteDetails: () => set({ routeDetails: [] }),
+
+  // Prepare delivery: Get the route details and shipment data
+  prepareDelivery: async (userLocation) => {
+    const { orderId } = get(); // Get the current orderId
+    if (!orderId) {
+      toast.error("Order not found. Cannot prepare delivery.");
+      return;
+    }
+
+    try {
+      // Prepare the delivery data, passing the orderId and userLocation
+      const response = await axiosInstance.post('/payment/delivery/prepare', { orderId, userLocation });
+      console.log(response.data);
+      // Update the route details in the state
+      set({
+        routeDetails: response.data.route_details,
+        totalDistance: response.data.total_distance,
+      });
+
+      toast.success("Delivery prepared successfully!");
+    } catch (error) {
+      console.error("Error preparing delivery:", error);
+      toast.error(error.response?.data?.message || "Failed to prepare delivery. Please try again.");
+    } finally {
+      set({ isPaymentProcessing: false }); // Reset the loading state
+    }
+  },
   processPayment: async (paymentMethod, paymentGateway, currency) => {
     const { orderId } = get(); // Get the current orderId and total amount
 

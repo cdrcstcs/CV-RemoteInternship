@@ -50,6 +50,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/coupon', [CouponController::class, 'getMyCoupon']);
         Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
         Route::post('/payment/process', [PaymentController::class, 'processPayment']);
+        Route::post('/payment/delivery/prepare', [PaymentController::class, 'prepareDelivery']);
         Route::get('/orders/{orderId}/status', [OrderController::class, 'getOrderStatusById']);
     });
     // Product Routes (Admin only)
