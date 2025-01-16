@@ -13,7 +13,6 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\VehicleManagerController;
-use App\Http\Controllers\DeliveryManagerController;
 
 
 // Apply CORS middleware globally on all routes in this file
@@ -75,17 +74,6 @@ Route::middleware('custom_cors')->group(function () {
     Route::middleware(['auth:sanctum','role:Administration,VehicleManager'])->group(function () {
         Route::get('/vehicles', [VehicleManagerController::class, 'getVehiclesWithVehicleManagement']);
         Route::put('/vehicles/{vehicleId}', [VehicleManagerController::class, 'updateVehicleWithManagement']);
-
-    });
-
-    Route::middleware(['auth:sanctum','role:Administration,ShipmentManager'])->group(function () {
-        Route::get('/orders', [DeliveryManagerController::class, 'getAllOrders']);
-        Route::post('/shipment/{orderId}', [DeliveryManagerController::class, 'createShipment']);
-        Route::post('/createroute', [DeliveryManagerController::class, 'createRoute']);
-        Route::get('/shipments', [DeliveryManagerController::class, 'getShipments']); 
-        Route::get('/shipment/vehicles', [DeliveryManagerController::class, 'getAllVehicles']);
-        Route::get('/shipment/routes', [DeliveryManagerController::class, 'getAllRoutes']);
-        Route::post('/shipment/{routeId}/assign-vehicle', [DeliveryManagerController::class, 'assignVehicleToRoute']);
 
     });
 

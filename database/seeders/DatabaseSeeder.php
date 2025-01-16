@@ -18,10 +18,6 @@ use App\Models\{
     Rating,
     OrderItem,
     Order,
-    Shipment,
-    Route,
-    Vehicle,
-    VehicleManagement,
     LocationHistory,
     UserAddress,
     Permission,
@@ -155,61 +151,6 @@ class DatabaseSeeder extends Seeder
                     'quantity' => rand(1, 10),
                 ]);
             }
-        }
-
-        // Seed Shipments for each Order
-        foreach (Order::all() as $order) {
-            // Create a Shipment for each Order
-            $shipment = Shipment::factory()->create([
-                'orders_id' => $order->id,
-            ]);
-
-            // Assign deterministic shipment status
-            $shipment->status = ['Pending', 'Shipped', 'Delivered'][$order->id % 3];  // Cycle through statuses
-            $shipment->save();
-        }
-
-        // Seed Routes for each Shipment
-        foreach (Shipment::all() as $shipment) {
-            // Create a Route for each Shipment
-            $route = Route::factory()->create([
-                'shipments_id' => $shipment->id,
-            ]);
-
-            // Assign deterministic route status
-            $route->route_status = ['Active', 'Inactive'][$shipment->id % 2];  // Alternate between Active and Inactive
-            $route->save();
-        }
-
-        // Seed Vehicles and associate with Routes
-        foreach (Route::all() as $route) {
-            // Create a Vehicle
-            $vehicle = Vehicle::factory()->create();
-            LocationHistory::factory()->create([
-                'vehicle_id' => $vehicle->id, // Assign a random user
-            ]);
-            // Assign deterministic vehicle status
-            $vehicle->status = ['Active', 'Under Maintenance'][$route->id % 2];  // Alternate between statuses
-            $vehicle->save();
-
-            // Now associate the vehicle with the route (since Route has `vehicles_id`)
-            $route->vehicles_id = $vehicle->id;
-            $route->save();
-            $vehicleManager = UserRole::whereHas('role', function ($query) {
-                $query->where('role_name', 'VehicleManager');
-            })->first();
-            // Create Vehicle Management for each Vehicle
-            $vehicleManagement = VehicleManagement::factory()->create([
-                'users_id' => $vehicleManager->user->id, // Assign a random user
-            ]);
-
-            // Assign deterministic maintenance status
-            $vehicleManagement->maintenance_status = ['Pending', 'Completed', 'In Progress'][$vehicle->id % 3];  // Cycle through statuses
-            $vehicleManagement->save();
-
-            // Associate vehicle management with the vehicle (since vehicle has `vehicle_management_id`)
-            $vehicle->vehicle_management_id = $vehicleManagement->id;
-            $vehicle->save();  // Save the vehicle with the correct relationship
         }
 
         $allUsers = User::all();

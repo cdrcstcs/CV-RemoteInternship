@@ -7,7 +7,7 @@ import Confetti from "react-confetti";
 
 const PurchaseSuccessPage = () => {
   const [isProcessing, setIsProcessing] = useState(true);
-  const { cart, orderId, clearCart } = useCartStore();
+  const { cart, orderId, clearCart, routeDetails, totalDistance } = useCartStore();
   const { orderStatus, getOrderStatusById, listenForOrderStatusUpdates, isLoading, errorMessage } = useOrderStore(state => ({
     orderStatus: state.orderStatus,
     getOrderStatusById: state.getOrderStatusById,
@@ -110,7 +110,29 @@ const PurchaseSuccessPage = () => {
           <p className="text-emerald-400 text-center text-lg mb-8">
             Check your email for order details and updates.
           </p>
-
+			{/* Route Details */}
+			{routeDetails.length > 0  && (
+						<div className="mt-6">
+							<h4 className="text-xl font-semibold">Expected Delivery Routes</h4>
+							<ul className="space-y-4 text-white mt-4">
+							{routeDetails.map((route, index) => (
+								<li key={index} className="bg-gray-700 p-3 rounded-md">
+								<p><strong>Route Name:</strong> {route.route_name}</p>
+								{route.supplier_name && (<p><strong>Supplier:</strong> {route.supplier_name}</p>)}
+								<p><strong>Warehouse:</strong> {route.warehouse_name_1}</p>
+								{route.warehouse_name_2 && (<p><strong>Warehouse:</strong> {route.warehouse_name_2}</p>)}
+								<p><strong>Start Location</strong> {route.start_location}</p>
+								<p><strong>Destination Location</strong> {route.end_location}</p>
+								<p><strong>Estimated Time</strong> {route.estimated_time}</p>
+								<p><strong>Distance:</strong> {route.distance} km</p>
+								</li>
+							))}
+							</ul>
+							<div className="mt-4">
+							<p><strong>Total Distance:</strong> {totalDistance} km</p>
+							</div>
+						</div>
+            )}
           {/* Order Timeline */}
           <div className="flex items-center justify-center space-x-8 mb-8 flex-wrap">
             {statuses.map((status, index) => (

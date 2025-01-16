@@ -24,4 +24,9 @@ class Warehouse extends Model
     {
         return $this->belongsTo(User::class, 'users_id');
     }
+    // Define the relationship to the Inventory model (a warehouse has many inventory items)
+    public function inventory()
+    {
+        return $this->hasMany(Inventory::class, 'warehouses_id'); // 'warehouses_id' is the foreign key in the 'inventory' table
+    }
 }

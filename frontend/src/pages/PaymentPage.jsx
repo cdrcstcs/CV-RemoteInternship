@@ -191,7 +191,7 @@ const PaymentPage = () => {
             {/* Route Details */}
             {routeDetails.length > 0 && !isDeliveryPreparing && (
               <div className="mt-6">
-                <h4 className="text-xl font-semibold">Delivery Route Details</h4>
+                <h4 className="text-xl font-semibold">Expected Delivery Routes</h4>
                 <ul className="space-y-4 text-white mt-4">
                   {routeDetails.map((route, index) => (
                     <li key={index} className="bg-gray-700 p-3 rounded-md">
@@ -199,6 +199,9 @@ const PaymentPage = () => {
                       {route.supplier_name && (<p><strong>Supplier:</strong> {route.supplier_name}</p>)}
                       <p><strong>Warehouse:</strong> {route.warehouse_name_1}</p>
                       {route.warehouse_name_2 && (<p><strong>Warehouse:</strong> {route.warehouse_name_2}</p>)}
+                      <p><strong>Start Location</strong> {route.start_location}</p>
+                      <p><strong>Destination Location</strong> {route.end_location}</p>
+                      <p><strong>Estimated Time</strong> {route.estimated_time}</p>
                       <p><strong>Distance:</strong> {route.distance} km</p>
                     </li>
                   ))}

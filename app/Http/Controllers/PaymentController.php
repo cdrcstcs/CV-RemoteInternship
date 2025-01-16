@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\Route;
 use App\Models\Shipment;
 use App\Models\Payment;
 use App\Models\RouteOptimization;
@@ -178,19 +177,34 @@ class PaymentController extends Controller
 
         // Step 1: Get all supplier locations for the given order
         Log::info('Fetching supplier locations for order ID: ' . $orderId);
-        $supplierLocations = OrderItem::where('orders_id', $orderId)
-            ->with('product.supplier')
-            ->get()
-            ->map(function ($orderItem) {
-                return $orderItem->product ? $orderItem->product->supplier : null;
-            })
-            ->filter();  // Remove any null values in case of missing supplier
+            // Single query to fetch order items with related product and supplier data
+        $results = OrderItem::where('orders_id', $orderId)
+        ->with(['product.supplier']) // Eager load product and supplier
+        ->get()
+        ->map(function ($orderItem) {
+            $product = $orderItem->product;
+            $supplier = $product ? $product->supplier : null;
+
+            return [
+                'product' => $product,
+                'supplier_location' => $supplier ? $supplier : null,
+            ];
+        });
+
+        // Separate the results into two variables: one for supplier locations, one for products
+        $supplierLocations = $results->pluck('supplier_location')->filter();
+        $productsInOrder = $results->pluck('product')->filter();
 
         Log::info('Found suppliers for the order.', ['suppliers' => $supplierLocations->toArray()]);
 
-        // Step 2: Get all warehouses
-        Log::info('Fetching all warehouses for route calculations.');
-        $warehouses = Warehouse::all();
+        $warehouses = Warehouse::whereHas('inventory', function ($query) use ($productsInOrder) {
+            // Filter warehouses that have inventory for any of the products in the order
+            $query->whereIn('products_id', $productsInOrder->pluck('id'));
+        })->get();
+
+        Log::info('Fetching warehouses with inventory for the products in the order.', [
+            'warehouses' => $warehouses->toArray()
+        ]);
         Log::info('Warehouses loaded for route calculations.', ['warehouses_count' => $warehouses->count()]);
 
         // Initialize variables
@@ -261,6 +275,9 @@ class PaymentController extends Controller
                 'supplier_name' => $supplier->first_name . $supplier->last_name,
                 'warehouse_name_1' => $nearestWarehouse['warehouse']->warehouse_name,
                 'distance' => $nearestWarehouse['distance'],
+                'start_location' => $supplierLocation,
+                'end_location' => $nearestWarehouse['warehouse']->location,
+                'estimated_time' => $estimatedTimeVariable,
             ];
 
             // Create RouteDetail records for each route optimization
@@ -271,22 +288,15 @@ class PaymentController extends Controller
                 'supplier_name' => $supplier->first_name . $supplier->last_name,
                 'warehouse_name_1' => $nearestWarehouse['warehouse']->warehouse_name,
                 'distance' => $nearestWarehouse['distance'],
-            ]);
-
-            $routeToSupplier = Route::create([
-                'route_name' => 'Supplier ' . $supplier->first_name . $supplier->last_name . ' to ' . $nearestWarehouse['warehouse']->warehouse_name,
                 'start_location' => $supplierLocation,
                 'end_location' => $nearestWarehouse['warehouse']->location,
+                'start_latitude' => $this->geocodeAddress($supplierLocation)['center'][1],
+                'start_longitude' => $this->geocodeAddress($supplierLocation)['center'][0],
+                'end_latitude' => $this->geocodeAddress($nearestWarehouse['warehouse']->location)['center'][1],
+                'end_longitude' => $this->geocodeAddress($nearestWarehouse['warehouse']->location)['center'][0],
                 'estimated_time' => $estimatedTimeVariable,
-                'distance' => $nearestWarehouse['distance'],
-                'route_type' => 'supplier_to_warehouse',
-                'traffic_condition' => 'unknown',
-                'route_status' => 'pending',
-                'shipments_id' => $shipmentId,
-                'vehicles_id' => null
             ]);
 
-            $routeIds[] = $routeToSupplier->id;
             $routeDetailModels[] = $routeDetail;
 
             // Update total distance
@@ -326,6 +336,9 @@ class PaymentController extends Controller
             // Step 6.2: Update total distance
             $totalDistance += $distanceBetweenWarehouses;
 
+            $estimatedTimeVariable = $this->estimateTime($distanceBetweenWarehouses, $timeSum, $nowDate);
+            Log::info('Estimated time for supplier-to-warehouse route.', ['estimated_time' => $estimatedTimeVariable]);
+            $timeSum = $estimatedTimeVariable;
             // Step 6.3: Create a RouteDetail for the warehouse-to-warehouse leg
             $routeDetail = RouteDetail::create([
                 'route_optimization_id' => $routeOptimization->id,
@@ -333,32 +346,24 @@ class PaymentController extends Controller
                 'warehouse_name_1' => $currentWarehouse['warehouse']->warehouse_name,
                 'warehouse_name_2' => $nextWarehouse['warehouse']->warehouse_name,
                 'distance' => $distanceBetweenWarehouses,
-            ]);
-
-            $estimatedTimeVariable = $this->estimateTime($distanceBetweenWarehouses, $timeSum, $nowDate);
-            Log::info('Estimated time for supplier-to-warehouse route.', ['estimated_time' => $estimatedTimeVariable]);
-            $timeSum = $estimatedTimeVariable;
-
-            $routeWarehouseToWarehouse = Route::create([
-                'route_name' => 'Warehouse ' . $currentWarehouse['warehouse']->warehouse_name . ' to ' . $nextWarehouse['warehouse']->warehouse_name,
-                'start_location' => $currentWarehouse['warehouse']->warehouse_name,
-                'end_location' => $nextWarehouse['warehouse']->warehouse_name,
+                'start_location' => $currentWarehouse['warehouse']->location,
+                'end_location' => $nextWarehouse['warehouse']->location,
+                'start_latitude' => $this->geocodeAddress($currentWarehouse['warehouse']->location)['center'][1],
+                'start_longitude' => $this->geocodeAddress($currentWarehouse['warehouse']->location)['center'][0],
+                'end_latitude' => $this->geocodeAddress($nextWarehouse['warehouse']->location)['center'][1],
+                'end_longitude' => $this->geocodeAddress($nextWarehouse['warehouse']->location)['center'][0],
                 'estimated_time' => $estimatedTimeVariable,
-                'distance' => $distanceBetweenWarehouses,
-                'route_type' => 'warehouse_to_warehouse',
-                'traffic_condition' => 'unknown',
-                'route_status' => 'pending',
-                'shipments_id' => $shipmentId,
-                'vehicles_id' => null
             ]);
 
-            $routeIds[] = $routeWarehouseToWarehouse->id;
 
             $routeDetails[] = [
                 'route_name' => 'Warehouse ' . $currentWarehouse['warehouse']->warehouse_name . ' to ' . $nextWarehouse['warehouse']->warehouse_name,
                 'warehouse_name_1' => $currentWarehouse['warehouse']->warehouse_name,
                 'warehouse_name_2' => $nextWarehouse['warehouse']->warehouse_name,
                 'distance' => $distanceBetweenWarehouses,
+                'start_location' => $currentWarehouse['warehouse']->location,
+                'end_location' => $nextWarehouse['warehouse']->location,
+                'estimated_time' => $estimatedTimeVariable,
             ];
 
             $routeDetailModels[] = $routeDetail;
@@ -394,21 +399,6 @@ class PaymentController extends Controller
         Log::info('Estimated time for warehouse-to-user route.', ['estimated_time' => $estimatedTimeVariable2]);
         $timeSum = $estimatedTimeVariable2;
 
-        // Step 9: Create a route for warehouse-to-user
-        Log::info('Creating route for warehouse-to-user.');
-        $routeToUser = Route::create([
-            'route_name' => 'Warehouse ' . $nearestWarehouseToUser['warehouse']->warehouse_name . ' to User',
-            'start_location' => $nearestWarehouseToUser['warehouse']->location,
-            'end_location' => $userLocation,
-            'estimated_time' => $estimatedTimeVariable2,
-            'distance' => $nearestWarehouseToUser['distance'],
-            'route_type' => 'warehouse_to_user',
-            'traffic_condition' => 'unknown',
-            'route_status' => 'pending',
-            'shipments_id' => $shipmentId,
-            'vehicles_id' => null
-        ]);
-        $routeIds[] = $routeToUser->id;
 
         // Create a RouteDetail for warehouse-to-user route
         $routeDetail = RouteDetail::create([
@@ -416,12 +406,22 @@ class PaymentController extends Controller
             'route_name' => 'Warehouse ' . $nearestWarehouseToUser['warehouse']->warehouse_name . ' to User',
             'warehouse_name_1' => $nearestWarehouseToUser['warehouse']->warehouse_name,
             'distance' => $nearestWarehouseToUser['distance'],
+            'start_location' => $nearestWarehouseToUser['warehouse']->location,
+            'end_location' => $userLocation,
+            'start_latitude' => $this->geocodeAddress($nearestWarehouseToUser['warehouse']->location)['center'][1],
+            'start_longitude' => $this->geocodeAddress($nearestWarehouseToUser['warehouse']->location)['center'][0],
+            'end_latitude' => $this->geocodeAddress($userLocation)['center'][1],
+            'end_longitude' => $this->geocodeAddress($userLocation)['center'][0],
+            'estimated_time' => $estimatedTimeVariable2,
         ]);
 
         $routeDetails[] = [
             'route_name' => 'Warehouse ' . $nearestWarehouseToUser['warehouse']->warehouse_name . ' to you',
             'warehouse_name_1' => $nearestWarehouseToUser['warehouse']->warehouse_name,
             'distance' => $nearestWarehouseToUser['distance'],
+            'start_location' => $nearestWarehouseToUser['warehouse']->location,
+            'end_location' => $userLocation,
+            'estimated_time' => $estimatedTimeVariable2,
         ];
 
         $routeDetailModels[] = $routeDetail;
@@ -437,13 +437,13 @@ class PaymentController extends Controller
 
         $shipment->update([
             'status' => 'in_transit',
-            'estimated_arrival' => now()->addHours(2),
+            'estimated_arrival' => $estimatedTimeVariable2,
             'origin' => $supplierLocations->first()->location,
             'destination' => $userLocation,
             'shipment_method' => 'standard',
             'tracking_number' => $trackingNumber,
             'last_updated' => now(),
-            'total_amount' => 100.00,
+            'total_amount' => $totalDistance / 100,
         ]);
 
         Log::info('Updating route optimization record.');

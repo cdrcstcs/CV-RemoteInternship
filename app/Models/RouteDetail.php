@@ -14,7 +14,15 @@ class RouteDetail extends Model
         'supplier_name',
         'warehouse_name_1',
         'warehouse_name_2',
+        'start_location',
+        'end_location',
+        'start_latitude',
+        'start_longitude',
+        'end_latitude',
+        'end_longitude',
+        'estimated_time',
         'distance',
+        'route_condition_id'
     ];
 
     /**
@@ -23,5 +31,9 @@ class RouteDetail extends Model
     public function routeOptimization()
     {
         return $this->belongsTo(RouteOptimization::class);
+    }
+    public function routeCondition()
+    {
+        return $this->belongsTo(RouteCondition::class, 'route_condition_id');
     }
 }
