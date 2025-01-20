@@ -7,7 +7,6 @@ const Markers = ({ shipment, onSelectedRoute }) => {
     // Call the onSelectedRoute with the clicked routeDetail
     onSelectedRoute(routeDetail);
   };
-
   return (
     <div>
       {/* Iterate over route details and display start/end markers */}
@@ -15,6 +14,8 @@ const Markers = ({ shipment, onSelectedRoute }) => {
         routeOptimization.routeDetails.map((routeDetail) => (
           <div key={routeDetail.routeDetail.id}>
             {/* Start Location Marker with Icon from react-icons */}
+            {  console.log(routeDetail.routeDetail)
+            }
             <Marker
               longitude={routeDetail.routeDetail.start_longitude}
               latitude={routeDetail.routeDetail.start_latitude}

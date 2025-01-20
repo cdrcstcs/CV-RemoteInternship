@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 $trackingNumber = 'TRACK-' . strtoupper(Str::random(10));  // Generate a random tracking number
 
@@ -29,6 +30,7 @@ class PaymentController extends Controller
         $this->mapboxApiKey = env('MAPBOX_API_KEY');  // Updated to the correct Mapbox token name
         
     }
+
     /**
      * Geocode an address using Mapbox Geocoding API
      *
@@ -37,7 +39,6 @@ class PaymentController extends Controller
      */
     public function geocodeAddress($address)
     {
-
         // Check if the address is valid (non-empty)
         if (empty($address)) {
             Log::error('Geocoding failed, empty address', ['address' => $address]);
@@ -47,16 +48,65 @@ class PaymentController extends Controller
         // Log the received address for debugging
         Log::info('Geocoding address received', ['address' => $address]);
 
+        // Check if the address is already cached
+        $cacheKey = 'geocode_' . md5($address);  // Create a unique cache key based on the address
+
+        // Try to get the geocoded data from cache
+        $result = Cache::get($cacheKey);
+
+        if ($result) {
+            // If the result is cached, return it directly
+            Log::info('Returning geocoded address from cache', ['address' => $address]);
+            return $result;
+        }
+
+        // If the result is not cached, perform the geocoding API call
         $url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' . urlencode($address) . '.json';
 
+        // Perform geocoding API call
         $response = Http::get($url, [
             'access_token' => $this->mapboxApiKey,
             'limit' => 1,  // Adjust the limit to control how many results you want
         ]);
 
+        // Check if the request was successful
         if ($response->successful()) {
-            // Return the first result if available
-            return $response->json()['features'][0] ?? null;
+            $result = $response->json()['features'][0] ?? null;
+
+            if ($result) {
+                // Extract the geocoded coordinates (longitude, latitude)
+                $longitude = $result['geometry']['coordinates'][0];
+                $latitude = $result['geometry']['coordinates'][1];
+
+                // Check if the coordinates fall within the valid bounds for Mapbox
+                if (!$this->isValidCoordinates($latitude, $longitude)) {
+                    // If not valid, adjust them (optional: you could set a default fallback location or adjust to nearest valid point)
+                    Log::warning('Coordinates are out of Mapbox bounds, adjusting coordinates.', [
+                        'latitude' => $latitude,
+                        'longitude' => $longitude,
+                    ]);
+
+                    // Adjust the coordinates to fit within Mapbox bounds
+                    // Latitude between -85 and 85
+                    // Longitude between -180 and 180
+                    $latitude = max(min($latitude, 85), -85);  
+                    $longitude = max(min($longitude, 180), -180);
+
+                    // Optionally, log the adjustment
+                    Log::info('Adjusted coordinates to be within Mapbox bounds.', [
+                        'adjusted_latitude' => $latitude,
+                        'adjusted_longitude' => $longitude,
+                    ]);
+
+                    // Update the result coordinates to the adjusted ones
+                    $result['geometry']['coordinates'] = [$longitude, $latitude];
+                }
+
+                // Cache the result for 24 hours (or any duration you prefer)
+                Cache::put($cacheKey, $result, now()->addHours(24));
+
+                return $result;  // Return the geocoded result
+            }
         } else {
             // Handle API failure
             Log::error('Mapbox Geocoding failed', [
@@ -64,9 +114,26 @@ class PaymentController extends Controller
                 'response_status' => $response->status(),
                 'response_body' => $response->body(),
             ]);
-            return null;
         }
+
+        return null;  // Return null if no result
     }
+
+
+    /**
+     * Check if coordinates are within valid Mapbox bounds.
+     *
+     * @param float $latitude
+     * @param float $longitude
+     * @return bool
+     */
+    private function isValidCoordinates($latitude, $longitude)
+    {
+        // Valid latitude range: -85 to 85
+        // Valid longitude range: -180 to 180
+        return $latitude >= -85 && $latitude <= 85 && $longitude >= -180 && $longitude <= 180;
+    }
+
 
     /**
      * Get the distance between two coordinates using Mapbox Directions API

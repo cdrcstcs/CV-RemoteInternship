@@ -16,13 +16,21 @@ class WarehouseFactory extends Factory
      */
     public function definition(): array
     {
-        // Predefined list of real warehouse names (can be expanded as needed)
-        $warehouseNames = [
-            'Amazon Fulfillment Center', 'Walmart Distribution Center', 'FedEx Warehouse',
-            'UPS Supply Chain Solutions', 'Home Depot Distribution Hub', 'Target Warehouse',
-            'Costco Distribution Center', 'Kroger Supply Chain', 'Best Buy Warehouse', 'Lidl Logistics Hub'
+        // Predefined list of real warehouse names with unique addresses
+        $warehouseAddresses = [
+            'Amazon Fulfillment Center' => '2001 7th Ave, Seattle, WA, USA',
+            'Walmart Distribution Center' => '8500 W Markham St, Little Rock, AR, USA',
+            'FedEx Warehouse' => '123 Main St, Memphis, TN, USA',
+            'UPS Supply Chain Solutions' => '1 UPS Way, Louisville, KY, USA',
+            'Home Depot Distribution Hub' => '240 Peachtree St, Atlanta, GA, USA',
+            'Target Warehouse' => '1000 Nicollet Mall, Minneapolis, MN, USA',
+            'Costco Distribution Center' => '999 3rd Ave, Issaquah, WA, USA',
+            'Kroger Supply Chain' => '1014 Vine St, Cincinnati, OH, USA',
+            'Best Buy Warehouse' => '7601 Penn Ave S, Richfield, MN, USA',
+            'Lidl Logistics Hub' => '1 Lidl Blvd, Arlington, VA, USA'
         ];
 
+        // Predefined list of real countries and cities
         // Predefined list of real cities, states, and country codes (ISO3)
         $countriesISO3 = [
             'USA' => 'United States', 'CAN' => 'Canada', 'GBR' => 'United Kingdom', 
@@ -77,30 +85,23 @@ class WarehouseFactory extends Factory
             'MYS' => ['Kuala Lumpur', 'George Town', 'Johor Bahru', 'Ipoh', 'Kota Kinabalu', 'Melaka', 'Shah Alam', 'Alor Setar', 'Kuching', 'Miri'],
             'NZL' => ['Auckland', 'Wellington', 'Christchurch', 'Hamilton', 'Dunedin', 'Tauranga', 'Napier-Hastings', 'Palmerston North', 'Rotorua', 'Whangarei'],
         ];
-        
-        
+        // Ensure that the warehouse names are unique by using array_keys to get the names
+        $warehouseNames = array_keys($warehouseAddresses);
 
-        // Randomly select a country and city
-        $countryISO3 = array_rand($countriesISO3);
-        $city = $cities[$countryISO3][array_rand($cities[$countryISO3])];
-
-        // Generate a random warehouse name from the predefined list
-        $warehouseName = $warehouseNames[array_rand($warehouseNames)];
-
-        // Generate a realistic address (combining city and country)
-        $location = "{$city}, {$countriesISO3[$countryISO3]} ({$countryISO3})";
+        // Randomly select a unique warehouse name and its corresponding unique address
+        $warehouseName = array_shift($warehouseNames); // Get the first available name (shift ensures uniqueness)
+        $location = $warehouseAddresses[$warehouseName]; // Get the corresponding address
 
         // Define realistic capacity and available space ranges
         $capacity = rand(1000, 10000);  // Warehouse capacity (1,000 to 10,000 units)
         $availableSpace = rand(0, $capacity);  // Available space within that range
 
         return [
-            'warehouse_name' => $warehouseName, // Predefined warehouse name
-            'location' => $location, // Realistic address format
+            'warehouse_name' => $warehouseName, // Unique warehouse name
+            'location' => $location, // Unique address for each warehouse name
             'capacity' => $capacity, // Random but realistic capacity
             'available_space' => $availableSpace, // Random available space
             'users_id' => User::factory(), // Associate a user with the warehouse (create a new user if needed)
         ];
     }
-
 }
