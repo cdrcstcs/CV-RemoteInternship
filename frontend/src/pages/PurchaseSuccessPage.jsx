@@ -18,7 +18,7 @@ const PurchaseSuccessPage = () => {
 
   const { orderIdFromURL } = useParams(); // Use if you pass the orderId in the URL, i.e., '/order/:orderId'
 
-  const statuses = ['Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Scheduled', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered','Canceled'];
+  const statuses = ['Route Optimization Created' ,'Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered','Canceled'];
 
   // Get status class
   const getStatusClass = (status) => {

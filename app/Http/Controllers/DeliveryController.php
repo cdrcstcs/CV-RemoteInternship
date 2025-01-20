@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log; // Import the Log facade
 use Carbon\Carbon; // For measuring the time taken
 use Illuminate\Support\Facades\Validator;
+use App\Events\OrderStatusUpdated;
 
 class DeliveryController extends Controller
 {
@@ -151,12 +152,30 @@ class DeliveryController extends Controller
         $routeDetail->vehicle_id = $request->vehicle_id;
         $routeDetail->save();
 
+        // Check if all RouteDetails for the associated RouteOptimization have a vehicle assigned
+        $routeOptimization = $routeDetail->routeOptimization; // Get the associated RouteOptimization
+        $allRouteDetailsHaveVehicle = $routeOptimization->routeDetails->every(function ($detail) {
+            return !is_null($detail->vehicle_id); // Check if vehicle_id is not null for each RouteDetail
+        });
+
+        if ($allRouteDetailsHaveVehicle) {
+            // If all RouteDetails have a vehicle assigned, update the Order status
+            $shipment = $routeOptimization->shipment; // Get the associated Shipment
+            $order = $shipment->order; // Get the associated Order
+
+            // Update the Order status to 'on delivery'
+            $order->status = 'On Delivery';
+            $order->save();
+            event(new OrderStatusUpdated($order));
+        }
+
         return response()->json([
             'status' => 'success',
             'message' => 'Vehicle assigned successfully.',
             'data' => $routeDetail,
         ]);
     }
+
 
     /**
      * Get the vehicle for the authenticated user.
