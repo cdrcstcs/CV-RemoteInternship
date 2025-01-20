@@ -11,6 +11,7 @@ class CreateRouteDetailsTable extends Migration
             $table->id();
             $table->unsignedBigInteger('route_optimization_id')->nullable(); // Make it nullable first
             $table->unsignedBigInteger('route_condition_id')->nullable(); // Foreign key to route_conditions table
+            $table->unsignedBigInteger('vehicle_id')->nullable(); // Foreign key to route_conditions table
             $table->string('route_name');
             $table->string('supplier_name')->nullable();
             $table->string('warehouse_name_1');
@@ -24,6 +25,7 @@ class CreateRouteDetailsTable extends Migration
             $table->decimal('end_longitude', 10, 7); // Longitude for the location
             $table->float('distance');
             $table->timestamps();
+            $table->foreign('vehicle_id')->references('id')->on('vehicles')->onDelete('set null');
             $table->foreign('route_condition_id')->references('id')->on('route_conditions')->onDelete('set null');
             $table->foreign('route_optimization_id')->references('id')->on('route_optimizations')->onDelete('set null');
         });

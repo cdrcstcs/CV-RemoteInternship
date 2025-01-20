@@ -30,6 +30,7 @@ import VehicleListPage from "./pages/VehicleManagement/VehicleListPage.jsx";
 import WrapperVehicle from "./pages/VehicleManagement/WrapperVehicle.jsx";
 import './echo.js'
 import UserAddressesPage from "./pages/UserAddressPage.jsx";
+import WrapperMap from "./pages/Map/WrapperMap.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -76,6 +77,11 @@ function App() {
           <Route
             path="/payment"
             element={user ? <PaymentPage /> : <Navigate to="/login" />}
+          />
+
+          <Route
+            path="/map"
+            element={user ? <WrapperMap /> : <Navigate to="/login" />}
           />
           <Route path="/warehouse" element={user ? <Wrapper/> : <Navigate to="/login" />}>
             <Route index element={<Expenses />} />

@@ -22,6 +22,7 @@ use App\Models\{
     UserAddress,
     Permission,
     RolePermission,
+    Vehicle,
 };
 
 class DatabaseSeeder extends Seeder
@@ -158,6 +159,12 @@ class DatabaseSeeder extends Seeder
         foreach ($allUsers as $user) {
             UserAddress::factory(5)->create(['users_id' => $user->id]);
         }
+
+        $deliveryMan = UserRole::whereHas('role', function ($query) {
+            $query->where('role_name', 'DeliveryMan');
+        })->first();
+
+        $vehicles = Vehicle::factory(1)->create(['driver_id' => $deliveryMan->user->id]);
 
     }
 }

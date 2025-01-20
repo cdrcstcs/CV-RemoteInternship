@@ -22,12 +22,15 @@ class RouteDetail extends Model
         'end_longitude',
         'estimated_time',
         'distance',
-        'route_condition_id'
+        'route_condition_id',
+        'vehicle_id',
     ];
 
     /**
      * Define the relationship with the RouteOptimization model.
      */
+
+    
     public function routeOptimization()
     {
         return $this->belongsTo(RouteOptimization::class);
@@ -35,5 +38,9 @@ class RouteDetail extends Model
     public function routeCondition()
     {
         return $this->belongsTo(RouteCondition::class, 'route_condition_id');
+    }
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 }

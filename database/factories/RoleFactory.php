@@ -26,7 +26,7 @@ class RoleFactory extends Factory
             'FinanceManager' => 'Oversees financial operations, budgeting, and reporting to ensure the company’s financial health.',
             'ProductSaler' => 'Create product posts, sale products, delete products',
             'VehicleManager' => 'Manage Vehicle Maintenance',
-            'ShipmentManager' => 'Manage and schedule shipment for orders',
+            'DeliveryMan' => 'Deliver Orders',
         ];
 
 

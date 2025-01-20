@@ -426,7 +426,6 @@ class PaymentController extends Controller
 
         $routeDetailModels[] = $routeDetail;
 
-        Log::info('Route created for warehouse-to-user.', ['route_id' => $routeToUser->id]);
 
         // Add the distance from the warehouse to the user
         $totalDistance += $nearestWarehouseToUser['distance'];
