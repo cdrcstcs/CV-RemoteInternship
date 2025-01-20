@@ -1,7 +1,11 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
-import { redirect } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
+
+// Load your Stripe publishable key
+const stripePromise = loadStripe("pk_test_51PMjcCIw69kb65LMm6zd49cWEi1zj4wFnwVbF9mxurJg1JlgoH0S7tOPdJglr0YmyejIYYfDTHhVTFOSgt0SD0rv00YmclMWcR");
 
 export const useCartStore = create((set, get) => ({
   cart: [],
@@ -17,35 +21,10 @@ export const useCartStore = create((set, get) => ({
   paymentMessage: '',
   routeDetails: [], // Stores the route details for delivery
   totalDistance: 0, // Total distance for the delivery
-  // Payment processing logic moved to the store
+  stripeClientSecret: "", // Stores the Stripe client secret for the payment
+  // Prepare delivery: Get the route details and shipment data
   resetRouteDetails: () => set({ routeDetails: [] }),
 
-  // Prepare delivery: Get the route details and shipment data
-  prepareDelivery: async (userLocation) => {
-    const { orderId } = get(); // Get the current orderId
-    if (!orderId) {
-      toast.error("Order not found. Cannot prepare delivery.");
-      return;
-    }
-
-    try {
-      // Prepare the delivery data, passing the orderId and userLocation
-      const response = await axiosInstance.post('/payment/delivery/prepare', { orderId, userLocation });
-      console.log(response.data);
-      // Update the route details in the state
-      set({
-        routeDetails: response.data.route_details,
-        totalDistance: response.data.total_distance,
-      });
-
-      toast.success("Delivery prepared successfully!");
-    } catch (error) {
-      console.error("Error preparing delivery:", error);
-      toast.error(error.response?.data?.message || "Failed to prepare delivery. Please try again.");
-    } finally {
-      set({ isPaymentProcessing: false }); // Reset the loading state
-    }
-  },
   processPayment: async (paymentMethod, paymentGateway, currency) => {
     const { orderId } = get(); // Get the current orderId and total amount
 
@@ -78,6 +57,90 @@ export const useCartStore = create((set, get) => ({
       set({ isPaymentProcessing: false });
     }
   },
+  prepareDelivery: async (userLocation) => {
+    const { orderId } = get(); // Get the current orderId
+    if (!orderId) {
+      toast.error("Order not found. Cannot prepare delivery.");
+      return;
+    }
+
+    try {
+      // Prepare the delivery data, passing the orderId and userLocation
+      const response = await axiosInstance.post('/payment/delivery/prepare', { orderId, userLocation });
+      console.log(response.data);
+      // Update the route details in the state
+      set({
+        routeDetails: response.data.route_details,
+        totalDistance: response.data.total_distance,
+      });
+
+      toast.success("Delivery prepared successfully!");
+    } catch (error) {
+      console.error("Error preparing delivery:", error);
+      toast.error(error.response?.data?.message || "Failed to prepare delivery. Please try again.");
+    } finally {
+      set({ isPaymentProcessing: false }); // Reset the loading state
+    }
+  },
+
+  processStripePayment: async (paymentMethod) => {
+    const { orderId, stripeClientSecret } = get(); // Get the current orderId and stripeClientSecret
+    const stripe = await stripePromise;
+    const elements = useElements();
+
+    if (!stripe || !elements) {
+      toast.error("Stripe is not loaded correctly. Please try again later.");
+      return;
+    }
+
+    set({ isPaymentProcessing: true, paymentMessage: '' });
+
+    try {
+      // Use Stripe's confirmCardPayment function to handle payment processing
+      const { error, paymentIntent } = await stripe.confirmCardPayment(stripeClientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+        },
+      });
+
+      if (error) {
+        set({ paymentMessage: error.message });
+        toast.error(error.message);
+      } else if (paymentIntent.status === "succeeded") {
+          toast.success("Payment processed successfully!");
+      }
+    } catch (error) {
+      set({ paymentMessage: 'An error occurred while processing the payment.' });
+      toast.error('An error occurred while processing the payment.');
+    } finally {
+      set({ isPaymentProcessing: false });
+    }
+  },
+
+  createStripePaymentIntent: async (currency) => {
+    const { orderId, totalAfterDiscount } = get();
+    if (!orderId) {
+      toast.error("Order not found. Cannot create payment intent.");
+      return;
+    }
+
+    try {
+      // Create a Stripe payment intent on the backend
+      const response = await axiosInstance.post("/create-payment-intent", {
+        orderId,
+        amount: totalAfterDiscount, // Send the amount after discount
+        currency: currency,
+      });
+
+      if (response.data.clientSecret) {
+        set({ stripeClientSecret: response.data.clientSecret });
+      }
+
+      toast.success("Stripe payment intent created successfully.");
+    } catch (error) {
+      toast.error("Failed to create payment intent. Please try again.");
+    }
+  },
 
   // Fetch all user coupons and include the cart items
   getMyCoupons: async () => {
@@ -91,7 +154,7 @@ export const useCartStore = create((set, get) => ({
       const productIds = cart.map(item => item.products_id); // Extract the product IDs from cart items
       const response = await axiosInstance.post(`/coupon`, { productIds });
 
-      set({ userCoupons: response.data, isCouponApplied:false }); // Store the list of user coupons
+      set({ userCoupons: response.data, isCouponApplied: false }); // Store the list of user coupons
     } catch (error) {
       console.error("Error fetching coupons:", error);
     }
@@ -131,16 +194,16 @@ export const useCartStore = create((set, get) => ({
 
   // Clear the cart, reset orderId, and reset coupon states
   clearCart: () => {
-	set({
-        cart: [], // Clear the cart
-        orderId: null, // Reset the orderId
-        isCouponApplied: false, // Reset coupon applied status
-        coupon: null, // Reset coupon
-        userCoupons: [], // Optionally clear user coupons
-        totalAmount: 0, // Reset totalAmount
-        discountAmount: 0, // Reset discountAmount
-        totalAfterDiscount: 0, // Reset totalAfterDiscount
-      });
+    set({
+      cart: [], // Clear the cart
+      orderId: null, // Reset the orderId
+      isCouponApplied: false, // Reset coupon applied status
+      coupon: null, // Reset coupon
+      userCoupons: [], // Optionally clear user coupons
+      totalAmount: 0, // Reset totalAmount
+      discountAmount: 0, // Reset discountAmount
+      totalAfterDiscount: 0, // Reset totalAfterDiscount
+    });
 
     toast.success("Cart cleared successfully");
   },
@@ -156,7 +219,8 @@ export const useCartStore = create((set, get) => ({
         orderId: newOrderId, // Update the orderId if changed
         cart: orderItems, // Update the cart with the new items
         isOrderChanged: !get().isOrderChanged, // Toggle the `isOrderChanged` flag
-		totalAmount: totalAmount,
+        totalAmount: totalAmount,
+        totalAfterDiscount: totalAmount,
       });
 
       toast.success("Product added to cart");
@@ -177,7 +241,8 @@ export const useCartStore = create((set, get) => ({
         orderId: newOrderId, // Update the orderId if changed
         cart: orderItems, // Update the cart with the new items
         isOrderChanged: !get().isOrderChanged, // Toggle the `isOrderChanged` flag
-		totalAmount: totalAmount,
+        totalAmount: totalAmount,
+        totalAfterDiscount: totalAmount,
       });
 
       toast.success("Product removed from cart");
@@ -192,14 +257,14 @@ export const useCartStore = create((set, get) => ({
     try {
       const { orderId } = get(); // Get the current orderId
       const response = await axiosInstance.put("/cart/quantity", { productId, orderId, isIncrement }); // Sending the isIncrement flag
-      const { orderId: newOrderId, orderItems, totalAmount} = response.data;
+      const { orderId: newOrderId, orderItems, totalAmount } = response.data;
 
       set({
         orderId: newOrderId, // Update the orderId if changed
         cart: orderItems, // Update the cart with the new items
         isOrderChanged: !get().isOrderChanged, // Toggle the `isOrderChanged` flag
-		totalAmount: totalAmount,
-
+        totalAmount: totalAmount,
+        totalAfterDiscount:totalAmount
       });
 
       toast.success(isIncrement ? "Quantity increased" : "Quantity decreased");

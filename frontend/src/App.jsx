@@ -31,6 +31,9 @@ import WrapperVehicle from "./pages/VehicleManagement/WrapperVehicle.jsx";
 import './echo.js'
 import UserAddressesPage from "./pages/UserAddressPage.jsx";
 import WrapperMap from "./pages/Map/WrapperMap.jsx";
+import { Elements } from '@stripe/react-stripe-js';
+import { stripePromise } from './stripe'; // Make sure you have stripe.js configured
+
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -74,9 +77,15 @@ function App() {
             path="/purchase-cancel"
             element={user ? <PurchaseCancelPage /> : <Navigate to="/login" />}
           />
+
+          {/* Payment Route - Wrapped in Elements */}
           <Route
             path="/payment"
-            element={user ? <PaymentPage /> : <Navigate to="/login" />}
+            element={user ? (
+              <Elements stripe={stripePromise}>
+                <PaymentPage />
+              </Elements>
+            ) : <Navigate to="/login" />}
           />
 
           <Route

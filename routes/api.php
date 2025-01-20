@@ -14,7 +14,7 @@ use App\Http\Controllers\RatingController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\VehicleManagerController;
 use App\Http\Controllers\DeliveryController;
-
+use App\Http\Controllers\StripeController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -52,6 +52,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/payment/process', [PaymentController::class, 'processPayment']);
         Route::post('/payment/delivery/prepare', [PaymentController::class, 'prepareDelivery']);
         Route::get('/orders/{orderId}/status', [OrderController::class, 'getOrderStatusById']);
+        Route::post('/create-payment-intent', [StripeController::class, 'createPaymentIntent']);
     });
     // Product Routes (Admin only)
     Route::get('/products', [ProductController::class, 'getAllProducts']);

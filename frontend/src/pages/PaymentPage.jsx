@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useCartStore } from '../stores/useCartStore';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../stores/useUserStore';
+import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+// Load Stripe with your public key
+const stripePromise = loadStripe('pk_test_51PMjcCIw69kb65LMm6zd49cWEi1zj4wFnwVbF9mxurJg1JlgoH0S7tOPdJglr0YmyejIYYfDTHhVTFOSgt0SD0rv00YmclMWcR');
 
 const PaymentPage = () => {
   const {
@@ -16,10 +20,11 @@ const PaymentPage = () => {
     routeDetails,
     totalDistance,
     resetRouteDetails,
+    createStripePaymentIntent, // Ensure this is available in your store
+    stripeClientSecret,
   } = useCartStore();
 
   const { userAddresses, getUserAddresses } = useUserStore();
-  
   useEffect(() => {
     // Fetch addresses when the component mounts
     getUserAddresses();
@@ -33,12 +38,56 @@ const PaymentPage = () => {
   const [isDeliveryPreparing, setIsDeliveryPreparing] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(userAddresses[0] || null);
 
+  // Stripe Elements hooks
+  const stripe = useStripe();
+  const elements = useElements();
+
   // Handle payment form submission
-  const handlePaymentSubmit = (e) => {
+  const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     setIsPaid(false);
-    processPayment(paymentMethod, paymentGateway, currency);
-    setIsPaid(true);
+
+    if (!stripe || !elements) {
+      console.error('Stripe has not loaded yet');
+      return;
+    }
+
+    // Get the client secret from your store (ensure it's already created)
+    await createStripePaymentIntent(currency); // This will set the client secret in your store
+
+    // Make sure the postal code is provided
+    const postalCode = selectedAddress ? selectedAddress.postal_code : '';
+
+    // Confirm payment using Stripe
+    const cardElement = elements.getElement(CardElement);
+    if(stripeClientSecret){
+
+      const { error, paymentIntent } = await stripe.confirmCardPayment(stripeClientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            address: {
+              postal_code: '118560', // Include the postal code here
+            },
+          },
+        },
+      });
+  
+      if (error) {
+        console.error(error.message);
+        alert(error.message);
+        return;
+      }
+  
+      console.log(paymentIntent.status);
+  
+      // If payment was successful, call your store's `processPayment` method
+      if (paymentIntent.status === 'succeeded') {
+        setIsPaid(true);
+        processPayment(paymentMethod, paymentGateway, currency);
+  
+      }
+    }
   };
 
   // Trigger delivery preparation
@@ -55,6 +104,7 @@ const PaymentPage = () => {
   };
 
   useEffect(() => {
+    console.log(paymentMessage)
     if (paymentMessage === 'ok' && isPaid) {
       navigate('/purchase-success');
     }
@@ -147,6 +197,27 @@ const PaymentPage = () => {
                   <option value="INR">INR</option>
                 </select>
               </div>
+
+              {/* Card Element */}
+              {paymentGateway === 'stripe' && (
+                <div>
+                  <label className="block text-lg font-medium mb-2">Credit Card Information</label>
+                  <CardElement
+                    options={{
+                      style: {
+                        base: {
+                          color: '#fff',
+                          fontSize: '16px',
+                          fontFamily: 'sans-serif',
+                          '::placeholder': {
+                            color: '#aaa',
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Payment Button */}
               <button
