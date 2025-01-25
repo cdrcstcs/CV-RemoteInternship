@@ -1,0 +1,10 @@
+ultralytics
+paddlepaddle
+paddleocr
+fastapi
+pydantic
+uvicorn
+pytest-asyncio 
+python-Levenshtein 
+pytest
+easyocr

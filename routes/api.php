@@ -15,6 +15,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\VehicleManagerController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\LicensePlateController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -71,6 +72,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/warehouse/capacity', [WarehouseController::class, 'getTotalInventoryWeightForUserWarehouse']);
         Route::get('/warehouse/orders', [WarehouseController::class, 'getOrdersByUserWarehouse']);
         Route::post('/orders/{orderId}/status', [WarehouseController::class, 'updateOrderStatus']);
+        Route::post('/process-license-plate', [LicensePlateController::class, 'processLicensePlate']);
     });
 
     Route::middleware(['auth:sanctum','role:Administration,VehicleManager'])->group(function () {

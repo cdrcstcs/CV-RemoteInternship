@@ -33,7 +33,7 @@ import UserAddressesPage from "./pages/UserAddressPage.jsx";
 import WrapperMap from "./pages/Map/WrapperMap.jsx";
 import { Elements } from '@stripe/react-stripe-js';
 import { stripePromise } from './stripe'; // Make sure you have stripe.js configured
-
+import LicensePlateCapturePage from "./pages/Warehouse/LicensePlateCapturePage.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -99,6 +99,7 @@ function App() {
             <Route path="geography" element={<Geography />} />
             <Route path="create-inventory" element={<CreateInventory />} />
             <Route path="orders" element={<WarehouseOrders />} />
+            <Route path="license-plate" element={<LicensePlateCapturePage />} />
           </Route>
 
           <Route path="/vehicle" element={user ? <WrapperVehicle/> : <Navigate to="/login" />}>
