@@ -23,10 +23,10 @@ const Navbar = () => {
             <Link to={"/warehouse"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Warehouse
             </Link>
-			<Link to={"/vehicle"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+			      <Link to={"/vehicle"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Vehicle
             </Link>
-			<Link to={"/map"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+			      <Link to={"/map"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Map
             </Link>
             {user && (

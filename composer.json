@@ -9,12 +9,14 @@
         "php": "^8.2",
         "cloudinary-labs/cloudinary-laravel": "^2.2",
         "cloudinary/cloudinary_php": "^2.14",
+        "get-stream/stream-chat": "^3.7",
         "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^11.31",
         "laravel/reverb": "^1.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "predis/predis": "^2.3",
+        "spatie/laravel-sluggable": "^3.7",
         "stripe/stripe-php": "^16.4",
         "tymon/jwt-auth": "^2.1"
     },
@@ -76,6 +78,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }

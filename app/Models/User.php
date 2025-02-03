@@ -27,6 +27,10 @@ class User extends Authenticatable  // Extend Authenticatable
         'language',
         'is_admin',
         'last_password_change',
+        'profile_picture',
+        'banner_img',
+        'headline',
+        'about',
     ];
 
     protected $casts = [
@@ -89,4 +93,43 @@ class User extends Authenticatable  // Extend Authenticatable
         return null;  // No address found
     }
 
+    // Define relationships
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'author_id'); // Posts authored by this user
+    }
+
+    // Define a relationship for connections
+    public function connections()
+    {
+        return $this->hasMany(UserConnection::class, 'user_id');
+    }
+
+    // Define a relationship for connected users
+    public function connectedUsers()
+    {
+        return $this->belongsToMany(User::class, 'user_connections', 'user_id', 'connection_id');
+    }
+
+    // Add a connection
+    public function addConnection($userId)
+    {
+        if (!$this->connectedUsers()->where('connection_id', $userId)->exists()) {
+            $this->connectedUsers()->attach($userId); // Use the relationship to attach
+        }
+    }
+
+    // Remove a connection
+    public function removeConnection($userId)
+    {
+        if ($this->connectedUsers()->where('connection_id', $userId)->exists()) {
+            $this->connectedUsers()->detach($userId); // Use the relationship to detach
+        }
+    }
+
+    // Get all connections
+    public function getConnections()
+    {
+        return $this->connectedUsers; // Returns a collection of connected User models
+    }
 }

@@ -16,6 +16,7 @@ use App\Http\Controllers\VehicleManagerController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\LicensePlateController;
+use App\Http\Controllers\StreamTokenController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -33,6 +34,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/user/addresses', [UserProfileController::class, 'getUserAddresses']);  // Get all addresses
         Route::post('/user/addresses', [UserProfileController::class, 'storeUserAddress']); // Create a new address
         Route::put('/user/addresses/{id}', [UserProfileController::class, 'updateUserAddress']); // Update an existing address
+        Route::get('/get-token', [StreamTokenController::class, 'getToken']);
     });
     
     // Route::middleware(['role:Administration,Customer,Customer Support Staff,Product Saler'])->group(function () {

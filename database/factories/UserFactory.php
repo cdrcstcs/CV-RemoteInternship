@@ -36,9 +36,19 @@ class UserFactory extends Factory
             'language' => fake()->languageCode(),
             'is_admin' => fake()->boolean(),
             'last_password_change' => fake()->dateTimeThisYear(),
+            'profile_picture' => $this->faker->imageUrl(),
+            'banner_img' => $this->faker->imageUrl(),
+            'headline' => $this->faker->sentence(),
+            'about' => $this->faker->paragraph(),
         ];
     }
-
+    public function withConnections($userCount = 2)
+    {
+        return $this->afterCreating(function ($user) use ($userCount) {
+            $connections = \App\Models\User::inRandomOrder()->take($userCount)->pluck('id')->toArray();
+            $user->addConnection($connections); // Add connections
+        });
+    }
 
     /**
      * Indicate that the user is an admin.

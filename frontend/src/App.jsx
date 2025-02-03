@@ -92,6 +92,8 @@ function App() {
             path="/map"
             element={user ? <WrapperMap /> : <Navigate to="/login" />}
           />
+
+          
           <Route path="/warehouse" element={user ? <Wrapper/> : <Navigate to="/login" />}>
             <Route index element={<Expenses />} />
             <Route path="products" element={<WarehouseInventories />} />

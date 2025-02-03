@@ -23,7 +23,19 @@ use App\Models\{
     Permission,
     RolePermission,
     Vehicle,
+    FeedbackForm,
+    FeedbackFormQuestion,
+    FeedbackFormAnswer,
+    FeedbackFormQuestionAnswer,
+    Post,
+    Notification,
+    ConnectionRequest,
+    Comment,
+    Like,
+    UserConnection,
 };
+
+use Faker\Factory as Faker;
 
 class DatabaseSeeder extends Seeder
 {
@@ -66,7 +78,94 @@ class DatabaseSeeder extends Seeder
                 'roles_id' => $role->id,
             ]);
         }
+        $faker = Faker::create();
+        // Seed applications with associated questions and answers
+        foreach ($users as $user) {
+            FeedbackForm::factory()
+                ->count(10)
+                ->create(['user_id' => $user->id])
+                ->each(function ($feedbackForm) use ($faker) {
+                    FeedbackFormQuestion::factory()
+                        ->count(10)
+                        ->create(['feedbackform_id' => $feedbackForm->id])
+                        ->each(function ($question) use ($feedbackForm, $faker) {
+                            $answer = FeedbackFormAnswer::factory()->create(['feedbackform_id' => $feedbackForm->id]);
+                            FeedbackFormQuestionAnswer::factory()->create([
+                                'feedbackform_question_id' => $question->id,
+                                'feedbackform_answer_id' => $answer->id,
+                                'answer' => $faker->sentence,
+                            ]);
+                        });
+                });
+        }
 
+        // Create posts for each user
+        $posts = [];
+        foreach ($users as $user) {
+            $userPosts = Post::factory()->count(3)->create([
+                'author_id' => $user->id,
+                'content' => 'This is a sample post content for ' . $user->name,
+                'image' => $faker->imageUrl(),
+            ]);
+            $posts = array_merge($posts, $userPosts->toArray());
+        }
+
+        // Create user connections
+        foreach ($users as $user) {
+            $connections = $users->where('id', '!=', $user->id)->random(rand(1, 3));
+            foreach ($connections as $connection) {
+                UserConnection::factory()->create([
+                    'user_id' => $user->id,
+                    'connection_id' => $connection->id,
+                ]);
+            }
+        }
+
+        // Create connection requests between users
+        foreach ($users as $sender) {
+            foreach ($users as $recipient) {
+                if ($sender->id !== $recipient->id) {
+                    ConnectionRequest::factory()->create([
+                        'sender_id' => $sender->id,
+                        'recipient_id' => $recipient->id,
+                        'status' => $faker->randomElement(['pending', 'accepted']),
+                    ]);
+                }
+            }
+        }
+
+        // Create notifications for each user
+        foreach ($users as $user) {
+            Notification::factory()->count(2)->create([
+                'recipient_id' => $user->id,
+                'type' => $faker->randomElement(['like', 'comment', 'connectionAccepted']),
+                'related_user' => $users->random()->id,
+                'related_post' => Post::factory()->create()->id,
+            ]);
+        }
+
+        // Create comments for each post
+        foreach ($posts as $post) {
+            $commentCount = rand(1, 5);
+            foreach (range(1, $commentCount) as $index) {
+                Comment::factory()->create([
+                    'post_id' => $post['id'],
+                    'user_id' => $users->random()->id,
+                    'content' => $faker->sentence,
+                ]);
+            }
+        }
+
+        // Create likes for some posts
+        foreach ($posts as $post) {
+            $likeCount = rand(1, 5);
+            foreach (range(1, $likeCount) as $index) {
+                Like::factory()->create([
+                    'post_id' => $post['id'],
+                    'user_id' => $users->random()->id,
+                ]);
+            }
+        }
         // Create Coupons and associate with products and users
         $coupons = Coupon::factory(10)->create();
         foreach ($users as $user) {

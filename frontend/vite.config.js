@@ -11,4 +11,12 @@ export default defineConfig({
 			},
 		},
 	},
+	define: {
+		global: 'globalThis', // Use globalThis instead of global
+	},
+	resolve: {
+		alias: {
+		  stream: 'stream-browserify',
+		},
+	  },
 });
