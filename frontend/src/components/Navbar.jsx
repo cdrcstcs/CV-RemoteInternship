@@ -29,6 +29,9 @@ const Navbar = () => {
 			      <Link to={"/map"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Map
             </Link>
+            <Link to={"/feedback-forms/create"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+              Create Feedback Form
+            </Link>
             {user && (
               <Link
                 to={"/cart"}

@@ -9,6 +9,10 @@ use App\Models\RouteOptimization;
 use App\Models\RouteDetail;
 use App\Models\OrderItem;
 use App\Models\Warehouse;
+use App\Models\FeedbackForm;
+use App\Models\FeedbackFormQuestion;
+use App\Models\FeedbackFormAnswer;
+use App\Models\FeedbackFormQuestionAnswer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -181,49 +185,128 @@ class PaymentController extends Controller
 
 
     /**
-     * Handle the payment processing through an AJAX request.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function processPayment(Request $request)
-    {
-        // Validate the payment data coming from frontend
-        $validatedData = $request->validate([
-            'orderId' => 'required|exists:orders,id',
-            'payment_method' => 'required|string',
-            'gateway' => 'required|string',
-            'currency' => 'required|string',
-        ]);
+ * Handle the payment processing through an AJAX request.
+ *
+ * @param Request $request
+ * @return \Illuminate\Http\JsonResponse
+ */
+public function processPayment(Request $request)
+{
+    // Validate the payment data coming from frontend
+    $validatedData = $request->validate([
+        'orderId' => 'required|exists:orders,id',
+        'payment_method' => 'required|string',
+        'gateway' => 'required|string',
+        'currency' => 'required|string',
+    ]);
 
-        // Retrieve the order
-        $order = Order::findOrFail($validatedData['orderId']);
+    // Retrieve the order
+    $order = Order::findOrFail($validatedData['orderId']);
 
-        // Check if the user is authorized to make this payment (for security reasons)
-        if ($order->user_id !== Auth::id()) {
-            return response()->json(['error' => 'Unauthorized access'], 403);
-        }
-
-        // Create the payment record
-        $payment = new Payment();
-        $payment->order_id = $order->id;
-        $payment->total_amount = $order->total_amount;
-        $payment->paid_amount = $order->total_amount;
-        $payment->due_amount = $order->total_amount - $payment->paid_amount;
-        $payment->payment_method = $validatedData['payment_method']; // 'credit_card', 'paypal', etc.
-        $payment->gateway = $validatedData['gateway']; // 'stripe', 'razorpay', etc.
-        $payment->currency = $validatedData['currency'];
-        $payment->payment_status = 'success'; // Assuming success if no issues
-        $payment->payment_date = now(); // Use the current date and time
-        $payment->providers_id = 1; // Use the current date and time
-        $payment->save();
-
-        $order->status = 'Paid';
-        $order->save();
-
-        // Return a successful response with the payment details
-        return response()->json(['success' => 'Payment processed successfully', 'payment' => $payment]);
+    // Check if the user is authorized to make this payment (for security reasons)
+    if ($order->user_id !== Auth::id()) {
+        return response()->json(['error' => 'Unauthorized access'], 403);
     }
+
+    // Create the payment record
+    $payment = new Payment();
+    $payment->order_id = $order->id;
+    $payment->total_amount = $order->total_amount;
+    $payment->paid_amount = $order->total_amount;
+    $payment->due_amount = $order->total_amount - $payment->paid_amount;
+    $payment->payment_method = $validatedData['payment_method']; // 'credit_card', 'paypal', etc.
+    $payment->gateway = $validatedData['gateway']; // 'stripe', 'razorpay', etc.
+    $payment->currency = $validatedData['currency'];
+    $payment->payment_status = 'success'; // Assuming success if no issues
+    $payment->payment_date = now(); // Use the current date and time
+    $payment->providers_id = 1; // Example for provider ID, this may need to be dynamic
+    $payment->save();
+
+    // Update the order status to 'Paid'
+    $order->status = 'Paid';
+    $order->save();
+
+    // Fetch the related order items with product and supplier details
+    $results = OrderItem::where('orders_id', $validatedData['orderId'])
+        ->with(['product.supplier']) // Eager load product and supplier
+        ->get()
+        ->map(function ($orderItem) {
+            $product = $orderItem->product;
+            $supplier = $product ? $product->supplier : null;
+
+            return [
+                'supplier' => $supplier ? $supplier : null,
+            ];
+        });
+    
+    // Get a collection of suppliers from the order items
+    $suppliers = $results->pluck('supplier')->filter();
+
+    foreach ($suppliers as $supplier) {
+        // Check if the FeedbackForm already exists for the supplier and the order
+        $existingFeedbackForm = FeedbackForm::where('order_id', $validatedData['orderId'])
+            ->where('user_id', $supplier->id)
+            ->first();
+
+        // Log the current state for debugging
+        Log::info('Existing Feedback Form', ['existing_feedback_form' => $existingFeedbackForm]);
+
+        if (!$existingFeedbackForm) {
+            // Find the FeedbackForm for the current supplier (assuming it exists)
+            $feedbackForm = FeedbackForm::where('user_id', $supplier->id)->first();
+
+            if ($feedbackForm) {
+                // Create a copy (replicate) of the existing FeedbackForm
+                $newFeedbackForm = $feedbackForm->replicate();
+                Log::info('New Feedback Form', ['new_feedback_form' => $newFeedbackForm]);
+
+                // Set the new order_id
+                $newFeedbackForm->order_id = $validatedData['orderId'];
+
+                // Set the timestamps to the current time
+                $newFeedbackForm->created_at = Carbon::now();
+                $newFeedbackForm->updated_at = Carbon::now();
+
+                // Save the new FeedbackForm with the updated order_id
+                $newFeedbackForm->save();
+
+                // Replicate FeedbackFormQuestion
+                $feedbackFormQuestions = FeedbackFormQuestion::where('feedback_form_id', $feedbackForm->id)->get();
+                foreach ($feedbackFormQuestions as $question) {
+                    $newQuestion = $question->replicate();
+                    $newQuestion->feedback_form_id = $newFeedbackForm->id; // Associate with the new feedback form
+                    $newQuestion->save();
+
+                    // Replicate FeedbackFormAnswer
+                    $feedbackFormAnswers = FeedbackFormAnswer::where('feedback_form_id', $feedbackForm->id)->get();
+                    foreach ($feedbackFormAnswers as $answer) {
+                        $newAnswer = $answer->replicate();
+                        $newAnswer->feedback_form_id = $newFeedbackForm->id; // Associate with the new feedback form
+                        $newAnswer->save();
+
+                        // Replicate FeedbackFormQuestionAnswer
+                        $questionAnswers = FeedbackFormQuestionAnswer::where([
+                            'feedback_form_question_id' => $question->id,
+                            'feedback_form_answer_id' => $answer->id
+                        ])->get();
+
+                        foreach ($questionAnswers as $qa) {
+                            $newQa = $qa->replicate();
+                            $newQa->feedback_form_question_id = $newQuestion->id;
+                            $newQa->feedback_form_answer_id = $newAnswer->id;
+                            $newQa->save();
+                        }
+                    }
+                }
+            }
+        } else {
+            Log::info('Skipping Feedback Form Creation', ['supplier_id' => $supplier->id, 'order_id' => $validatedData['orderId']]);
+        }
+    }
+
+    // Return a successful response with the payment details
+    return response()->json(['success' => 'Payment processed successfully', 'payment' => $payment]);
+}
 
 
     public function prepareDelivery(Request $request)

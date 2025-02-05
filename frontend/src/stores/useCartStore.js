@@ -34,7 +34,7 @@ export const useCartStore = create((set, get) => ({
     }
 
     set({ isPaymentProcessing: true, paymentMessage: '' }); // Set loading state
-
+    console.log(orderId);
     const formData = {
       orderId: orderId,
       payment_method: paymentMethod,

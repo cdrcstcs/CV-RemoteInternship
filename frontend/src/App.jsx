@@ -34,6 +34,7 @@ import WrapperMap from "./pages/Map/WrapperMap.jsx";
 import { Elements } from '@stripe/react-stripe-js';
 import { stripePromise } from './stripe'; // Make sure you have stripe.js configured
 import LicensePlateCapturePage from "./pages/Warehouse/LicensePlateCapturePage.jsx";
+import CreateFeedbackForm from "./pages/FeedbackForm/CreateFeedbackForm.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -115,6 +116,7 @@ function App() {
             <Route path="address" element={<UserAddressesPage />} />
           </Route>
 
+          <Route path="/feedback-forms/create" element={user ? <CreateFeedbackForm /> : <Navigate to="/login" />} />
         </Routes>
       </div>
       <Toaster />

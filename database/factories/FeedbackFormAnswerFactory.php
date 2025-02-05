@@ -16,7 +16,7 @@ class FeedbackFormAnswerFactory extends Factory
         return [
             'start_date' => $this->faker->dateTimeBetween('now', '+1 month'),
             'end_date' => $this->faker->dateTimeBetween('+1 month', '+2 months'),
-            'feedbackform_id' => null, // Set later
+            'feedback_form_id' => null, // Set later
         ];
     }
 }

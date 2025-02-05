@@ -17,6 +17,11 @@ use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\LicensePlateController;
 use App\Http\Controllers\StreamTokenController;
+use App\Http\Controllers\ConnectionRequestController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\FeedbackFormController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -56,7 +61,40 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/payment/delivery/prepare', [PaymentController::class, 'prepareDelivery']);
         Route::get('/orders/{orderId}/status', [OrderController::class, 'getOrderStatusById']);
         Route::post('/create-payment-intent', [StripeController::class, 'createPaymentIntent']);
+            
+        Route::post('/connections/request/{userId}', [ConnectionRequestController::class, 'sendConnectionRequest']);
+        Route::put('/connections/accept/{requestId}', [ConnectionRequestController::class, 'acceptConnectionRequest']);
+        Route::put('/connections/reject/{requestId}', [ConnectionRequestController::class, 'rejectConnectionRequest']);
+        Route::get('/connections/requests', [ConnectionRequestController::class, 'getConnectionRequests']);
+        Route::get('/connections', [ConnectionRequestController::class, 'getUserConnections']);
+        Route::delete('/connections/{userId}', [ConnectionRequestController::class, 'removeConnection']);
+        Route::get('/connections/status/{userId}', [ConnectionRequestController::class, 'getConnectionStatus']);
+
+        Route::get('/notifications', [NotificationController::class, 'getUserNotifications']);
+        Route::put('/notifications/{id}/read', [NotificationController::class, 'markNotificationAsRead']);
+        Route::delete('/notifications/{id}', [NotificationController::class, 'deleteNotification']);
+
+        Route::get('/posts', [PostController::class, 'getFeedPosts']);
+        Route::post('/posts/create', [PostController::class, 'createPost']);
+        Route::delete('/posts/delete/{id}', [PostController::class, 'deletePost']);
+        Route::get('/posts/{id}', [PostController::class, 'getPostById']);
+        Route::post('/posts/{id}/comment', [PostController::class, 'createComment']);
+        Route::post('/posts/{id}/like', [PostController::class, 'likePost']);
+
+        Route::get('/users/suggestions', [UserController::class, 'getSuggestedConnections']);
+        Route::get('/users/{username}', [UserController::class, 'getPublicProfile']);
+        Route::put('/users/profile', [UserController::class, 'updateProfile']);
+
+        Route::get('/feedback-forms/view/{id}', [FeedbackFormController::class, 'showFeedbackForm']);
+        Route::post('/feedback-forms/{id}/answer', [FeedbackFormController::class, 'storeAnswer']);
+
     });
+    Route::middleware(['auth:sanctum','role:Administration,ProductSaler'])->group(function () {
+        Route::post('/feedback-forms', [FeedbackFormController::class, 'storeFeedbackForm']);
+        Route::put('/feedback-forms/{id}', [FeedbackFormController::class, 'updateFeedbackForm']);  
+        Route::get('/feedback-forms/{orderId}', [FeedbackFormController::class, 'getOrderWithFeedbackForms']);      
+    });
+
     // Product Routes (Admin only)
     Route::get('/products', [ProductController::class, 'getAllProducts']);
     Route::post('/products', [ProductController::class, 'createProduct']);

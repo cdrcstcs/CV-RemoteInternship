@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('feedback_form_answers', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(\App\Models\FeedbackForm::class, 'feedbackform_id');
+            $table->foreignIdFor(\App\Models\FeedbackForm::class, 'feedback_form_id');
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
         });

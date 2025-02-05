@@ -12,8 +12,8 @@ class FeedbackFormQuestionAnswerFactory extends Factory
     public function definition()
     {
         return [
-            'feedbackform_question_id' => \App\Models\FeedbackFormQuestion::factory(), // Create a question if it doesn't exist
-            'feedbackform_answer_id' => \App\Models\FeedbackFormAnswer::factory(), // Create an answer if it doesn't exist
+            'feedback_form_question_id' => \App\Models\FeedbackFormQuestion::factory(), // Create a question if it doesn't exist
+            'feedback_form_answer_id' => \App\Models\FeedbackFormAnswer::factory(), // Create an answer if it doesn't exist
             'answer' => $this->faker->sentence,
         ];
     }

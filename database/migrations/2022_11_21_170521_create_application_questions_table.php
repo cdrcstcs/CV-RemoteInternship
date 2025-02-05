@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('question',2000);
             $table->longText('description')->nullable();
             $table->longText('data')->nullable();
-            $table->foreignIdFor(\App\Models\FeedbackForm::class, 'feedbackform_id');
+            $table->foreignIdFor(\App\Models\FeedbackForm::class, 'feedback_form_id');
             $table->timestamps();
         });
     }

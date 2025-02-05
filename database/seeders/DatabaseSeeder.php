@@ -46,12 +46,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $users = User::factory(100)->create();  // Create 20 users
+
+        // Seed Users and their roles
+        foreach ($users as $user) {
+            $role = Role::factory()->create();
+            UserRole::create([
+                'users_id' => $user->id,
+                'roles_id' => $role->id,
+            ]);
+            RolePermission::factory()->create([
+                'roles_id' => $role->id,
+            ]);
+        }
+
         // Seed Categories
         $categories = Category::factory(5)->create(); // Create 5 categories
         
-        // Seed Products and associate each with categories
-        $products = Product::factory(20)->create(); // Create 20 products
+        $productSaler = UserRole::whereHas('role', function ($query) {
+            $query->where('role_name', 'ProductSaler');
+        })->first();
+
+        $products = Product::factory(20)->create([
+            'supplier_id' => $productSaler->user->id,
+        ]); // Create 20 products
         foreach ($products as $product) {
+
             // Associate each product with all categories
             foreach ($categories as $category) {
                 ProductCategory::create([
@@ -66,38 +86,24 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // Seed Users and their roles
-        $users = User::factory(100)->create();  // Create 20 users
-        foreach ($users as $user) {
-            $role = Role::factory()->create();
-            UserRole::create([
-                'users_id' => $user->id,
-                'roles_id' => $role->id,
-            ]);
-            RolePermission::factory()->create([
-                'roles_id' => $role->id,
-            ]);
-        }
         $faker = Faker::create();
         // Seed applications with associated questions and answers
-        foreach ($users as $user) {
-            FeedbackForm::factory()
-                ->count(10)
-                ->create(['user_id' => $user->id])
-                ->each(function ($feedbackForm) use ($faker) {
-                    FeedbackFormQuestion::factory()
-                        ->count(10)
-                        ->create(['feedbackform_id' => $feedbackForm->id])
-                        ->each(function ($question) use ($feedbackForm, $faker) {
-                            $answer = FeedbackFormAnswer::factory()->create(['feedbackform_id' => $feedbackForm->id]);
-                            FeedbackFormQuestionAnswer::factory()->create([
-                                'feedbackform_question_id' => $question->id,
-                                'feedbackform_answer_id' => $answer->id,
-                                'answer' => $faker->sentence,
-                            ]);
-                        });
-                });
-        }
+        FeedbackForm::factory()
+            ->count(10)
+            ->create(['user_id' => $productSaler->user->id])
+            ->each(function ($feedbackForm) use ($faker) {
+                FeedbackFormQuestion::factory()
+                    ->count(10)
+                    ->create(['feedback_form_id' => $feedbackForm->id])
+                    ->each(function ($question) use ($feedbackForm, $faker) {
+                        $answer = FeedbackFormAnswer::factory()->create(['feedback_form_id' => $feedbackForm->id]);
+                        FeedbackFormQuestionAnswer::factory()->create([
+                            'feedback_form_question_id' => $question->id,
+                            'feedback_form_answer_id' => $answer->id,
+                            'answer' => $faker->sentence,
+                        ]);
+                    });
+            });
 
         // Create posts for each user
         $posts = [];

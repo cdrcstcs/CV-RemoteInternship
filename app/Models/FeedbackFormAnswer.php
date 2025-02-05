@@ -12,7 +12,7 @@ class FeedbackFormAnswer extends Model
     const CREATED_AT = null;
     const UPDATED_AT = null;
 
-    protected $fillable = ['feedbackform_id', 'start_date', 'end_date'];
+    protected $fillable = ['feedback_form_id', 'start_date', 'end_date'];
 
     public function feedbackForm()
     {

@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('feedback_form_question_answers', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(\App\Models\FeedbackFormQuestion::class, 'feedbackform_question_id');
-            $table->foreignIdFor(\App\Models\FeedbackFormAnswer::class, 'feedbackform_answer_id');
+            $table->foreignIdFor(\App\Models\FeedbackFormQuestion::class, 'feedback_form_question_id');
+            $table->foreignIdFor(\App\Models\FeedbackFormAnswer::class, 'feedback_form_answer_id');
             $table->text('answer');
             $table->timestamps();
         });

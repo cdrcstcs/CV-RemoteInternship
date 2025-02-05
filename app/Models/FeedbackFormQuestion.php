@@ -9,6 +9,6 @@ class FeedbackFormQuestion extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['id', 'type', 'question', 'description', 'data', 'feedbackform_id'];
+    protected $fillable = ['id', 'type', 'question', 'description', 'data', 'feedback_form_id'];
 
 }
