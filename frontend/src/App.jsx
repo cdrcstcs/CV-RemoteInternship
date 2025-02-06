@@ -35,6 +35,9 @@ import { Elements } from '@stripe/react-stripe-js';
 import { stripePromise } from './stripe'; // Make sure you have stripe.js configured
 import LicensePlateCapturePage from "./pages/Warehouse/LicensePlateCapturePage.jsx";
 import CreateFeedbackForm from "./pages/FeedbackForm/CreateFeedbackForm.jsx";
+import SocialMediaPage from "./pages/SocialMedia/SocialMediaPage.jsx";
+import NotificationsPage from "./pages/SocialMedia/NotificationsPage.jsx";
+import NetworkPage from "./pages/SocialMedia/NetworkPage.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -93,9 +96,11 @@ function App() {
             path="/map"
             element={user ? <WrapperMap /> : <Navigate to="/login" />}
           />
-
-          
-          <Route path="/warehouse" element={user ? <Wrapper/> : <Navigate to="/login" />}>
+            <Route path="/social-media" element={authUser ? <SocialMediaPage /> : <Navigate to="/login" />} />
+            <Route path="/notification" element={authUser ? <NotificationsPage /> : <Navigate to="/login" />} />
+            <Route path="/network" element={authUser ? <NetworkPage /> : <Navigate to="/login" />} />
+            
+            <Route path="/warehouse" element={user ? <Wrapper/> : <Navigate to="/login" />}>
             <Route index element={<Expenses />} />
             <Route path="products" element={<WarehouseInventories />} />
             <Route path="linechart" element={<Daily />} />

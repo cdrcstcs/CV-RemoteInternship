@@ -82,8 +82,6 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/posts/{id}/like', [PostController::class, 'likePost']);
 
         Route::get('/users/suggestions', [UserController::class, 'getSuggestedConnections']);
-        Route::get('/users/{username}', [UserController::class, 'getPublicProfile']);
-        Route::put('/users/profile', [UserController::class, 'updateProfile']);
 
         Route::get('/feedback-forms/view/{id}', [FeedbackFormController::class, 'showFeedbackForm']);
         Route::post('/feedback-forms/{id}/answer', [FeedbackFormController::class, 'storeAnswer']);

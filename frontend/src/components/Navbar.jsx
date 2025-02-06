@@ -32,6 +32,15 @@ const Navbar = () => {
             <Link to={"/feedback-forms/create"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Create Feedback Form
             </Link>
+            <Link to={"/social-media"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+              Social Media
+            </Link>
+            <Link to={"/notification"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+              Notifications
+            </Link>
+            <Link to={"/network"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+              Network
+            </Link>
             {user && (
               <Link
                 to={"/cart"}
