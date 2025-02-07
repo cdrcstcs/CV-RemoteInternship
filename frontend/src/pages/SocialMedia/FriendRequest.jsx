@@ -1,4 +1,5 @@
 import useSocialMediaStore from "../../stores/useSocialMediaStore";
+
 const FriendRequest = ({ request }) => {
   const { acceptConnectionRequest, rejectConnectionRequest } = useSocialMediaStore();
 
@@ -11,25 +12,25 @@ const FriendRequest = ({ request }) => {
   };
 
   return (
-    <div className='bg-white rounded-lg shadow p-4 flex items-center justify-between transition-all hover:shadow-md'>
-      <div className='flex items-center gap-4'>
+    <div className="border-2 border-white rounded-lg p-4 flex items-center justify-between transition-all hover:shadow-md text-emerald-400">
+      <div className="flex items-center gap-4">
         <div>
-          <div className='font-semibold text-lg'>
+          <div className="font-semibold text-lg">
             {`${request.sender.first_name} ${request.sender.last_name}`}
           </div>
-          <p className='text-gray-600'>{request.sender.headline}</p>
+          <p className="text-emerald-400">{request.sender.headline}</p>
         </div>
       </div>
 
-      <div className='space-x-2'>
+      <div className="space-x-2">
         <button
-          className='bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors'
+          className="border-2 border-white text-emerald-400 px-4 py-2 rounded-md hover:bg-emerald-400 hover:text-white transition-colors"
           onClick={handleAccept}
         >
           Accept
         </button>
         <button
-          className='bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors'
+          className="border-2 border-white text-emerald-400 px-4 py-2 rounded-md hover:bg-emerald-400 hover:text-white transition-colors"
           onClick={handleReject}
         >
           Reject

@@ -14,8 +14,8 @@ class PostController extends Controller
     {
         try {
             $posts = Post::with([
-                    'author:id,name,username,profile_picture,headline',
-                    'comments.user:id,name,profile_picture',
+                    'author:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about',
+                    'comments.user:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about',
                     'likes'
                 ])
                 ->orderBy('created_at', 'desc')
@@ -84,7 +84,7 @@ class PostController extends Controller
     public function getPostById(Request $request, $id)
     {
         try {
-            $post = Post::with(['author:id,name,username,profile_picture,headline', 'comments.user:id,name,profile_picture,username,headline'])
+            $post = Post::with(['author:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about', 'comments.user:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about'])
                 ->findOrFail($id);
 
             return response()->json($post, 200);
@@ -115,7 +115,7 @@ class PostController extends Controller
                 ]);
             }
 
-            return response()->json($comment->load('user:id,name,profile_picture'), 201);
+            return response()->json($comment->load('user:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about'), 201);
         } catch (\Exception $error) {
             Log::error("Error in createComment controller: ", ['error' => $error]);
             return response()->json(['message' => 'Server error'], 500);

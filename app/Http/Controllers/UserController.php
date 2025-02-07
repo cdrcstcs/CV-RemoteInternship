@@ -17,7 +17,7 @@ class UserController extends Controller
             
             // Fetch all users except the current user
             $allUsers = User::where('id', '!=', $currentUser->id)
-                ->select('id', 'name', 'username', 'profile_picture', 'headline')
+                ->select('id', 'first_name','last_name','phone_number','email','language','profile_picture','banner_img','headline','about')
                 ->orderBy('created_at', 'desc') // Sort by created_at, latest first
                 ->limit(10)
                 ->get();

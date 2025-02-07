@@ -103,7 +103,7 @@ class ConnectionRequestController extends Controller
 
         $requests = ConnectionRequest::where('recipient_id', $userId)
             ->where('status', 'pending')
-            ->with('sender:id,name,username,profile_picture,headline')
+            ->with('sender:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about')
             ->get();
 
         return response()->json($requests);
@@ -115,7 +115,7 @@ class ConnectionRequestController extends Controller
 
         // Fetch connections using the UserConnection model
         $connections = UserConnection::where('user_id', $userId)
-            ->with('connection:id,username,profile_picture,headline') // Assuming you have the relationship set in UserConnection
+            ->with('connection:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about') // Assuming you have the relationship set in UserConnection
             ->get();
 
         return response()->json($connections);

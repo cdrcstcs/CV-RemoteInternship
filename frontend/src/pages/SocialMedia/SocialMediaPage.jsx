@@ -5,9 +5,10 @@ import Post from "./Post";
 import { Users } from "lucide-react";
 import RecommendedUser from "./RecommendedUser";
 import { useUserStore } from "../../stores/useUserStore";
+
 const SocialMediaPage = () => {
-    const { user } = useUserStore();
-    const { 
+  const { user } = useUserStore();
+  const { 
     recommendedUsers, 
     posts, 
     isLoadingPosts, 
@@ -25,17 +26,17 @@ const SocialMediaPage = () => {
 
   // Handle loading states
   if ( isLoadingRecommendedUsers || isLoadingPosts) {
-    return <div>Loading...</div>;
+    return <div className="text-emerald-400">Loading...</div>;
   }
 
   // Handle error states
   if ( isErrorRecommendedUsers || isErrorPosts) {
-    return <div>Error loading data. Please try again later.</div>;
+    return <div className="text-emerald-400">Error loading data. Please try again later.</div>;
   }
 
   return (
-    <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
-      <div className='col-span-1 lg:col-span-2 order-first lg:order-none'>
+    <div className='grid grid-cols-1 lg:grid-cols-4 gap-6 h-full'>
+      <div className='col-span-1 lg:col-span-2 order-first lg:order-none border-2 border-white rounded-lg text-emerald-400'>
         <PostCreation user={user} />
 
         <div
@@ -58,19 +59,19 @@ const SocialMediaPage = () => {
         </div>
 
         {posts?.length === 0 && (
-          <div className='bg-white rounded-lg shadow p-8 text-center'>
+          <div className='border-2 border-white rounded-lg shadow p-8 text-emerald-400 text-center'>
             <div className='mb-6'>
-              <Users size={64} className='mx-auto text-blue-500' />
+              <Users size={64} className='mx-auto text-emerald-400' />
             </div>
-            <h2 className='text-2xl font-bold mb-4 text-gray-800'>No Posts Yet</h2>
+            <h2 className='text-2xl font-bold mb-4 text-emerald-400'>No Posts Yet</h2>
           </div>
         )}
       </div>
 
       {recommendedUsers?.length > 0 && (
-        <div className='col-span-1 lg:col-span-1 hidden lg:block'>
-          <div className='bg-secondary rounded-lg shadow p-4'>
-            <h2 className='font-semibold mb-4'>People you may know</h2>
+        <div className='col-span-1 lg:col-span-2 hidden lg:block'>
+          <div className='border-2 border-white rounded-lg p-4 text-emerald-400'>
+            <h2 className='font-semibold mb-4 text-emerald-400'>People you may know</h2>
             <div
               style={{
                 maxHeight: '550px',

@@ -40,6 +40,7 @@ class UserFactory extends Factory
             'banner_img' => $this->faker->imageUrl(),
             'headline' => $this->faker->sentence(),
             'about' => $this->faker->paragraph(),
+            'connections' => json_encode([]), // Start with an empty array for connections
         ];
     }
     public function withConnections($userCount = 2)

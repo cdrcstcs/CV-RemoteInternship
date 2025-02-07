@@ -13,7 +13,7 @@ const RecommendedUser = ({ user }) => {
   const renderButton = () => {
     if (isLoadingConnectionStatus) {
       return (
-        <button className='px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-500' disabled>
+        <button className='px-3 py-1 rounded-full text-sm border-2 border-white text-emerald-400' disabled>
           Loading...
         </button>
       );
@@ -23,10 +23,10 @@ const RecommendedUser = ({ user }) => {
       case "pending":
         return (
           <button
-            className='px-3 py-1 rounded-full text-sm bg-yellow-500 text-white flex items-center'
+            className='px-3 py-1 rounded-full text-sm border-2 border-white text-emerald-400 flex items-center'
             disabled
           >
-            <Clock size={16} className='mr-1' />
+            <Clock size={16} className='mr-1 text-emerald-400' />
             Pending
           </button>
         );
@@ -35,13 +35,13 @@ const RecommendedUser = ({ user }) => {
           <div className='flex gap-2 justify-center'>
             <button
               onClick={() => acceptConnectionRequestForRecommendedUser(connectionStatus.requestId)}
-              className={`rounded-full p-1 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white`}
+              className='rounded-full p-1 flex items-center justify-center border-2 border-white text-emerald-400 hover:bg-emerald-400 hover:text-white transition-colors'
             >
               <Check size={16} />
             </button>
             <button
               onClick={() => rejectConnectionRequestForRecommendedUser(connectionStatus.requestId)}
-              className={`rounded-full p-1 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white`}
+              className='rounded-full p-1 flex items-center justify-center border-2 border-white text-emerald-400 hover:bg-red-500 hover:text-white transition-colors'
             >
               <X size={16} />
             </button>
@@ -50,20 +50,20 @@ const RecommendedUser = ({ user }) => {
       case "connected":
         return (
           <button
-            className='px-3 py-1 rounded-full text-sm bg-green-500 text-white flex items-center'
+            className='px-3 py-1 rounded-full text-sm border-2 border-white text-emerald-400 flex items-center'
             disabled
           >
-            <UserCheck size={16} className='mr-1' />
+            <UserCheck size={16} className='mr-1 text-emerald-400' />
             Connected
           </button>
         );
       default:
         return (
           <button
-            className='px-3 py-1 rounded-full text-sm border border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200 flex items-center'
+            className='px-3 py-1 rounded-full text-sm border-2 border-white text-emerald-400 hover:bg-emerald-400 hover:text-white transition-colors duration-200 flex items-center'
             onClick={() => sendConnectionRequest(user.id)}
           >
-            <UserPlus size={16} className='mr-1' />
+            <UserPlus size={16} className='mr-1 text-emerald-400' />
             Connect
           </button>
         );
@@ -71,15 +71,15 @@ const RecommendedUser = ({ user }) => {
   };
 
   return (
-    <div className='flex items-center justify-between mb-4'>
-		<img
-			src={user.profilePicture || "/avatar.png"}
-			className='w-12 h-12 rounded-full mr-3'
-		/>
-		<div>
-			<h3 className='font-semibold text-sm'>{user.first_name + user.last_name}</h3>
-			<p className='text-xs text-info'>{user.headline}</p>
-		</div>
+    <div className='flex items-center justify-between mb-4 border-2 border-white rounded-lg p-4 text-emerald-400'>
+      <img
+        src={user.profilePicture || "/avatar.png"}
+        className='w-12 h-12 rounded-full mr-3'
+      />
+      <div>
+        <h3 className='font-semibold text-sm'>{user.first_name + user.last_name}</h3>
+        <p className='text-xs'>{user.headline}</p>
+      </div>
       {renderButton()}
     </div>
   );

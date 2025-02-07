@@ -96,9 +96,9 @@ function App() {
             path="/map"
             element={user ? <WrapperMap /> : <Navigate to="/login" />}
           />
-            <Route path="/social-media" element={authUser ? <SocialMediaPage /> : <Navigate to="/login" />} />
-            <Route path="/notification" element={authUser ? <NotificationsPage /> : <Navigate to="/login" />} />
-            <Route path="/network" element={authUser ? <NetworkPage /> : <Navigate to="/login" />} />
+            <Route path="/social-media" element={user ? <SocialMediaPage /> : <Navigate to="/login" />} />
+            <Route path="/notification" element={user ? <NotificationsPage /> : <Navigate to="/login" />} />
+            <Route path="/network" element={user ? <NetworkPage /> : <Navigate to="/login" />} />
             
             <Route path="/warehouse" element={user ? <Wrapper/> : <Navigate to="/login" />}>
             <Route index element={<Expenses />} />

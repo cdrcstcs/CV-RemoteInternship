@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Image, Loader } from "lucide-react";
 import useSocialMediaStore from "../../stores/useSocialMediaStore";
+
 const PostCreation = ({ user }) => {
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  
+
   // Access the createPost method from the store
   const { createPost, isLoadingPost, isErrorPost, errorMessagePost } = useSocialMediaStore((state) => state);
 
@@ -51,12 +52,12 @@ const PostCreation = ({ user }) => {
   };
 
   return (
-    <div className="bg-secondary rounded-lg shadow mb-4 p-4">
+    <div className="border-2 border-white rounded-lg p-4 text-emerald-400">
       <div className="flex space-x-3 items-center">
         <div>{`${user.first_name} ${user.last_name}`}</div>
         <textarea
           placeholder="What's on your mind?"
-          className="w-full p-3 rounded-lg bg-base-100 hover:bg-base-200 focus:bg-base-200 focus:outline-none resize-none transition-colors duration-200 min-h-[100px]"
+          className="w-full p-3 rounded-lg bg-transparent hover:bg-transparent focus:bg-transparent focus:outline-none resize-none transition-colors duration-200 min-h-[100px] text-emerald-400"
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
@@ -74,7 +75,7 @@ const PostCreation = ({ user }) => {
 
       <div className="flex justify-between items-center mt-4">
         <div className="flex space-x-4">
-          <label className="flex items-center text-info hover:text-info-dark transition-colors duration-200 cursor-pointer">
+          <label className="flex items-center text-emerald-400 hover:text-emerald-500 transition-colors duration-200 cursor-pointer">
             <Image size={20} className="mr-2" />
             <span>Photo</span>
             <input

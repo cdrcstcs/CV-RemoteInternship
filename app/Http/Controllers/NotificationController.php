@@ -12,7 +12,7 @@ class NotificationController extends Controller
         try {
             $notifications = Notification::where('recipient_id', $request->user()->id)
                 ->orderBy('created_at', 'desc')
-                ->with(['relatedUser:id,name,username,profile_picture', 'relatedPost:id,content,image'])
+                ->with(['relatedUser:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about', 'relatedPost:id,content,image'])
                 ->get();
 
             return response()->json($notifications, 200);

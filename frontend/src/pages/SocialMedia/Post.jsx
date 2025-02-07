@@ -6,7 +6,6 @@ import useSocialMediaStore from "../../stores/useSocialMediaStore";
 import { useUserStore } from "../../stores/useUserStore";
 
 const Post = ({ post }) => {
-
   const { user } = useUserStore();
   const { likePost, createComment, deletePost } = useSocialMediaStore();
 
@@ -48,13 +47,13 @@ const Post = ({ post }) => {
   };
 
   return (
-    <div className="bg-secondary rounded-lg shadow mb-4">
+    <div className="border-2 border-white rounded-lg mb-4 text-emerald-400">
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <div>
-              <h3 className="font-semibold">{`${post.author.first_name} ${post.author.last_name}`}</h3>
-              <p className="text-xs text-info">
+              <h3 className="font-semibold text-emerald-400">{`${post.author.first_name} ${post.author.last_name}`}</h3>
+              <p className="text-xs text-emerald-400">
                 {isNaN(new Date(post.created_at).getTime())
                   ? "Error: Invalid date"
                   : formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
@@ -67,12 +66,12 @@ const Post = ({ post }) => {
             </button>
           )}
         </div>
-        <p className="mb-4">{post.content}</p>
+        <p className="mb-4 text-emerald-400">{post.content}</p>
         {post.image && <img src={post.image} alt="Post content" className="rounded-lg w-full mb-4" />}
 
-        <div className="flex justify-between text-info">
+        <div className="flex justify-between text-emerald-400">
           <PostAction
-            icon={<ThumbsUp size={18} className={isLiked ? "text-blue-500  fill-blue-300" : ""} />}
+            icon={<ThumbsUp size={18} className={isLiked ? "text-blue-500 fill-blue-300" : ""} />}
             text={`Like (${post.likes.length})`}
             onClick={handleLikePost}
           />
@@ -89,17 +88,17 @@ const Post = ({ post }) => {
         <div className="px-4 pb-4">
           <div className="mb-4 max-h-60 overflow-y-auto">
             {comments.map((comment) => (
-              <div key={comment.id} className="mb-2 bg-base-100 p-2 rounded flex items-start">
+              <div key={comment.id} className="mb-2 bg-transparent p-2 rounded flex items-start">
                 <div className="flex-grow">
                   <div className="flex items-center mb-1">
-                    <span className="font-semibold mr-2">{`${comment.user.first_name} ${comment.user.last_name}`}</span>
-                    <span className="text-xs text-info">
+                    <span className="font-semibold text-emerald-400 mr-2">{`${comment.user.first_name} ${comment.user.last_name}`}</span>
+                    <span className="text-xs text-emerald-400">
                       {isNaN(new Date(comment.created_at).getTime())
                         ? "Error: Invalid date"
                         : formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
                     </span>
                   </div>
-                  <p>{comment.content}</p>
+                  <p className="text-emerald-400">{comment.content}</p>
                 </div>
               </div>
             ))}
@@ -111,11 +110,11 @@ const Post = ({ post }) => {
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Add a comment..."
-              className="flex-grow p-2 rounded-l-full bg-base-100 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="flex-grow p-2 rounded-l-full bg-transparent focus:outline-none focus:ring-2 focus:ring-primary text-emerald-400"
             />
             <button
               type="submit"
-              className="bg-primary text-white p-2 rounded-r-full hover:bg-primary-dark transition duration-300"
+              className="border-2 border-white text-emerald-400 p-2 rounded-r-full hover:bg-emerald-400 hover:text-white transition duration-300"
               disabled={false}
             >
               {false ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
