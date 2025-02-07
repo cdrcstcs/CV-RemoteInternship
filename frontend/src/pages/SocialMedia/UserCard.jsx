@@ -3,7 +3,7 @@ function UserCard({ user, isConnection }) {
 	return (
 		<div className='border-2 border-white rounded-lg p-4 flex flex-col items-center transition-all hover:shadow-md hover:bg-emerald-400'>
 			<img
-				src={user.connection.profilePicture || "/avatar.png"}
+				src={user.connection.profile_picture || "/avatar.png"}
 				className='w-24 h-24 rounded-full object-cover mb-4'
 			/>
 			<h3 className='font-semibold text-lg text-emerald-400 text-center'>

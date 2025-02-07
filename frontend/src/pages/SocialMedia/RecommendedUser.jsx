@@ -4,7 +4,7 @@ import { Check, Clock, UserCheck, UserPlus, X } from "lucide-react";
 
 const RecommendedUser = ({ user }) => {
   const { connectionStatus, isLoadingConnectionStatus, fetchConnectionStatus, sendConnectionRequest, acceptConnectionRequestForRecommendedUser, rejectConnectionRequestForRecommendedUser } = useSocialMediaStore((state) => state);
-  
+
   // Fetch connection status when the component mounts
   useEffect(() => {
     fetchConnectionStatus(user.id);
@@ -32,7 +32,7 @@ const RecommendedUser = ({ user }) => {
         );
       case "received":
         return (
-          <div className='flex gap-2 justify-center'>
+          <div className='flex gap-2'>
             <button
               onClick={() => acceptConnectionRequestForRecommendedUser(connectionStatus.requestId)}
               className='rounded-full p-1 flex items-center justify-center border-2 border-white text-emerald-400 hover:bg-emerald-400 hover:text-white transition-colors'
@@ -50,7 +50,7 @@ const RecommendedUser = ({ user }) => {
       case "connected":
         return (
           <button
-            className='px-3 py-1 rounded-full text-sm border-2 border-white text-emerald-400 flex items-center'
+            className='px-3 py-1 rounded-full text-sm border-2 border-white text-emerald-400 flex items-center '
             disabled
           >
             <UserCheck size={16} className='mr-1 text-emerald-400' />
@@ -60,7 +60,7 @@ const RecommendedUser = ({ user }) => {
       default:
         return (
           <button
-            className='px-3 py-1 rounded-full text-sm border-2 border-white text-emerald-400 hover:bg-emerald-400 hover:text-white transition-colors duration-200 flex items-center'
+            className='px-3 py-1 rounded-full text-sm border-2 border-white text-emerald-400 hover:bg-emerald-400 hover:text-white transition-colors duration-200'
             onClick={() => sendConnectionRequest(user.id)}
           >
             <UserPlus size={16} className='mr-1 text-emerald-400' />
@@ -72,15 +72,19 @@ const RecommendedUser = ({ user }) => {
 
   return (
     <div className='flex items-center justify-between mb-4 border-2 border-white rounded-lg p-4 text-emerald-400'>
-      <img
-        src={user.profilePicture || "/avatar.png"}
-        className='w-12 h-12 rounded-full mr-3'
-      />
-      <div>
-        <h3 className='font-semibold text-sm'>{user.first_name + user.last_name}</h3>
-        <p className='text-xs'>{user.headline}</p>
+      <div className="flex items-center">
+        <img
+          src={user.profile_picture || "/avatar.png"}
+          className='w-12 h-12 rounded-full mr-3'
+        />
+        <div className="text-start">
+          <h3 className='font-semibold text-sm'>{user.first_name + " " + user.last_name}</h3>
+          <p className='text-xs'>{user.headline}</p>
+        </div>
       </div>
-      {renderButton()}
+      <div className="ml-4">
+        {renderButton()}
+      </div>
     </div>
   );
 };

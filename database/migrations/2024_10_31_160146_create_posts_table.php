@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('author_id')->constrained('users')->onDelete('cascade'); // Foreign key for author
             $table->text('content')->nullable();
-            $table->string('image')->nullable();
+            $table->string('image',1000)->nullable();
             $table->timestamps();
         });
     }

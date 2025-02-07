@@ -26,8 +26,8 @@ return new class extends Migration
             $table->boolean('is_admin')->default(false);
             $table->timestamps(); // CreatedAt and UpdatedAt
             $table->timestamp('last_password_change')->nullable()->default(null);
-            $table->string('profile_picture')->default('');
-            $table->string('banner_img')->default('');
+            $table->string('profile_picture',1000)->default('');
+            $table->string('banner_img',1000)->default('');
             $table->string('headline')->default('Linkedin User');
             $table->text('about')->nullable();
             

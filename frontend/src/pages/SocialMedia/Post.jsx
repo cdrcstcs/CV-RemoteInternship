@@ -38,7 +38,7 @@ const Post = ({ post }) => {
           user: {
             id: user.id,
             name: user.name,
-            profilePicture: user.profilePicture,
+            profile_picture: user.profile_picture,
           },
           created_at: new Date(),
         },

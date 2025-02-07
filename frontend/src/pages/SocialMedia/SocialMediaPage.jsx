@@ -35,18 +35,18 @@ const SocialMediaPage = () => {
   }
 
   return (
-    <div className='grid grid-cols-1 lg:grid-cols-4 gap-6 h-full'>
-      <div className='col-span-1 lg:col-span-2 order-first lg:order-none border-2 border-white rounded-lg text-emerald-400'>
+    <div className='grid grid-cols-1 lg:grid-cols-4 gap-6 h-full p-4'>
+      <div className='col-span-1 lg:col-span-2 order-first lg:order-none border-2 border-white  rounded-lg text-emerald-400'>
         <PostCreation user={user} />
 
         <div
           style={{
-            maxHeight: '420px',
+            maxHeight: '470px',
             overflowY: 'auto',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
           }}
-          className="posts-container"
+          className="posts-container mt-4"
         >
           {posts?.map((post) => (
             <Post key={post.id} post={post} />
@@ -69,12 +69,12 @@ const SocialMediaPage = () => {
       </div>
 
       {recommendedUsers?.length > 0 && (
-        <div className='col-span-1 lg:col-span-2 hidden lg:block'>
+        <div className='col-span-1 lg:col-span-2 hidden lg:block '>
           <div className='border-2 border-white rounded-lg p-4 text-emerald-400'>
             <h2 className='font-semibold mb-4 text-emerald-400'>People you may know</h2>
             <div
               style={{
-                maxHeight: '550px',
+                maxHeight: '610px',
                 overflowY: 'auto',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
