@@ -33,7 +33,11 @@ use App\Models\{
     Comment,
     Like,
     UserConnection,
+    Message,
+    Conversation,
+    Group,
 };
+use Carbon\Carbon;
 
 use Faker\Factory as Faker;
 
@@ -46,7 +50,94 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $users = User::factory(100)->create();  // Create 20 users
+        // Create 100 users
+        $users = User::factory(100)->create(); 
+
+        // Create 5 groups
+        $groups = Group::factory(5)->create(); 
+
+        // Assign each user to a random group, ensuring at least one group for each user
+        foreach ($users as $user) {
+            $group = $groups->random();
+            $user->groups()->attach($group->id);
+        }
+
+        // Create 10 conversations for each user with other random users
+        foreach ($users as $user) {
+            for ($i = 0; $i < 10; $i++) {
+                // Ensure the other user in the conversation is not the same user
+                $otherUser = $users->where('id', '!=', $user->id)->random();
+
+                // Check if a conversation already exists between these two users
+                $conversation = Conversation::where(function ($query) use ($user, $otherUser) {
+                    $query->where('user_id1', $user->id)
+                        ->where('user_id2', $otherUser->id);
+                })->orWhere(function ($query) use ($user, $otherUser) {
+                    $query->where('user_id1', $otherUser->id)
+                        ->where('user_id2', $user->id);
+                })->first();
+
+                // If no conversation exists, create a new one
+                if (!$conversation) {
+                    $conversation = Conversation::create([
+                        'user_id1' => $user->id,
+                        'user_id2' => $otherUser->id,
+                    ]);
+                }
+
+                // Create 20 messages for each side of the conversation
+                $lastMessage = null;
+                for ($j = 0; $j < 20; $j++) {
+                    // User sends a message
+                    $message = Message::factory()->create([
+                        'sender_id' => $user->id,
+                        'receiver_id' => $otherUser->id,
+                        'conversation_id' => $conversation->id,
+                    ]);
+
+                    // Update the conversation's last message id
+                    $conversation->update([
+                        'last_message_id' => $message->id,
+                    ]);
+
+                    // Other user responds with a message
+                    $message = Message::factory()->create([
+                        'sender_id' => $otherUser->id,
+                        'receiver_id' => $user->id,
+                        'conversation_id' => $conversation->id,
+                    ]);
+
+                    // Update the conversation's last message id
+                    $conversation->update([
+                        'last_message_id' => $message->id,
+                    ]);
+                }
+            }
+        }
+
+        // Create group messages and ensure last_message_id is set for groups
+        foreach ($groups as $group) {
+            $usersInGroup = $group->users;
+
+            foreach ($usersInGroup as $user) {
+                // Create messages in groups, ensuring group_id is set
+                for ($i = 0; $i < 10; $i++) {
+                    // Random message sender within the group
+                    $sender = $usersInGroup->random();
+                    $message = Message::factory()->create([
+                        'sender_id' => $sender->id,
+                        'group_id' => $group->id, // Make sure the group_id is set
+                    ]);
+
+                    // Update the group's last message id
+                    $group->update([
+                        'last_message_id' => $message->id,
+                    ]);
+                }
+            }
+        }
+
+
 
         // Seed Users and their roles
         foreach ($users as $user) {

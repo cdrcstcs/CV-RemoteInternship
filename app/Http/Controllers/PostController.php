@@ -19,7 +19,6 @@ class PostController extends Controller
                 'likes'
             ])
             ->orderBy('created_at', 'desc')
-            ->take(10) // or use ->limit(10)
             ->get();
             
 
