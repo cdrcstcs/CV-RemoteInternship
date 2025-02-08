@@ -23,6 +23,8 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FeedbackFormController;
 
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\MessageController;
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
 
@@ -40,6 +42,17 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/user/addresses', [UserProfileController::class, 'storeUserAddress']); // Create a new address
         Route::put('/user/addresses/{id}', [UserProfileController::class, 'updateUserAddress']); // Update an existing address
         Route::get('/get-token', [StreamTokenController::class, 'getToken']);
+        
+        Route::get('user/{user}', [MessageController::class, 'byUser']);
+        Route::get('group/{group}', [MessageController::class, 'byGroup']);
+
+        Route::post('/message', [MessageController::class, 'store']);
+        Route::delete('/message/{message}', [MessageController::class, 'destroy']);
+        Route::get('/message/older/{message}', [MessageController::class, 'loadOlder']);
+
+        Route::post('/group', [GroupController::class, 'store']);
+        Route::put('/group/{group}', [GroupController::class, 'update']);
+        Route::delete('/group/{group}', [GroupController::class, 'destroy']);
     });
     
     // Route::middleware(['role:Administration,Customer,Customer Support Staff,Product Saler'])->group(function () {
