@@ -19,13 +19,11 @@ class UserFactory extends Factory
 
     // Create a list of image URLs
     private static $imageUrls = [
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.vectorstock.com%2Froyalty-free-vector%2Fstudent-avatar-user-profile-icon-vector-47025187&psig=AOvVaw0RQ6Q5lOzlps9ojkG1K5vI&ust=1738986472690000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPCH_cvTsIsDFQAAAAAdAAAAABAE',
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngkey.com%2Fdetail%2Fu2q8u2w7e6t4q8t4_setting-user-avatar-in-specific-size-without-breaking%2F&psig=AOvVaw0RQ6Q5lOzlps9ojkG1K5vI&ust=1738986472690000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPCH_cvTsIsDFQAAAAAdAAAAABAJ', // Random image
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fscalar.fas.harvard.edu%2Fstudentpower%2Fmedia%2Fuser-avatar&psig=AOvVaw0RQ6Q5lOzlps9ojkG1K5vI&ust=1738986472690000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPCH_cvTsIsDFQAAAAAdAAAAABAR', // Random male portrait
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.veryicon.com%2Ficons%2Fmiscellaneous%2Fuser-avatar%2Fuser-avatar-male-5.html&psig=AOvVaw0RQ6Q5lOzlps9ojkG1K5vI&ust=1738986472690000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPCH_cvTsIsDFQAAAAAdAAAAABAZ', // Random female portrait
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngarts.com%2Fexplore%2F153017&psig=AOvVaw0RQ6Q5lOzlps9ojkG1K5vI&ust=1738986472690000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPCH_cvTsIsDFQAAAAAdAAAAABAh', // Random kitten image
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngplay.com%2Fimage%2F325470&psig=AOvVaw0RQ6Q5lOzlps9ojkG1K5vI&ust=1738986472690000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPCH_cvTsIsDFQAAAAAdAAAAABA_', // Bill Murray image
-        // Add more URLs as needed
+        'https://www.cnet.com/a/img/resize/11aa4eb14e5479a9569e7cf4d887f11ab0648512/hub/2020/05/18/5bac8cc1-4bd5-4496-a8c3-66a6cd12d0cb/fb-avatar-2.jpg?auto=webp&width=768',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThTDi9zqkRyyg3e9LJGPC5lTZqB72CMSlw8g&s',
+        'https://api.duniagames.co.id/api/content/upload/file/8143860661599124172.jpg',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR300hWAIiV7V5uxmHX5_Hvte-iABlC_tV9fw&s',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSPmYCAnwPyxf8ySZQVO2moLKoDrDJBkKFRIROH6cjcIDEOJFLufZzjk9n805XvW9weLs&usqp=CAU',
     ];
 
     /**

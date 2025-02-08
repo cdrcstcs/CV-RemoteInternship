@@ -14,12 +14,14 @@ class PostController extends Controller
     {
         try {
             $posts = Post::with([
-                    'author:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about',
-                    'comments.user:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about',
-                    'likes'
-                ])
-                ->orderBy('created_at', 'desc')
-                ->get();
+                'author:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about',
+                'comments.user:id,first_name,last_name,phone_number,email,language,profile_picture,banner_img,headline,about',
+                'likes'
+            ])
+            ->orderBy('created_at', 'desc')
+            ->take(10) // or use ->limit(10)
+            ->get();
+            
 
             return response()->json($posts, 200);
         } catch (\Exception $error) {

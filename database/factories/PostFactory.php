@@ -14,13 +14,14 @@ class PostFactory extends Factory
 
     // Collection of image URLs
     private static $imageUrls = [
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fcarmellamarketing.com%2F2023%2F05%2F09%2Fproduct-photography-ecommerce-success%2F&psig=AOvVaw0KmEMutxZZnTiYBYZOKxij&ust=1738986748220000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMjhj83UsIsDFQAAAAAdAAAAABAE', // Placeholder image
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.shutterstock.com%2Fsearch%2Fdifferent-products&psig=AOvVaw0KmEMutxZZnTiYBYZOKxij&ust=1738986748220000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMjhj83UsIsDFQAAAAAdAAAAABAJ', // Random image from Picsum
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Ffr.freepik.com%2Fimages-ia-premium%2Fecommerce-apple-tous-produits-devices_48812450.htm&psig=AOvVaw0KmEMutxZZnTiYBYZOKxij&ust=1738986748220000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMjhj83UsIsDFQAAAAAdAAAAABAY', // Random kitten image
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.indiamart.com%2Fproddetail%2Fecommerce-product-photography-services-2851799262288.html&psig=AOvVaw0FQCsFnVW5P_LBxJqHVH7D&ust=1738986811335000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCIjcnOzUsIsDFQAAAAAdAAAAABAE', // Bill Murray image
-        'https://www.google.com/url?sa=i&url=http%3A%2F%2Fwww.maki.vn%2Fblog%2Fchup-anh-quang-cao-san-pham-doc-dao&psig=AOvVaw1FdTyoDIVpM1a92rXNAt6P&ust=1738986837159000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPCc2vvUsIsDFQAAAAAdAAAAABAE', // Random male portrait
-        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fstudios.vn%2Fblog%2Fconcept-chup-anh-quang-cao-dot-pha&psig=AOvVaw1FdTyoDIVpM1a92rXNAt6P&ust=1738986837159000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPCc2vvUsIsDFQAAAAAdAAAAABAJ', // Random female portrait
-        // Add more URLs here as needed
+        'https://cdn.thewirecutter.com/wp-content/media/2024/11/runningshoes-2048px-09522.jpg?auto=webp&quality=75&width=1024', // Placeholder image
+        'https://m.media-amazon.com/images/I/61V98P7+jiL.jpg',
+        'https://down-sg.img.susercontent.com/file/2520047a3506c1dc94f41677d129f540',
+        'https://cdn.thewirecutter.com/wp-content/media/2024/05/white-sneaker-2048px-9320.jpg?auto=webp&quality=75&crop=1.91:1&width=1200',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbzCINXMUbqCfb_MnCjyooBavt2dYK-gVrBQ&s',
+        'https://assets.vogue.com/photos/5891e0ebb482c0ea0e4db2a8/4:3/w_2560%2Cc_limit/02-lestrange.jpg',
+        'https://i.ebayimg.com/images/g/sTgAAOSwinJk3YuY/s-l1200.jpg',
+        'https://marilyn.nz/wp-content/uploads/2021/12/Morilee-Wedding-Dress-5960-Feature.webp'
     ];
 
     public function definition()

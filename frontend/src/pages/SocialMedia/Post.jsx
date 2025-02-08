@@ -66,8 +66,9 @@ const Post = ({ post }) => {
             </button>
           )}
         </div>
+		{console.log(post.image)}
         <p className="mb-4 text-emerald-400">{post.content}</p>
-        {post.image && <img src={post.image} alt="Post content" className="rounded-lg w-full mb-4" />}
+        {post.image && <img  src={post.image} alt="Post content" className="rounded-lg w-full mb-4" />}
 
         <div className="flex justify-between text-emerald-400">
           <PostAction

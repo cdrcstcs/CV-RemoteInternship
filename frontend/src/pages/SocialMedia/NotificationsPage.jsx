@@ -65,8 +65,8 @@ const NotificationsPage = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full">
-      <div className="col-span-1 lg:col-span-3">
+    <div className="w-screen min-h-screen flex justify-center">
+      <div className="w-full max-w-screen-xl px-6">
         <div className="border-2 border-white rounded-lg p-6 text-emerald-400">
           <h1 className="text-2xl font-bold mb-6">Notifications</h1>
 
@@ -84,7 +84,7 @@ const NotificationsPage = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-4">
                       <img
-                        src={notification.related_user.profilePicture || "/avatar.png"}
+                        src={notification.related_user.profile_picture || "/avatar.png"}
                         className="w-12 h-12 rounded-full object-cover"
                       />
 

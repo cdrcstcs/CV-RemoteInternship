@@ -110,8 +110,6 @@ class DatabaseSeeder extends Seeder
         foreach ($users as $user) {
             $userPosts = Post::factory()->count(3)->create([
                 'author_id' => $user->id,
-                'content' => 'This is a sample post content for ' . $user->name,
-                'image' => $faker->imageUrl(),
             ]);
             $posts = array_merge($posts, $userPosts->toArray());
         }
@@ -134,7 +132,6 @@ class DatabaseSeeder extends Seeder
                     ConnectionRequest::factory()->create([
                         'sender_id' => $sender->id,
                         'recipient_id' => $recipient->id,
-                        'status' => $faker->randomElement(['pending', 'accepted']),
                     ]);
                 }
             }
