@@ -17,20 +17,82 @@ use Illuminate\Support\Facades\Log;
 
 class MessageController extends Controller
 {
-    public static function getConversationsForSidebar(User $user)
+
+    public static function getConversationsForSidebar(Request $request): JsonResponse
     {
-        $users = User::getUsersExceptUser($user);
-        $groups = Group::getGroupsForUser($user);
-        return $users->map(function (User $user) {
-            return $user->toConversationArray();
-        })->concat($groups->map(function (Group $group) {
-            return $group->toConversationArray();
-        }));
+        $user = $request->user();
+        // Query for group-to-user conversations
+        $queryForGroupToUser = Group::select(['groups.*', 'messages.message as last_message', 'messages.created_at as last_message_date'])
+            ->join('group_users', 'group_users.group_id', '=', 'groups.id')
+            ->leftJoin('messages', 'messages.id', '=', 'groups.last_message_id')
+            ->where('group_users.user_id', $user->id)
+            ->orderBy('messages.created_at', 'desc')
+            ->orderBy('groups.name');
+
+        // Query for user-to-user conversations
+        $userId = $user->id;
+        $queryForUserToUser = Conversation::select(['conversations.id', 'messages.message as last_message', 'messages.created_at as last_message_date'])
+            ->leftJoin('users as u1', 'u1.id', '=', 'conversations.user_id1')
+            ->leftJoin('users as u2', 'u2.id', '=', 'conversations.user_id2')
+            ->leftJoin('messages', 'messages.id', '=', 'conversations.last_message_id')
+            ->where(function ($query) use ($userId) {
+                $query->where('conversations.user_id1', $userId)
+                    ->orWhere('conversations.user_id2', $userId);
+            })
+            ->orderByDesc('messages.created_at');
+
+        // Map group conversations
+        $groupConversations = $queryForGroupToUser->get()->map(function ($group) {
+            return [
+                'id' => $group->id,
+                'name' => $group->name,
+                'description' => $group->description,
+                'is_group' => true,
+                'is_user' => false,
+                'owner_id' => $group->owner_id,
+                'users' => $group->users,
+                'user_ids' => $group->users->pluck('id'),
+                'last_message' => $group->last_message,
+                'last_message_date' => $group->last_message_date ? ($group->last_message_date . ' UTC') : null,
+            ];
+        });
+
+        // Map user-to-user conversations
+        $userToUserConversations = $queryForUserToUser->get()->map(function ($conversation) use ($userId) {
+            $userConversation = ($conversation->user_id1 === $userId) ? $conversation->user2 : $conversation->user1;
+            return [
+                'id' => $conversation->id,
+                'name' => $userConversation->first_name . ' ' . $userConversation->last_name,
+                'profile_picture' => $userConversation->profile_picture,
+                'is_group' => false,
+                'is_user' => true,
+                'last_message' => $conversation->last_message,
+                'last_message_date' => $conversation->last_message_date ? ($conversation->last_message_date . ' UTC') : null,
+            ];
+        });
+
+        // Merge both conversations and sort by last message date
+        $mergedConversations = $groupConversations->merge($userToUserConversations)->sortByDesc('last_message_date');
+
+        return response()->json($mergedConversations);
     }
 
-    public static function updateConversationWithMessage($userId1, $userId2, $message)
+
+    public function updateConversationWithMessage(Request $request): JsonResponse
     {
-        // Find conversation, by user_id1 and user_id2 and update last message id
+        // Extract data from the request
+        $userId1 = $request->input('user_id1');
+        $userId2 = $request->input('user_id2');
+        $messageContent = $request->input('message');
+
+        // Create a new message instance
+        $message = Message::create([
+            'user_id' => $userId1,  // Assuming the user sending the message is user_id1
+            'message' => $messageContent,
+            // Add other necessary fields for the Message model
+        ]);
+
+        // Find conversation by user_id1 and user_id2, and update the last message ID
         $conversation = Conversation::where(function ($query) use ($userId1, $userId2) {
             $query->where('user_id1', $userId1)
                 ->where('user_id2', $userId2);
@@ -40,80 +102,62 @@ class MessageController extends Controller
         })->first();
 
         if ($conversation) {
+            // Update the last_message_id if the conversation exists
             $conversation->update([
                 'last_message_id' => $message->id,
             ]);
         } else {
+            // Create a new conversation if it doesn't exist
             Conversation::create([
                 'user_id1' => $userId1,
                 'user_id2' => $userId2,
                 'last_message_id' => $message->id,
             ]);
         }
+
+        return response()->json(['message' => 'Conversation updated successfully']);
     }
-   
-    public function fetchUserConversations(Request $request): JsonResponse
+
+    public function updateGroupWithMessage(Request $request): JsonResponse
     {
-        // Log incoming user ID and request details
-        Log::info('Fetching user conversations', [
-            'user_id' => request()->user()->id,
-            'request' => $request->all(),  // Log the entire request for further details if needed
-        ]);
+        // Extract data from the request
+        $groupId = $request->input('group_id');
+        $messageId = $request->input('message_id');        
 
-        // Get all conversations where the authenticated user is either user_id1 or user_id2
-        $conversations = Conversation::where('user_id1', request()->user()->id)
-            ->orWhere('user_id2', request()->user()->id)
-            ->latest()
-            ->paginate(10);
+        // Use updateOrCreate to either update the existing group or create a new one with the last message ID
+        $group = Group::updateOrCreate(
+            ['id' => $groupId], // search conditions (looking for group by ID)
+            ['last_message_id' => $messageId] // values to update (set the last_message_id to the new message ID)
+        );
 
-        // Log conversations count and pagination details
-        Log::info('Conversations fetched', [
-            'user_id' => request()->user()->id,
-            'total_conversations' => $conversations->total(),
-            'current_page' => $conversations->currentPage(),
-            'per_page' => $conversations->perPage(),
-        ]);
-
-
-        // Log the formatted conversations (you can choose not to log large data, or limit it if necessary)
-        Log::info('Formatted conversations', [
-            'conversations' => $conversations->toArray()  // Log formatted data
-        ]);
-
-        return response()->json($conversations);
+        return response()->json(['message' => 'Group updated successfully']);
     }
 
     /**
      * Get messages by user
      */
-    public function byUser(Request $request, User $user): JsonResponse
+    public function byUser(Request $request, $userId): JsonResponse
     {
         $messages = Message::where('sender_id', request()->user()->id)
-            ->where('receiver_id', $user->id)
-            ->orWhere('sender_id', $user->id)
+            ->where('receiver_id', $userId)
+            ->orWhere('sender_id', $userId)
             ->where('receiver_id', request()->user()->id)
             ->latest()
             ->paginate(10);
 
-        return response()->json([
-            'selectedConversation' => $user->toConversationArray(),
-            'messages' => MessageResource::collection($messages),
-        ]);
+        return response()->json(MessageResource::collection($messages));
     }
 
     /**
      * Get messages by group
      */
-    public function byGroup(Request $request, Group $group): JsonResponse
+    public function byGroup($groupId): JsonResponse
     {
-        $messages = Message::where('group_id', $group->id)
+        $messages = Message::where('group_id', $groupId)
             ->latest()
             ->paginate(10);
 
-        return response()->json([
-            'selectedConversation' => $group->toConversationArray(),
-            'messages' => MessageResource::collection($messages),
-        ]);
+        return response()->json(MessageResource::collection($messages));
     }
 
     /**
@@ -189,7 +233,7 @@ class MessageController extends Controller
         SocketMessage::dispatch($message);
 
         // Return the created message as a resource
-        return response()->json(new MessageResource($message), 201);
+        return response()->json(new MessageResource($message));
     }
 
     /**
@@ -226,8 +270,6 @@ class MessageController extends Controller
         }
 
         // Return the last message or null
-        return response()->json([
-            'last_message' => $lastMessage ? new MessageResource($lastMessage) : null
-        ]);
+        return response()->json($lastMessage ? new MessageResource($lastMessage) : null);
     }
 }

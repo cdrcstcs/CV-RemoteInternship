@@ -27,8 +27,6 @@ class UserResource extends JsonResource
             'banner_img' => $this->banner_img,
             'headline' => $this->headline,
             'about' => $this->about,
-            'last_message' => $this->last_message,
-            'last_message_date' => $this->last_message_date,
         ];
     }
 }
