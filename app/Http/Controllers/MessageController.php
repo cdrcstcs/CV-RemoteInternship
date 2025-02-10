@@ -12,18 +12,86 @@ use App\Models\MessageAttachment;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class MessageController extends Controller
 {
+    public static function getConversationsForSidebar(User $user)
+    {
+        $users = User::getUsersExceptUser($user);
+        $groups = Group::getGroupsForUser($user);
+        return $users->map(function (User $user) {
+            return $user->toConversationArray();
+        })->concat($groups->map(function (Group $group) {
+            return $group->toConversationArray();
+        }));
+    }
+
+    public static function updateConversationWithMessage($userId1, $userId2, $message)
+    {
+        // Find conversation, by user_id1 and user_id2 and update last message id
+        $conversation = Conversation::where(function ($query) use ($userId1, $userId2) {
+            $query->where('user_id1', $userId1)
+                ->where('user_id2', $userId2);
+        })->orWhere(function ($query) use ($userId1, $userId2) {
+            $query->where('user_id1', $userId2)
+                ->where('user_id2', $userId1);
+        })->first();
+
+        if ($conversation) {
+            $conversation->update([
+                'last_message_id' => $message->id,
+            ]);
+        } else {
+            Conversation::create([
+                'user_id1' => $userId1,
+                'user_id2' => $userId2,
+                'last_message_id' => $message->id,
+            ]);
+        }
+    }
+   
+    public function fetchUserConversations(Request $request): JsonResponse
+    {
+        // Log incoming user ID and request details
+        Log::info('Fetching user conversations', [
+            'user_id' => request()->user()->id,
+            'request' => $request->all(),  // Log the entire request for further details if needed
+        ]);
+
+        // Get all conversations where the authenticated user is either user_id1 or user_id2
+        $conversations = Conversation::where('user_id1', request()->user()->id)
+            ->orWhere('user_id2', request()->user()->id)
+            ->latest()
+            ->paginate(10);
+
+        // Log conversations count and pagination details
+        Log::info('Conversations fetched', [
+            'user_id' => request()->user()->id,
+            'total_conversations' => $conversations->total(),
+            'current_page' => $conversations->currentPage(),
+            'per_page' => $conversations->perPage(),
+        ]);
+
+
+        // Log the formatted conversations (you can choose not to log large data, or limit it if necessary)
+        Log::info('Formatted conversations', [
+            'conversations' => $conversations->toArray()  // Log formatted data
+        ]);
+
+        return response()->json($conversations);
+    }
+
     /**
      * Get messages by user
      */
-    public function byUser(User $user): JsonResponse
+    public function byUser(Request $request, User $user): JsonResponse
     {
-        $messages = Message::where('sender_id', auth()->id())
+        $messages = Message::where('sender_id', request()->user()->id)
             ->where('receiver_id', $user->id)
             ->orWhere('sender_id', $user->id)
-            ->where('receiver_id', auth()->id())
+            ->where('receiver_id', request()->user()->id)
             ->latest()
             ->paginate(10);
 
@@ -36,7 +104,7 @@ class MessageController extends Controller
     /**
      * Get messages by group
      */
-    public function byGroup(Group $group): JsonResponse
+    public function byGroup(Request $request, Group $group): JsonResponse
     {
         $messages = Message::where('group_id', $group->id)
             ->latest()
@@ -51,7 +119,7 @@ class MessageController extends Controller
     /**
      * Load older messages based on the provided message
      */
-    public function loadOlder(Message $message): JsonResponse
+    public function loadOlder(Request $request, Message $message): JsonResponse
     {
         // Load older messages that are older than the given message
         if ($message->group_id) {
@@ -78,10 +146,10 @@ class MessageController extends Controller
     /**
      * Store a newly created message in storage.
      */
-    public function store(StoreMessageRequest $request): JsonResponse
+    public function store(Request $request, StoreMessageRequest $messageRequest): JsonResponse
     {
-        $data = $request->validated();
-        $data['sender_id'] = auth()->id();
+        $data = $messageRequest->validated();
+        $data['sender_id'] = request()->user()->id; // Updated here
         $receiverId = $data['receiver_id'] ?? null;
         $groupId = $data['group_id'] ?? null;
 
@@ -110,7 +178,7 @@ class MessageController extends Controller
 
         // Update conversation or group with the message
         if ($receiverId) {
-            Conversation::updateConversationWithMessage($receiverId, auth()->id(), $message);
+            Conversation::updateConversationWithMessage($receiverId, request()->user()->id, $message); // Updated here
         }
 
         if ($groupId) {
@@ -127,10 +195,10 @@ class MessageController extends Controller
     /**
      * Remove the specified message from storage.
      */
-    public function destroy(Message $message): JsonResponse
+    public function destroy(Request $request, Message $message): JsonResponse
     {
         // Check if the user is the sender of the message
-        if ($message->sender_id !== auth()->id()) {
+        if ($message->sender_id !== request()->user()->id) { // Updated here
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

@@ -41,6 +41,9 @@ const Navbar = () => {
             <Link to={"/network"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Network
             </Link>
+            <Link to={"/chat"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+              Chat
+            </Link>
             {user && (
               <Link
                 to={"/cart"}

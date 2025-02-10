@@ -139,50 +139,5 @@ class User extends Authenticatable  // Extend Authenticatable
         return $this->belongsToMany(Group::class, 'group_users');
     }
 
-    public static function getUsersExceptUser(User $user)
-    {
-        $userId = $user->id;
-        $query = User::select(['users.*', 
-                            'messages.message as last_message', 
-                            'messages.created_at as last_message_date'])
-                    ->where('users.id', '!=', $userId)
-                    ->leftJoin('conversations', function ($join) use ($userId) {
-                        $join->on('conversations.user_id1', '=', 'users.id')
-                            ->where('conversations.user_id2', '=', $userId)
-                            ->orWhere(function ($query) use ($userId) {
-                                $query->on('conversations.user_id2', '=', 'users.id')
-                                    ->where('conversations.user_id1', '=', $userId);
-                            });
-                    })
-                    ->leftJoin('messages', 'messages.id', '=', 'conversations.last_message_id')
-                    ->orderByRaw('CONCAT(users.first_name, " ", users.last_name)')  // Correct order by name concatenation
-                    ->orderByDesc('messages.created_at')  // Ensure we order by the most recent message
-        ;
-
-        return $query->get();
-    }
-
-    public function toConversationArray()
-    {
-        return [
-            'id' => $this->id,
-            'first_name' => $this->first_name,  // Added value for first_name
-            'last_name' => $this->last_name,    // Added value for last_name
-            'phone_number' => $this->phone_number, // Added value for phone_number
-            'ip_address' => $this->ip_address,   // Added value for ip_address
-            'email' => $this->email,             // Added value for email
-            'language' => $this->language,       // Added value for language
-            'profile_picture' => $this->profile_picture,  // Added value for profile_picture
-            'banner_img' => $this->banner_img,   // Added value for banner_img
-            'headline' => $this->headline,       // Added value for headline
-            'about' => $this->about,             // Added value for about
-            'is_group' => false,                 // Assuming this is always false
-            'is_user' => true,                   // Assuming this is always true
-            'created_at' => $this->created_at,   // Added value for created_at
-            'updated_at' => $this->updated_at,   // Added value for updated_at
-            'last_message' => $this->last_message,
-            'last_message_date' => $this->last_message_date ? \Carbon\Carbon::parse($this->last_message_date)->toDateTimeString() : null, // Format date properly
-        ];
-    }
 
 }
