@@ -236,7 +236,7 @@ const ChatWrapper = () => {
                     </div>
                 </div>
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <ChatMain selectedConversation={selectedConversation}/>
+                    <ChatMain selectedConversation={selectedConversation} isUser={selectedConversation?.is_user}/>
                 </div>
             </div>
             <GroupModal show={showGroupModal} onClose={() => setShowGroupModal(false)} />

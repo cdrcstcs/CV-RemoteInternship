@@ -43,16 +43,16 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/get-token', [StreamTokenController::class, 'getToken']);
 
         Route::get('/user/conversations', [MessageController::class, 'getConversationsForSidebar']);
-        Route::get('/user/{user}', [MessageController::class, 'byUser']);
-        Route::get('/conversations/{conversationId}/messages', [MessageController::class, 'byGroup']);
 
-        Route::post('/message', [MessageController::class, 'store']);
-        Route::delete('/message/{message}', [MessageController::class, 'destroy']);
-        Route::get('/messages/load-older/{firstMessage.id}', [MessageController::class, 'loadOlder']);
+        Route::get('/conversations/{conversationId}/messages', [MessageController::class, 'getMessages']);
 
-        Route::post('/group', [GroupController::class, 'store']);
+        Route::post('/message/store', [MessageController::class, 'store']);
+        Route::delete('/messages/{messageId}', [MessageController::class, 'deleteMessage']);
+        Route::get('/messages/load-older/{firstMessageId}', [MessageController::class, 'loadOlder']);
+
+        Route::post('/group/store', [GroupController::class, 'store']);
         Route::put('/group/update/{groupId}', [GroupController::class, 'update']);
-        Route::delete('/group/{group}', [GroupController::class, 'destroy']);
+        Route::delete('/group/destroy/{groupId}', [GroupController::class, 'destroy']);
     });
     
     // Route::middleware(['role:Administration,Customer,Customer Support Staff,Product Saler'])->group(function () {

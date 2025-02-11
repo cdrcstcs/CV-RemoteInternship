@@ -7,7 +7,7 @@ import MessageInput from "./MessageInput";
 import AttachmentPreviewModal from "./AttachmentPreviewModal";
 import { useEventBus } from "../../EventBus";
 import NewMessageNotification from "./NewMessageNotification";
-export default function ChatMain({ selectedConversation }) {
+export default function ChatMain({ selectedConversation, isUser }) {
   const { localMessages, noMoreMessages, scrollFromBottom, fetchConversationData, loadMoreMessages, messageCreated, messageDeleted } = useChatStore();
   const { on } = useEventBus();
 
@@ -19,7 +19,7 @@ export default function ChatMain({ selectedConversation }) {
 
   useEffect(() => {
     if (selectedConversation) {
-      fetchConversationData(selectedConversation.id); // Fetch messages when conversation is selected
+      fetchConversationData(selectedConversation.id, isUser); // Fetch messages when conversation is selected
     }
 
     const offCreated = on("message.created", messageCreated);

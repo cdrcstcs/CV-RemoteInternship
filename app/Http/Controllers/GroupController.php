@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Jobs\DeleteGroupJob;
@@ -7,10 +6,10 @@ use App\Models\Group;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class GroupController extends Controller
 {
-
     /**
      * Store a newly created resource in storage.
      */
@@ -33,8 +32,10 @@ class GroupController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateGroupRequest $request, Group $group): JsonResponse
+    public function update(UpdateGroupRequest $request, $groupId): JsonResponse
     {
+        $group = Group::find($groupId);
+
         // Validate the request data
         $data = $request->validated();
         $user_ids = $data['user_ids'] ?? [];
@@ -53,10 +54,18 @@ class GroupController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Group $group): JsonResponse
+    public function destroy(Request $request, $groupId): JsonResponse
     {
+        // Retrieve the group based on the groupId
+        $group = Group::find($groupId);
+
+        // If the group doesn't exist, return a 404 error
+        if (!$group) {
+            return response()->json(['message' => 'Group not found'], 404);
+        }
+
         // Check if the authenticated user is the owner of the group
-        if ($group->owner_id !== auth()->id()) {
+        if ($group->owner_id !== $request->user()->id) {
             // If the user is not the owner, return a 403 Forbidden response
             return response()->json([
                 'message' => 'You are not authorized to delete this group'

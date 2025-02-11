@@ -14,13 +14,15 @@ import { isAudio, isImage } from "../../helpers";
 import AttachmentPreview from "./AttachmentPreview";
 import CustomAudioPlayer from "./CustomAudioPlayer";
 import AudioRecorder from "./AudioRecorder";
-
+import useChatStore from "../../stores/useChatStore";
 const MessageInput = ({ conversation = null }) => {
     const [newMessage, setNewMessage] = useState("");
     const [inputErrorMessage, setInputErrorMessage] = useState("");
     const [messageSending, setMessageSending] = useState(false);
     const [chosenFiles, setChosenFiles] = useState([]);
     const [uploadProgress, setUploadProgress] = useState(0);
+
+    const { sendMessage } = useChatStore(); // Get sendMessage from the store
 
     const onFileChange = (ev) => {
         const files = ev.target.files;
@@ -37,6 +39,7 @@ const MessageInput = ({ conversation = null }) => {
             return [...prevFiles, ...updatedFiles];
         });
     };
+
     const onSendClick = () => {
         if (messageSending) {
             return;
@@ -51,31 +54,10 @@ const MessageInput = ({ conversation = null }) => {
             }, 3000);
             return;
         }
-        const formData = new FormData();
-        chosenFiles.forEach((file) => {
-            formData.append("attachments[]", file.file);
-        });
-        formData.append("message", newMessage);
-        if (conversation.is_user) {
-            formData.append("receiver_id", conversation.id);
-        } else if (conversation.is_group) {
-            formData.append("group_id", conversation.id);
-        }
 
         setMessageSending(true);
-        axios
-            .post(route("message.store"), formData, {
-                onUploadProgress: (progressEvent) => {
-                    const progress = Math.round(
-                        (progressEvent.loaded / progressEvent.total) * 100
-                    );
-                    console.log(progress);
-                    if (chosenFiles.length > 0) {
-                        setUploadProgress(progress);
-                    }
-                },
-            })
-            .then((response) => {
+        sendMessage(newMessage, chosenFiles, conversation)
+            .then(() => {
                 setNewMessage("");
                 setMessageSending(false);
                 setUploadProgress(0);
@@ -84,9 +66,8 @@ const MessageInput = ({ conversation = null }) => {
             .catch((error) => {
                 setMessageSending(false);
                 setChosenFiles([]);
-                const message = error?.response?.data?.message;
                 setInputErrorMessage(
-                    message || "An error occurred while sending message"
+                    error?.response?.data?.message || "An error occurred while sending message"
                 );
             });
     };
@@ -104,7 +85,7 @@ const MessageInput = ({ conversation = null }) => {
             data["group_id"] = conversation.id;
         }
 
-        axios.post(route("message.store"), data);
+        axios.post("/message/store", data);
     };
 
     const recordedAudioReady = (file, url) => {

@@ -74,20 +74,20 @@ const GroupModal = ({ show = false, onClose = () => {} }) => {
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50" // Black background with opacity
       onClick={closeModal}
     >
       <div
-        className="bg-white p-6 w-full sm:w-96 rounded-lg"
+        className="bg-black text-white border-2 border-white p-6 w-full sm:w-96 rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <form onSubmit={handleSubmit}>
-          <h2 className="text-xl font-medium text-gray-900">
+          <h2 className="text-xl font-medium text-white">
             {group.id ? `Edit Group "${group.name}"` : "Create new Group"}
           </h2>
 
           <div className="mt-8">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="block text-sm font-medium text-white">
               Name
             </label>
             <input
@@ -103,7 +103,7 @@ const GroupModal = ({ show = false, onClose = () => {} }) => {
           </div>
 
           <div className="mt-4">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="description" className="block text-sm font-medium text-white">
               Description
             </label>
             <textarea
@@ -117,7 +117,7 @@ const GroupModal = ({ show = false, onClose = () => {} }) => {
           </div>
 
           <div className="mt-4">
-            <label htmlFor="users" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="users" className="block text-sm font-medium text-white">
               Select Users
             </label>
             <select
@@ -143,7 +143,7 @@ const GroupModal = ({ show = false, onClose = () => {} }) => {
             <button
               type="button"
               onClick={closeModal}
-              className="bg-gray-300 text-gray-700 rounded-md px-4 py-2 hover:bg-gray-400"
+              className="bg-gray-700 text-white rounded-md px-4 py-2 hover:bg-gray-600"
             >
               Cancel
             </button>

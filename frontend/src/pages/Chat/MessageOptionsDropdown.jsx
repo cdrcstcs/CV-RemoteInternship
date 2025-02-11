@@ -2,22 +2,18 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { EllipsisVerticalIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { useEventBus } from "../../EventBus";
+import useChatStore from "../../stores/useChatStore";
 export default function MessageOptionsDropdown({ message }) {
     const { emit } = useEventBus();
+    const { deleteMessage } = useChatStore(); // Get the deleteMessage method from the store
 
     const onMessageDelete = () => {
-        console.log("Delete message");
-        // Send axios post request to delete message and show notification on success
-        axios
-            .delete(route("message.destroy", message.id))
-            .then((res) => {
-                emit("message.deleted", {
-                    message,
-                    prevMessage: res.data.message,
-                });
+        deleteMessage(message.id) // Call deleteMessage from the store
+            .then(() => {
+                emit("message.deleted", { message });
             })
-            .catch((err) => {
-                console.error(err);
+            .catch((error) => {
+                console.error("Error deleting message", error);
             });
     };
 

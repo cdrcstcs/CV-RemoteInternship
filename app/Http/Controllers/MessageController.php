@@ -99,87 +99,110 @@ class MessageController extends Controller
         return response()->json($mergedConversations);
     }
 
-    public function updateConversationWithMessage(Request $request): JsonResponse
+
+    public function store(Request $request, StoreMessageRequest $messageRequest): JsonResponse
     {
-        // Extract data from the request
-        $userId1 = $request->input('user_id1');
-        $userId2 = $request->input('user_id2');
-        $messageContent = $request->input('message');
+        // Validate and extract data from the request
+        $data = $messageRequest->validated();
+        $data['sender_id'] = request()->user()->id; // Set sender ID
+
+        $receiverId = $data['receiver_id'] ?? null;
+        $groupId = $data['group_id'] ?? null;
+        $messageContent = $data['message']; // The actual message content
+        $files = $data['attachments'] ?? []; // The attachments
 
         // Create a new message instance
-        $message = Message::create([
-            'user_id' => $userId1,  // Assuming the user sending the message is user_id1
-            'message' => $messageContent,
-            // Add other necessary fields for the Message model
-        ]);
+        $message = Message::create($data);
 
-        // Find conversation by user_id1 and user_id2, and update the last message ID
-        $conversation = Conversation::where(function ($query) use ($userId1, $userId2) {
-            $query->where('user_id1', $userId1)
-                ->where('user_id2', $userId2);
-        })->orWhere(function ($query) use ($userId1, $userId2) {
-            $query->where('user_id1', $userId2)
-                ->where('user_id2', $userId1);
-        })->first();
+        // Handle file attachments
+        $attachments = [];
+        if ($files) {
+            foreach ($files as $file) {
+                $directory = 'attachments/' . Str::random(32);
+                Storage::makeDirectory($directory);
 
-        if ($conversation) {
-            // Update the last_message_id if the conversation exists
-            $conversation->update([
-                'last_message_id' => $message->id,
-            ]);
-        } else {
-            // Create a new conversation if it doesn't exist
-            Conversation::create([
-                'user_id1' => $userId1,
-                'user_id2' => $userId2,
-                'last_message_id' => $message->id,
-            ]);
+                $attachmentModel = [
+                    'message_id' => $message->id,
+                    'name' => $file->getClientOriginalName(),
+                    'mime' => $file->getClientMimeType(),
+                    'size' => $file->getSize(),
+                    'path' => $file->store($directory, 'public'),
+                ];
+
+                $attachment = MessageAttachment::create($attachmentModel);
+                $attachments[] = $attachment;
+            }
+            $message->attachments = $attachments;
         }
 
-        return response()->json(['message' => 'Conversation updated successfully']);
-    }
+        // Update or create a conversation
+        if ($receiverId) {
+            // Find the conversation by user_id1 and user_id2, or create it if it doesn't exist
+            $conversation = Conversation::where(function ($query) use ($receiverId) {
+                $query->where('user_id1', request()->user()->id)
+                    ->where('user_id2', $receiverId);
+            })->orWhere(function ($query) use ($receiverId) {
+                $query->where('user_id1', $receiverId)
+                    ->where('user_id2', request()->user()->id);
+            })->first();
 
-    public function updateGroupWithMessage(Request $request): JsonResponse
-    {
-        // Extract data from the request
-        $groupId = $request->input('group_id');
-        $messageId = $request->input('message_id');        
+            if ($conversation) {
+                // If conversation exists, update the last_message_id
+                $conversation->update([
+                    'last_message_id' => $message->id,
+                ]);
+            } else {
+                // Create a new conversation if it doesn't exist
+                Conversation::create([
+                    'user_id1' => request()->user()->id,
+                    'user_id2' => $receiverId,
+                    'last_message_id' => $message->id,
+                ]);
+            }
+        }
 
-        // Use updateOrCreate to either update the existing group or create a new one with the last message ID
-        $group = Group::updateOrCreate(
-            ['id' => $groupId], // search conditions (looking for group by ID)
-            ['last_message_id' => $messageId] // values to update (set the last_message_id to the new message ID)
-        );
+        // Update the group if the groupId is provided
+        if ($groupId) {
+            // Use updateOrCreate to update or create the group with the last_message_id
+            Group::updateOrCreate(
+                ['id' => $groupId], // search conditions (looking for group by ID)
+                ['last_message_id' => $message->id] // values to update (set the last_message_id to the new message ID)
+            );
+        }
 
-        return response()->json(['message' => 'Group updated successfully']);
+        // Dispatch the message event for broadcasting
+        SocketMessage::dispatch($message);
+
+        // Return the created message as a response, formatted with MessageResource
+        return response()->json(new MessageResource($message));
     }
 
     /**
-     * Get messages by user
+     * Get messages by user or group
      */
-    public function byUser(Request $request, $userId): JsonResponse
+    public function getMessages(Request $request, $id): JsonResponse
     {
-        $messages = Message::where('sender_id', request()->user()->id)
-            ->where('receiver_id', $userId)
-            ->orWhere('sender_id', $userId)
-            ->where('receiver_id', request()->user()->id)
-            ->latest()
-            ->paginate(10);
+        // Check if the ID belongs to a user or group by some identifier (e.g., `is_user` in the request)
+        $isUser = $request->query('isUser', false); // You can set 'isUser' as a query parameter
+
+        if ($isUser) {
+            // Fetch messages between the current user and the specified user
+            $messages = Message::where('sender_id', request()->user()->id)
+                ->where('receiver_id', $id)
+                ->orWhere('sender_id', $id)
+                ->where('receiver_id', request()->user()->id)
+                ->latest()
+                ->paginate(10);
+        } else {
+            // Fetch messages for a group
+            $messages = Message::where('group_id', $id)
+                ->latest()
+                ->paginate(10);
+        }
 
         return response()->json(MessageResource::collection($messages));
     }
 
-    /**
-     * Get messages by group
-     */
-    public function byGroup($groupId): JsonResponse
-    {
-        $messages = Message::where('group_id', $groupId)
-            ->latest()
-            ->paginate(10);
-
-        return response()->json(MessageResource::collection($messages));
-    }
 
     /**
      * Load older messages based on the provided message
@@ -208,60 +231,13 @@ class MessageController extends Controller
         return response()->json(MessageResource::collection($messages));
     }
 
-    /**
-     * Store a newly created message in storage.
-     */
-    public function store(Request $request, StoreMessageRequest $messageRequest): JsonResponse
-    {
-        $data = $messageRequest->validated();
-        $data['sender_id'] = request()->user()->id; // Updated here
-        $receiverId = $data['receiver_id'] ?? null;
-        $groupId = $data['group_id'] ?? null;
-
-        $files = $data['attachments'] ?? [];
-
-        $message = Message::create($data);
-
-        $attachments = [];
-        if ($files) {
-            foreach ($files as $file) {
-                $directory = 'attachments/' . Str::random(32);
-                Storage::makeDirectory($directory);
-
-                $model = [
-                    'message_id' => $message->id,
-                    'name' => $file->getClientOriginalName(),
-                    'mime' => $file->getClientMimeType(),
-                    'size' => $file->getSize(),
-                    'path' => $file->store($directory, 'public'),
-                ];
-                $attachment = MessageAttachment::create($model);
-                $attachments[] = $attachment;
-            }
-            $message->attachments = $attachments;
-        }
-
-        // Update conversation or group with the message
-        if ($receiverId) {
-            Conversation::updateConversationWithMessage($receiverId, request()->user()->id, $message); // Updated here
-        }
-
-        if ($groupId) {
-            Group::updateGroupWithMessage($groupId, $message);
-        }
-
-        // Dispatch the event
-        SocketMessage::dispatch($message);
-
-        // Return the created message as a resource
-        return response()->json(new MessageResource($message));
-    }
 
     /**
      * Remove the specified message from storage.
      */
-    public function destroy(Request $request, Message $message): JsonResponse
+    public function deleteMessage(Request $request, $messageId): JsonResponse
     {
+        $message = Message::find($messageId);
         // Check if the user is the sender of the message
         if ($message->sender_id !== request()->user()->id) { // Updated here
             return response()->json(['message' => 'Forbidden'], 403);

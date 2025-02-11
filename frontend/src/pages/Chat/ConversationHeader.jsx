@@ -10,25 +10,20 @@ import GroupDescriptionPopover from "./GroupDescriptionPopover";
 import GroupUsersPopover from "./GroupUsersPopover";
 import { useEventBus } from "../../EventBus";
 import { useUserStore } from "../../stores/useUserStore";
+import useChatStore from "../../stores/useChatStore"; // Import useChatStore
 
 const ConversationHeader = ({ selectedConversation }) => {
     const { user } = useUserStore();
     const { emit } = useEventBus();
+    const { deleteGroup } = useChatStore(); // Get the deleteGroup function from the store
 
     const onDeleteGroup = () => {
         if (!window.confirm("Are you sure you want to delete this group?")) {
             return;
         }
 
-        axios
-            .delete(route("group.destroy", selectedConversation.id))
-            .then((res) => {
-                console.log(res);
-                emit("toast.show", res.data.message);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+        // Use deleteGroup from the store instead of making an API call directly
+        deleteGroup(selectedConversation.id);
     };
 
     return (

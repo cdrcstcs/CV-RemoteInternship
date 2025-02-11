@@ -1,7 +1,5 @@
-import { Link } from "react-router-dom"; // Updated to react-router-dom
 import UserAvatar from "./UserAvatar";
 import GroupAvatar from "./GroupAvatar";
-import UserOptionsDropdown from "./UserOptionsDropdown";
 import { formatMessageDateShort } from "../../helpers";
 import { useUserStore } from "../../stores/useUserStore";
 
@@ -68,10 +66,6 @@ const ConversationItem = ({
         )}
       </div>
 
-      {/* Show the options dropdown for admin users in user conversations */}
-      {conversation.is_user && (
-        <UserOptionsDropdown conversation={conversation} />
-      )}
     </div>
   );
 };
