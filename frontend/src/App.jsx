@@ -38,8 +38,7 @@ import CreateFeedbackForm from "./pages/FeedbackForm/CreateFeedbackForm.jsx";
 import SocialMediaPage from "./pages/SocialMedia/SocialMediaPage.jsx";
 import NotificationsPage from "./pages/SocialMedia/NotificationsPage.jsx";
 import NetworkPage from "./pages/SocialMedia/NetworkPage.jsx";
-import ChatSystem from "./pages/Chat/ChatSystem.jsx";
-import ChatLayout from "./pages/Chat/ChatLayout.jsx";
+import ChatWrapper from "./pages/Chat/ChatWrapper.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -125,9 +124,9 @@ function App() {
 
           <Route path="/feedback-forms/create" element={user ? <CreateFeedbackForm /> : <Navigate to="/login" />} />
 
-          <Route path="/chat" element={user ? <ChatLayout/> : <Navigate to="/login" />}>
-            <Route index element={<ChatSystem />} />
-          </Route>
+          <Route path="/chat" element={<ChatWrapper />} />
+
+          
         </Routes>
       </div>
       <Toaster />

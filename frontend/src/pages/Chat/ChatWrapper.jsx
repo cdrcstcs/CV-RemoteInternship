@@ -5,28 +5,31 @@ import { PencilSquareIcon } from "@heroicons/react/24/solid";
 import { useState, useEffect } from "react";
 import useChatStore from '../../stores/useChatStore';
 import { useUserStore } from '../../stores/useUserStore';
-
-const ChatLayout = ({ children }) => {
+import ChatMain from './ChatMain';
+const ChatWrapper = () => {
     const { selectedConversation, setSelectedConversation, fetchConversations, conversations, isLoading } = useChatStore();
     const [localConversations, setLocalConversations] = useState([]);
     const [sortedConversations, setSortedConversations] = useState([]);
     const [onlineUsers, setOnlineUsers] = useState({});
     const [showGroupModal, setShowGroupModal] = useState(false);
     const { emit, on } = useEventBus();
-    const { user } = useUserStore(); // Fixed missing user store
+    const { user } = useUserStore();
 
     useEffect(() => {
         fetchConversations(); // Fetch conversations on component mount
     }, [fetchConversations]);
+
     useEffect(() => {
         if (isLoading) return;
         console.log("Conversations updated:", conversations);
     }, [conversations]);
-    
+
     useEffect(() => {
         if (!conversations || !user || isLoading) return;
+
         console.log(conversations);
-        conversations.forEach((conversation) => {
+        // Convert object to array if necessary
+        Object.values(conversations).forEach((conversation) => {
             let channel = `message.group.${conversation.id}`;
 
             if (conversation.is_user) {
@@ -70,7 +73,7 @@ const ChatLayout = ({ children }) => {
         });
 
         return () => {
-            conversations.forEach((conversation) => {
+            Object.values(conversations).forEach((conversation) => {
                 let channel = `message.group.${conversation.id}`;
 
                 if (conversation.is_user) {
@@ -97,7 +100,7 @@ const ChatLayout = ({ children }) => {
     const onSearch = (ev) => {
         const search = ev.target.value.toLowerCase();
         setLocalConversations(
-            conversations.filter((conversation) => {
+            Object.values(conversations).filter((conversation) => {
                 return conversation.name.toLowerCase().includes(search);
             })
         );
@@ -168,7 +171,7 @@ const ChatLayout = ({ children }) => {
     }, [localConversations]);
 
     useEffect(() => {
-        setLocalConversations(conversations);
+        setLocalConversations(Object.values(conversations));
     }, [conversations]);
 
     useEffect(() => {
@@ -200,7 +203,7 @@ const ChatLayout = ({ children }) => {
 
     return (
         <>
-            <div className="flex-1 w-full flex overflow-hidden">
+            <div className="flex-1 w-full flex overflow-hidden h-screen">
                 <div className={`transition-all w-full sm:w-[220px] md:w-[300px] bg-slate-800 flex flex-col overflow-hidden ${
                     selectedConversation ? "-ml-[100%] sm:ml-0" : ""}`}>
                     <div className="flex items-center justify-between py-2 px-3 text-xl font-medium text-gray-200">
@@ -233,7 +236,7 @@ const ChatLayout = ({ children }) => {
                     </div>
                 </div>
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    {children}
+                    <ChatMain selectedConversation={selectedConversation}/>
                 </div>
             </div>
             <GroupModal show={showGroupModal} onClose={() => setShowGroupModal(false)} />
@@ -241,4 +244,4 @@ const ChatLayout = ({ children }) => {
     );
 };
 
-export default ChatLayout;
+export default ChatWrapper;

@@ -42,7 +42,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::put('/user/addresses/{id}', [UserProfileController::class, 'updateUserAddress']); // Update an existing address
         Route::get('/get-token', [StreamTokenController::class, 'getToken']);
 
-        Route::get('/user/conversations', [MessageController::class, 'fetchUserConversations']);
+        Route::get('/user/conversations', [MessageController::class, 'getConversationsForSidebar']);
         Route::get('/user/{user}', [MessageController::class, 'byUser']);
         Route::get('/conversations/{conversationId}/messages', [MessageController::class, 'byGroup']);
 

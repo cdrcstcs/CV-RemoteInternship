@@ -12,6 +12,30 @@ export const useChatStore = create((set, get) => ({
   isLoading: false,
   isError: false,
   errorMessage: '',
+
+  blockUser: async (conversationId, blockedAt) => {
+    try {
+      // Check if the user is blocked or not to decide on the action
+      const action = blockedAt ? 'unblock' : 'block';
+      const url = `/user/${action}/${conversationId}`;  // Direct endpoint URL
+      
+      const response = await axiosInstance.post(url);
+      
+      toast.success(response.data.message);
+      
+      // Optionally update the state to reflect the change
+      set((state) => ({
+        conversations: state.conversations.map(convo =>
+          convo.id === conversationId
+            ? { ...convo, blocked_at: blockedAt ? null : new Date() } // Update blocked_at field
+            : convo
+        ),
+      }));
+    } catch (err) {
+      const message = err.response?.data?.message || "Error processing user block/unblock request.";
+      toast.error(message);
+    }
+  },
   createOrUpdateGroup: async (data, groupId = null) => {
     try {
       const response = groupId
@@ -32,7 +56,7 @@ export const useChatStore = create((set, get) => ({
     try {
       const response = await axiosInstance.get("/user/conversations");
       console.log(response.data)
-      set({ conversations: response.data.data });
+      set({ conversations: response.data });
     } catch (error) {
       const message = error.response?.data?.message || "Error fetching conversations.";
       set({ isError: true, errorMessage: message });

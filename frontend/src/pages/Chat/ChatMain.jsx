@@ -7,18 +7,8 @@ import MessageInput from "./MessageInput";
 import AttachmentPreviewModal from "./AttachmentPreviewModal";
 import { useEventBus } from "../../EventBus";
 import NewMessageNotification from "./NewMessageNotification";
-
-export default function ChatSystem({ selectedConversation }) {
-  const {
-    localMessages,
-    noMoreMessages,
-    scrollFromBottom,
-    fetchConversationData,
-    loadMoreMessages,
-    messageCreated,
-    messageDeleted,
-  } = useChatStore((state) => state);
-  
+export default function ChatMain({ selectedConversation }) {
+  const { localMessages, noMoreMessages, scrollFromBottom, fetchConversationData, loadMoreMessages, messageCreated, messageDeleted } = useChatStore();
   const { on } = useEventBus();
 
   const loadMoreIntersect = useRef(null);
@@ -84,18 +74,11 @@ export default function ChatSystem({ selectedConversation }) {
   return (
     <>
       <NewMessageNotification />
-      <div className="flex flex-col gap-8">
-        <div className="flex justify-center items-center text-center h-full opacity-35">
-          <div className="text-2xl md:text-4xl p-16 text-slate-200">
-            Please select a conversation to see messages
-          </div>
-          <ChatBubbleLeftRightIcon className="w-32 h-32 inline-block" />
-        </div>
-
+      <div className="flex flex-col h-full gap-8">
         {selectedConversation ? (
           <>
             <ConversationHeader selectedConversation={selectedConversation} />
-            <div ref={messagesCtrRef} className="flex-1 overflow-y-auto p-5 messages-container">
+            <div ref={messagesCtrRef} className="flex-1 overflow-y-auto p-5 messages-container flex flex-col justify-between">
               {localMessages.length === 0 ? (
                 <div className="flex justify-center items-center h-full">
                   <div className="text-lg text-slate-200">No messages found</div>
@@ -113,7 +96,9 @@ export default function ChatSystem({ selectedConversation }) {
                 </div>
               )}
             </div>
-            <MessageInput conversation={selectedConversation} />
+            <div className="mt-auto"> {/* This ensures that the input stays at the bottom */}
+              <MessageInput conversation={selectedConversation} />
+            </div>
           </>
         ) : (
           <div className="flex justify-center items-center text-center h-full opacity-35">

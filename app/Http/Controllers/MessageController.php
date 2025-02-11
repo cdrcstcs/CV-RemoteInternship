@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class MessageController extends Controller
 {
@@ -21,17 +22,28 @@ class MessageController extends Controller
     public static function getConversationsForSidebar(Request $request): JsonResponse
     {
         $user = $request->user();
-        // Query for group-to-user conversations
+
+        // Query for group-to-user conversations with eager loading of users
         $queryForGroupToUser = Group::select(['groups.*', 'messages.message as last_message', 'messages.created_at as last_message_date'])
             ->join('group_users', 'group_users.group_id', '=', 'groups.id')
             ->leftJoin('messages', 'messages.id', '=', 'groups.last_message_id')
             ->where('group_users.user_id', $user->id)
+            ->with('users') // Ensure the users relationship is loaded
             ->orderBy('messages.created_at', 'desc')
             ->orderBy('groups.name');
 
         // Query for user-to-user conversations
         $userId = $user->id;
-        $queryForUserToUser = Conversation::select(['conversations.id', 'messages.message as last_message', 'messages.created_at as last_message_date'])
+        $queryForUserToUser = Conversation::select([
+                'conversations.id', 
+                'messages.message as last_message', 
+                'messages.created_at as last_message_date', 
+                'u1.first_name as user1_first_name', 
+                'u1.last_name as user1_last_name', 
+                'u2.first_name as user2_first_name', 
+                'u2.last_name as user2_last_name', 
+                'u2.profile_picture'
+            ])
             ->leftJoin('users as u1', 'u1.id', '=', 'conversations.user_id1')
             ->leftJoin('users as u2', 'u2.id', '=', 'conversations.user_id2')
             ->leftJoin('messages', 'messages.id', '=', 'conversations.last_message_id')
@@ -53,21 +65,31 @@ class MessageController extends Controller
                 'users' => $group->users,
                 'user_ids' => $group->users->pluck('id'),
                 'last_message' => $group->last_message,
-                'last_message_date' => $group->last_message_date ? ($group->last_message_date . ' UTC') : null,
+                'last_message_date' => $group->last_message_date ? (Carbon::parse($group->last_message_date)->toIso8601String())  : null, // Format the date correctly
             ];
         });
 
         // Map user-to-user conversations
         $userToUserConversations = $queryForUserToUser->get()->map(function ($conversation) use ($userId) {
-            $userConversation = ($conversation->user_id1 === $userId) ? $conversation->user2 : $conversation->user1;
+            // Determine which user is the logged-in user and get the other user's details
+            if ($conversation->user_id1 === $userId) {
+                $otherUserFirstName = $conversation->user2_first_name;
+                $otherUserLastName = $conversation->user2_last_name;
+                $otherUserProfilePicture = $conversation->profile_picture;
+            } else {
+                $otherUserFirstName = $conversation->user1_first_name;
+                $otherUserLastName = $conversation->user1_last_name;
+                $otherUserProfilePicture = $conversation->profile_picture;
+            }
+
             return [
                 'id' => $conversation->id,
-                'name' => $userConversation->first_name . ' ' . $userConversation->last_name,
-                'profile_picture' => $userConversation->profile_picture,
+                'name' => $otherUserFirstName . ' ' . $otherUserLastName,
+                'profile_picture' => $otherUserProfilePicture,
                 'is_group' => false,
                 'is_user' => true,
                 'last_message' => $conversation->last_message,
-                'last_message_date' => $conversation->last_message_date ? ($conversation->last_message_date . ' UTC') : null,
+                'last_message_date' => $conversation->last_message_date ?(Carbon::parse($conversation->last_message_date)->toIso8601String()) : null, // Format the date correctly
             ];
         });
 
@@ -76,7 +98,6 @@ class MessageController extends Controller
 
         return response()->json($mergedConversations);
     }
-
 
     public function updateConversationWithMessage(Request $request): JsonResponse
     {

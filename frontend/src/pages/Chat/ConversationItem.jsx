@@ -38,7 +38,7 @@ const ConversationItem = ({
       className={
         "conversation-item flex items-center gap-2 p-2 text-gray-300 transition-all cursor-pointer border-l-4 hover:bg-black/30 " +
         classes +
-        (conversation.is_user && user.is_admin ? " pr-2" : " pr-4")
+        (conversation.is_user ? " pr-2" : " pr-4")
       }
     >
       {/* User Avatar or Group Avatar */}
@@ -49,10 +49,7 @@ const ConversationItem = ({
       )}
 
       <div
-        className={
-          `flex-1 text-xs max-w-full overflow-hidden ` +
-          (conversation.is_user && conversation.blocked_at ? " opacity-50" : "")
-        }
+        className="flex-1 text-xs max-w-full overflow-hidden"
       >
         <div className="flex gap-1 justify-between items-center">
           <h3 className="text-sm font-semibold overflow-hidden text-nowrap text-ellipsis">
@@ -72,7 +69,7 @@ const ConversationItem = ({
       </div>
 
       {/* Show the options dropdown for admin users in user conversations */}
-      {user.is_admin && conversation.is_user && (
+      {conversation.is_user && (
         <UserOptionsDropdown conversation={conversation} />
       )}
     </div>
