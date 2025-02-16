@@ -39,6 +39,10 @@ import SocialMediaPage from "./pages/SocialMedia/SocialMediaPage.jsx";
 import NotificationsPage from "./pages/SocialMedia/NotificationsPage.jsx";
 import NetworkPage from "./pages/SocialMedia/NetworkPage.jsx";
 import ChatWrapper from "./pages/Chat/ChatWrapper.jsx";
+import RootLayout from "./components/Bank/RootLayout.jsx";
+import MyBanks from "./pages/Bank/MyBanks.jsx";
+import TransactionHistory from "./pages/Bank/TransactionHistory.jsx";
+import Transfer from "./pages/Bank/Transfer.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -120,6 +124,12 @@ function App() {
             <Route path="edit" element={<EditProfilePage />} />
             <Route path="change-password" element={<ChangePasswordPage />} />
             <Route path="address" element={<UserAddressesPage />} />
+          </Route>
+
+          <Route path="/banks" element={user ? <RootLayout/> : <Navigate to="/login"/> }>
+            <Route path="my-banks" element={<MyBanks />} />
+            <Route path="transaction-history" element={<TransactionHistory />} />
+            <Route path="payment-transfer" element={<Transfer />} />
           </Route>
 
           <Route path="/feedback-forms/create" element={user ? <CreateFeedbackForm /> : <Navigate to="/login" />} />

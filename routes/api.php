@@ -24,6 +24,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\FeedbackFormController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\BankAccountController;
+
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
 
@@ -98,6 +100,57 @@ Route::middleware('custom_cors')->group(function () {
 
         Route::get('/feedback-forms/view/{id}', [FeedbackFormController::class, 'showFeedbackForm']);
         Route::post('/feedback-forms/{id}/answer', [FeedbackFormController::class, 'storeAnswer']);
+
+
+        // Route for creating a Plaid link token
+        Route::post('/create-link-token', [BankAccountController::class, 'createLinkToken']);
+
+        // Route for exchanging the public token for an access token
+        Route::post('/exchange-public-token', [BankAccountController::class, 'exchangePublicToken']);
+
+        // Route for fetching user's bank accounts from the database
+        Route::get('/get-banks', [BankAccountController::class, 'getBanks']);
+        Route::get('/get-accounts', [BankAccountController::class, 'getAccounts']);
+
+        // Route for creating a transaction in the database
+        Route::post('/create-transaction', [BankAccountController::class, 'createTransaction']);
+
+        // Route for fetching transactions by bank ID
+        Route::get('/get-transactions-by-bank/{bankId}', [BankAccountController::class, 'getTransactionsByBankId']);
+
+        // Route for creating a bank account
+        Route::post('/create-bank-account', [BankAccountController::class, 'createBankAccount']);
+
+        // Route for fetching a bank by its account ID
+        Route::get('/get-bank-by-account/{accountId}', [BankAccountController::class, 'getBankByAccountId']);
+
+        // Route for creating an on-demand authorization with Dwolla
+        Route::post('/create-on-demand-authorization', [BankAccountController::class, 'createOnDemandAuthorization']);
+
+        // Route for creating a transfer using Dwolla API
+        Route::post('/create-transfer', [BankAccountController::class, 'createTransfer']);
+
+        // Route for adding a Dwolla funding source
+        Route::post('/add-funding-source', [BankAccountController::class, 'addFundingSource']);
+
+        // Route for fetching all accounts of a user
+        Route::get('/get-accounts', [BankAccountController::class, 'getAccounts']);
+
+        // Route for creating a Dwolla customer
+        Route::post('/create-dwolla-customer', [BankAccountController::class, 'createDwollaCustomer']);
+
+        // Route for creating a Dwolla funding source
+        Route::post('/create-funding-source', [BankAccountController::class, 'createFundingSource']);
+
+        // Route for getting account information from Plaid and sorting transactions
+        Route::get('/get-account/{appwriteItemId}', [BankAccountController::class, 'getAccount']);
+
+        // Route for fetching institution information from Plaid
+        Route::get('/get-institution/{institutionId}', [BankAccountController::class, 'getInstitution']);
+
+        // Route for fetching transactions from Plaid
+        Route::get('/get-transactions/{accessToken}', [BankAccountController::class, 'getTransactions']);
+
 
     });
     Route::middleware(['auth:sanctum','role:Administration,ProductSaler'])->group(function () {

@@ -30,7 +30,9 @@ return new class extends Migration
             $table->string('banner_img',1000)->default('');
             $table->string('headline')->default('Linkedin User');
             $table->text('about')->nullable();
-            
+            $table->string('ssn')->nullable();              // Add SSN field
+            $table->string('dwollaCustomerUrl')->nullable(); // Add Dwolla customer URL field
+            $table->string('dwollaCustomerId')->nullable();  // Add Dwolla customer ID field
         });
 
         // Create 'password_reset_tokens' table

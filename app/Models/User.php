@@ -31,6 +31,9 @@ class User extends Authenticatable  // Extend Authenticatable
         'banner_img',
         'headline',
         'about',
+        'ssn',                  // Add SSN to fillable
+        'dwollaCustomerUrl',     // Add Dwolla customer URL to fillable
+        'dwollaCustomerId',      // Add Dwolla customer ID to fillable
     ];
 
     protected $casts = [

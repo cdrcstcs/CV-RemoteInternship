@@ -9,6 +9,7 @@
         "php": "^8.2",
         "cloudinary-labs/cloudinary-laravel": "^2.2",
         "cloudinary/cloudinary_php": "^2.14",
+        "dwolla/dwollaswagger": "^1.9",
         "get-stream/stream-chat": "^3.7",
         "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^11.31",
