@@ -40,7 +40,7 @@ const ProductDetailPage = () => {
   }, [products]);
 
   const handleAddToCart = () => {
-    addToCart(currentProduct);
+    addToCart(currentProduct.id);
   };
 
   const handleFeedbackSubmit = async (e) => {
