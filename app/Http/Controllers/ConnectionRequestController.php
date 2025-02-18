@@ -42,41 +42,60 @@ class ConnectionRequestController extends Controller
         return response()->json(['message' => "Connection request sent successfully"], 201);
     }
 
+
     public function acceptConnectionRequest(Request $request, $requestId)
     {
         $userId = $request->user()->id;
+        
+        // Log the incoming request and user ID
+        Log::info("User {$userId} is attempting to accept connection request {$requestId}");
+
         $connectionRequest = ConnectionRequest::findOrFail($requestId);
 
         if ($connectionRequest->recipient_id !== $userId) {
+            // Log unauthorized access attempt
+            Log::warning("User {$userId} attempted to accept a connection request that was not intended for them (Request ID: {$requestId})");
+            
             return response()->json(['message' => "Not authorized to accept this request"], 403);
         }
 
         if ($connectionRequest->status !== 'pending') {
+            // Log that the request has already been processed
+            Log::info("Connection request {$requestId} has already been processed (status: {$connectionRequest->status}) by user {$userId}");
+            
             return response()->json(['message' => "This request has already been processed"], 400);
         }
+
+        // Log when the request is being accepted
+        Log::info("User {$userId} has accepted connection request {$requestId}");
 
         $connectionRequest->status = 'accepted';
         $connectionRequest->save();
 
-        // Use the UserConnection model to create connections
+        // Log creation of connections for both users
         UserConnection::create([
             'user_id' => $connectionRequest->sender_id,
             'connection_id' => $userId,
         ]);
+        Log::info("Connection created between user {$connectionRequest->sender_id} and user {$userId}");
 
         UserConnection::create([
             'user_id' => $userId,
             'connection_id' => $connectionRequest->sender_id,
         ]);
+        Log::info("Connection created between user {$userId} and user {$connectionRequest->sender_id}");
 
+        // Log notification creation
         Notification::create([
             'recipient_id' => $connectionRequest->sender_id,
             'type' => 'connectionAccepted',
             'related_user' => $userId,
         ]);
+        Log::info("Notification sent to user {$connectionRequest->sender_id} regarding connection acceptance from user {$userId}");
 
         return response()->json(['message' => "Connection accepted successfully"]);
     }
+
 
     public function rejectConnectionRequest(Request $request, $requestId)
     {

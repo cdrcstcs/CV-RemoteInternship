@@ -54,13 +54,13 @@ const RecommendedUser = ({ user }) => {
         return (
           <div className="flex gap-2">
             <button
-              onClick={() => acceptConnectionRequestForRecommendedUser(status.requestId)}
+              onClick={() => acceptConnectionRequestForRecommendedUser(user.id)}
               className="rounded-full p-1 flex items-center justify-center border-2 border-white text-emerald-400 hover:bg-emerald-400 hover:text-white transition-colors"
             >
               <Check size={16} />
             </button>
             <button
-              onClick={() => rejectConnectionRequestForRecommendedUser(status.requestId)}
+              onClick={() => rejectConnectionRequestForRecommendedUser(user.id)}
               className="rounded-full p-1 flex items-center justify-center border-2 border-white text-emerald-400 hover:bg-red-500 hover:text-white transition-colors"
             >
               <X size={16} />
