@@ -36,6 +36,7 @@ class ConnectionRequestController extends Controller
         $newRequest = ConnectionRequest::create([
             'sender_id' => $senderId,
             'recipient_id' => $userId,
+            'status' => 'pending',
         ]);
 
         return response()->json(['message' => "Connection request sent successfully"], 201);

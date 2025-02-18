@@ -9,7 +9,7 @@ export const useSocialMediaStore = create((set, get) => ({
   connections: [],
   notifications: [],
   post: null,
-  connectionStatus: null,
+  connectionStatuses: [],
 
   isLoadingPosts: false,
   isLoadingRecommendedUsers: false,
@@ -31,12 +31,29 @@ export const useSocialMediaStore = create((set, get) => ({
   errorMessage: '',
   errorMessagePost: "",
 
-  // Fetch connection status
   fetchConnectionStatus: async (userId) => {
     set({ isLoadingConnectionStatus: true, isErrorConnectionStatus: false, errorMessageConnectionStatus: "" });
+    
     try {
       const response = await axiosInstance.get(`/connections/status/${userId}`);
-      set({ connectionStatus: response.data });
+      
+      // Use get to retrieve current connection statuses array
+      const currentConnectionStatuses = get().connectionStatuses || [];
+  
+      // Check if the user already has a status in the array
+      const userIndex = currentConnectionStatuses.findIndex(status => status.userId === userId);
+      
+      if (userIndex >= 0) {
+        // Update the existing user status in the array
+        currentConnectionStatuses[userIndex] = { userId, status: response.data.status };
+      } else {
+        // If not found, add a new status object for the user
+        currentConnectionStatuses.push({ userId, status: response.data.status });
+      }
+  
+      // Update state with the modified array
+      set({ connectionStatuses: currentConnectionStatuses });
+      
     } catch (error) {
       set({
         isErrorConnectionStatus: true,
@@ -47,6 +64,8 @@ export const useSocialMediaStore = create((set, get) => ({
       set({ isLoadingConnectionStatus: false });
     }
   },
+  
+  
 
   // Send connection request
   sendConnectionRequest: async (userId) => {
