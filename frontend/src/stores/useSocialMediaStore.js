@@ -42,13 +42,13 @@ export const useSocialMediaStore = create((set, get) => ({
   
       // Check if the user already has a status in the array
       const userIndex = currentConnectionStatuses.findIndex(status => status.userId === userId);
-      
       if (userIndex >= 0) {
+
         // Update the existing user status in the array
-        currentConnectionStatuses[userIndex] = { userId, status: response.data.status };
+        currentConnectionStatuses[userIndex] = { userId, status: response.data };
       } else {
         // If not found, add a new status object for the user
-        currentConnectionStatuses.push({ userId, status: response.data.status });
+        currentConnectionStatuses.push({ userId, status: response.data });
       }
   
       // Update state with the modified array
@@ -119,15 +119,11 @@ export const useSocialMediaStore = create((set, get) => ({
   },
   // Create post action
   createPost: async (postData, queryClient) => {
-    try {
       const res = await axiosInstance.post("/posts/create", postData);
       toast.success("Post created successfully");
       
       // Invalidate posts query to refresh data
       queryClient.invalidateQueries({ queryKey: ["posts"] });
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create post");
-    }
   },
   // Add new actions for post, comment, like and delete
   likePost: async (postId, authUserId) => {
@@ -293,7 +289,7 @@ export const useSocialMediaStore = create((set, get) => ({
   },
 
   // Accept a connection request
-  acceptConnectionRequestForRecommendedUser: async (requestId) => {
+  acceptConnectionRequest: async (requestId) => {
     try {
       await axiosInstance.put(`/connections/accept/${requestId}`);
       toast.success("Connection request accepted");

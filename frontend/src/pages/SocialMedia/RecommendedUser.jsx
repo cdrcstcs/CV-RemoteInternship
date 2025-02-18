@@ -21,7 +21,7 @@ const RecommendedUser = ({ user }) => {
   const renderButton = () => {
     // Use get() to ensure `connectionStatuses` exists and get the status
     const status = connectionStatuses.find(conn => conn.userId === user.id); // Find the status for this user
-    
+    console.log(status);
     if (isLoadingConnectionStatus) {
       return (
         <button className="px-3 py-1 rounded-full text-sm border-2 border-white text-emerald-400" disabled>
@@ -42,7 +42,7 @@ const RecommendedUser = ({ user }) => {
       );
     }
 
-    switch (status.status) {
+    switch (status.status.status) {
       case "pending":
         return (
           <button className="px-3 py-1 rounded-full text-sm border-2 border-white text-emerald-400 flex items-center" disabled>
@@ -54,13 +54,13 @@ const RecommendedUser = ({ user }) => {
         return (
           <div className="flex gap-2">
             <button
-              onClick={() => acceptConnectionRequestForRecommendedUser(user.id)}
+              onClick={() => acceptConnectionRequestForRecommendedUser(status.status.requestId)}
               className="rounded-full p-1 flex items-center justify-center border-2 border-white text-emerald-400 hover:bg-emerald-400 hover:text-white transition-colors"
             >
               <Check size={16} />
             </button>
             <button
-              onClick={() => rejectConnectionRequestForRecommendedUser(user.id)}
+              onClick={() => rejectConnectionRequestForRecommendedUser(status.status.requestId)}
               className="rounded-full p-1 flex items-center justify-center border-2 border-white text-emerald-400 hover:bg-red-500 hover:text-white transition-colors"
             >
               <X size={16} />

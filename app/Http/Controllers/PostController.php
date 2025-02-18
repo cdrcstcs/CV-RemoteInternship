@@ -7,9 +7,18 @@ use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Integrations\files\CloudinaryImageClient; // Use the custom Cloudinary client
 
 class PostController extends Controller
 {
+
+    protected $cloudinaryClient;
+
+    public function __construct()
+    {
+        // Initialize custom Cloudinary image client
+        $this->cloudinaryClient = new CloudinaryImageClient();
+    }
     public function getFeedPosts(Request $request)
     {
         try {
@@ -32,6 +41,7 @@ class PostController extends Controller
     public function createPost(Request $request)
     {
         try {
+            // Validate the incoming request
             $request->validate([
                 'content' => 'required|string',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -39,24 +49,46 @@ class PostController extends Controller
 
             $imageUrl = null;
 
+            // Check if an image file is provided
             if ($request->hasFile('image')) {
                 $uploadedFile = $request->file('image');
-                $path = $uploadedFile->store('post_images', 'public');
-                $imageUrl = Storage::url($path);
+                $mimeType = $uploadedFile->getClientMimeType();
+                $base64Contents = base64_encode($uploadedFile->getContent());
+
+                // Upload image to Cloudinary using the custom Cloudinary client
+                $uploadResult = $this->cloudinaryClient->uploadImage($mimeType, $base64Contents);
+
+                // Check the upload result
+                if ($uploadResult->isSuccess) {
+                    $imageUrl = $uploadResult->secureUrl;
+                    Log::info('Post image uploaded to Cloudinary', ['image_url' => $imageUrl]);
+                } else {
+                    // If upload failed, throw an exception with the message from Cloudinary
+                    throw new \Exception("Cloudinary image upload failed: " . $uploadResult->msg);
+                }
             }
 
+            // Create the new post in the database
             $newPost = Post::create([
                 'author_id' => $request->user()->id,
                 'content' => $request->input('content'),
                 'image' => $imageUrl,
             ]);
 
+            // Return the newly created post along with its author relationship
             return response()->json($newPost->load('author'), 201);
         } catch (\Exception $error) {
-            Log::error("Error in createPost controller: ", ['error' => $error]);
+            // Log the exception for debugging
+            Log::error("Error in createPost controller: ", [
+                'error' => $error->getMessage(),
+                'stack' => $error->getTraceAsString(),
+            ]);
+
+            // Return a generic server error response
             return response()->json(['message' => 'Server error'], 500);
         }
     }
+
 
     public function deletePost(Request $request, $id)
     {

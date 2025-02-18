@@ -205,29 +205,6 @@ class DatabaseSeeder extends Seeder
             $posts = array_merge($posts, $userPosts->toArray());
         }
 
-        // Create user connections
-        foreach ($users as $user) {
-            $connections = $users->where('id', '!=', $user->id)->random(rand(1, 3));
-            foreach ($connections as $connection) {
-                UserConnection::factory()->create([
-                    'user_id' => $user->id,
-                    'connection_id' => $connection->id,
-                ]);
-            }
-        }
-
-        // Create connection requests between users
-        foreach ($users as $sender) {
-            foreach ($users as $recipient) {
-                if ($sender->id !== $recipient->id) {
-                    ConnectionRequest::factory()->create([
-                        'sender_id' => $sender->id,
-                        'recipient_id' => $recipient->id,
-                    ]);
-                }
-            }
-        }
-
         // Create notifications for each user
         foreach ($users as $user) {
             Notification::factory()->count(2)->create([

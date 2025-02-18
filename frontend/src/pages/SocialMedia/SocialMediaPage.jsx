@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useSocialMediaStore from "../../stores/useSocialMediaStore";
 import PostCreation from "./PostCreation";
 import Post from "./Post";
@@ -19,24 +19,40 @@ const SocialMediaPage = () => {
     isErrorRecommendedUsers,
   } = useSocialMediaStore();
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState(recommendedUsers);
+
   useEffect(() => {
     fetchRecommendedUsers(); // Fetch recommended users data
     fetchPosts(); // Fetch posts
-  }, [ fetchRecommendedUsers, fetchPosts]);
+  }, [fetchRecommendedUsers, fetchPosts]);
+
+  // Filter the users when search query changes
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = recommendedUsers.filter((user) => {
+        const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
+        return fullName.includes(searchQuery.toLowerCase());
+      });
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers(recommendedUsers);
+    }
+  }, [searchQuery, recommendedUsers]);
 
   // Handle loading states
-  if ( isLoadingRecommendedUsers || isLoadingPosts) {
+  if (isLoadingRecommendedUsers || isLoadingPosts) {
     return <div className="text-emerald-400">Loading...</div>;
   }
 
   // Handle error states
-  if ( isErrorRecommendedUsers || isErrorPosts) {
+  if (isErrorRecommendedUsers || isErrorPosts) {
     return <div className="text-emerald-400">Error loading data. Please try again later.</div>;
   }
 
   return (
-    <div className='grid grid-cols-1 lg:grid-cols-4 gap-6 h-full p-4'>
-      <div className='col-span-1 lg:col-span-2 order-first lg:order-none border-2 border-white  rounded-lg text-emerald-400'>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full p-4">
+      <div className="col-span-1 lg:col-span-2 order-first lg:order-none border-2 border-white rounded-lg text-emerald-400">
         <PostCreation user={user} />
 
         <div
@@ -59,19 +75,29 @@ const SocialMediaPage = () => {
         </div>
 
         {posts?.length === 0 && (
-          <div className='border-2 border-white rounded-lg shadow p-8 text-emerald-400 text-center'>
-            <div className='mb-6'>
-              <Users size={64} className='mx-auto text-emerald-400' />
+          <div className="border-2 border-white rounded-lg shadow p-8 text-emerald-400 text-center">
+            <div className="mb-6">
+              <Users size={64} className="mx-auto text-emerald-400" />
             </div>
-            <h2 className='text-2xl font-bold mb-4 text-emerald-400'>No Posts Yet</h2>
+            <h2 className="text-2xl font-bold mb-4 text-emerald-400">No Posts Yet</h2>
           </div>
         )}
       </div>
 
       {recommendedUsers?.length > 0 && (
-        <div className='col-span-1 lg:col-span-2 hidden lg:block '>
-          <div className='border-2 border-white rounded-lg p-4 text-emerald-400'>
-            <h2 className='font-semibold mb-4 text-emerald-400'>People you may know</h2>
+        <div className="col-span-1 lg:col-span-2 hidden lg:block ">
+          <div className="border-2 border-white rounded-lg p-4 text-emerald-400">
+            <h2 className="font-semibold mb-4 text-emerald-400">People you may know</h2>
+
+            {/* Search Bar */}
+            <input
+              type="text"
+              placeholder="Search by name..."
+              className="w-full p-2 mb-4 border-2 border-white rounded-lg text-emerald-400"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+
             <div
               style={{
                 maxHeight: '610px',
@@ -80,7 +106,7 @@ const SocialMediaPage = () => {
                 msOverflowStyle: 'none',
               }}
             >
-              {recommendedUsers.map((user) => (
+              {filteredUsers.map((user) => (
                 <RecommendedUser key={user.id} user={user} />
               ))}
               <style jsx>{`

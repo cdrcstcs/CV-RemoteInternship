@@ -18,7 +18,7 @@ class UserController extends Controller
             // Fetch all users except the current user
             $allUsers = User::where('id', '!=', $currentUser->id)
                 ->select('id', 'first_name','last_name','phone_number','email','language','profile_picture','banner_img','headline','about')
-                ->limit(10)
+                ->limit(30)
                 ->get();
     
             return response()->json($allUsers);
