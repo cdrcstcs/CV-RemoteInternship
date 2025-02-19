@@ -37,8 +37,10 @@ const Post = ({ post }) => {
           content: newComment,
           user: {
             id: user.id,
-            name: user.name,
+            first_name: user.first_name, // Keep first_name separate
+            last_name: user.last_name,   // Keep last_name separate
             profile_picture: user.profile_picture,
+            name: `${user.first_name} ${user.last_name}`, // Concatenate name field
           },
           created_at: new Date(),
         },
@@ -66,7 +68,7 @@ const Post = ({ post }) => {
             </button>
           )}
         </div>
-		{console.log(post.image)}
+        {console.log(post.image)}
         <p className="mb-4 text-emerald-400">{post.content}</p>
         {post.image && <img  src={post.image} alt="Post content" className="rounded-lg w-full mb-4" />}
 
@@ -92,7 +94,9 @@ const Post = ({ post }) => {
               <div key={comment.id} className="mb-2 bg-transparent p-2 rounded flex items-start">
                 <div className="flex-grow">
                   <div className="flex items-center mb-1">
-                    <span className="font-semibold text-emerald-400 mr-2">{`${comment.user.first_name} ${comment.user.last_name}`}</span>
+                    <span className="font-semibold text-emerald-400 mr-2">
+                      {`${comment.user.first_name} ${comment.user.last_name}`} {/* Concatenate first_name and last_name */}
+                    </span>
                     <span className="text-xs text-emerald-400">
                       {isNaN(new Date(comment.created_at).getTime())
                         ? "Error: Invalid date"

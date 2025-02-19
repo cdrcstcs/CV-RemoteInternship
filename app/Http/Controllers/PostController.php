@@ -161,12 +161,16 @@ class PostController extends Controller
             $post = Post::findOrFail($id);
             $userId = $request->user()->id;
 
-            if ($post->likes()->where('user_id', $userId)->exists()) {
-                // Unlike the post
-                $post->likes()->detach($userId);
+            // Get the current likes for the post
+            $likes = $post->likes()->pluck('user_id')->toArray();
+
+            if (in_array($userId, $likes)) {
+                // If the user already liked, remove like
+                $post->likes()->sync(array_diff($likes, [$userId]));
             } else {
-                // Like the post
-                $post->likes()->attach($userId);
+                // Otherwise, add like
+                $post->likes()->sync([...$likes, $userId]);
+                
                 // Create a notification if the post owner is not the user who liked
                 if ($post->author_id !== $userId) {
                     Notification::create([
@@ -184,4 +188,5 @@ class PostController extends Controller
             return response()->json(['message' => 'Server error'], 500);
         }
     }
+
 }

@@ -28,11 +28,15 @@ class Post extends Model
         return $this->hasMany(Comment::class, 'post_id');
     }
 
+    // public function likes()
+    // {
+    //     return $this->hasMany(Like::class, 'post_id');
+    // }
     public function likes()
     {
-        return $this->hasMany(Like::class, 'post_id');
+        return $this->belongsToMany(User::class, 'likes', 'post_id', 'user_id');
     }
-
+    
     public function likeCount()
     {
         return $this->likes()->count();
