@@ -43,13 +43,10 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/get-token', [StreamTokenController::class, 'getToken']);
 
         Route::get('/user/conversations', [MessageController::class, 'getConversationsForSidebar']);
-
         Route::get('/conversations/{conversationId}/messages', [MessageController::class, 'getMessages']);
-
         Route::post('/message/store', [MessageController::class, 'store']);
         Route::delete('/messages/{messageId}', [MessageController::class, 'deleteMessage']);
         Route::get('/messages/load-older/{firstMessageId}', [MessageController::class, 'loadOlder']);
-
         Route::post('/group/store', [GroupController::class, 'store']);
         Route::put('/group/update/{groupId}', [GroupController::class, 'update']);
         Route::delete('/group/destroy/{groupId}', [GroupController::class, 'destroy']);
@@ -82,18 +79,15 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/connections', [ConnectionRequestController::class, 'getUserConnections']);
         Route::delete('/connections/{userId}', [ConnectionRequestController::class, 'removeConnection']);
         Route::get('/connections/status/{userId}', [ConnectionRequestController::class, 'getConnectionStatus']);
-
         Route::get('/notifications', [NotificationController::class, 'getUserNotifications']);
         Route::put('/notifications/{id}/read', [NotificationController::class, 'markNotificationAsRead']);
         Route::delete('/notifications/{id}', [NotificationController::class, 'deleteNotification']);
-
         Route::get('/posts', [PostController::class, 'getFeedPosts']);
         Route::post('/posts/create', [PostController::class, 'createPost']);
         Route::delete('/posts/delete/{id}', [PostController::class, 'deletePost']);
         Route::get('/posts/{id}', [PostController::class, 'getPostById']);
         Route::post('/posts/{id}/comment', [PostController::class, 'createComment']);
         Route::post('/posts/{id}/like', [PostController::class, 'likePost']);
-
         Route::get('/users/suggestions', [UserController::class, 'getSuggestedConnections']);
 
         Route::get('/feedback-forms/view/{id}', [FeedbackFormController::class, 'showFeedbackForm']);
