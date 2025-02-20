@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
-
+use App\Models\RouteCondition;
 $trackingNumber = 'TRACK-' . strtoupper(Str::random(10));  // Generate a random tracking number
 
 class PaymentController extends Controller
@@ -34,6 +34,7 @@ class PaymentController extends Controller
         $this->mapboxApiKey = env('MAPBOX_API_KEY');  // Updated to the correct Mapbox token name
         
     }
+
 
     /**
      * Geocode an address using Mapbox Geocoding API
@@ -641,4 +642,65 @@ public function processPayment(Request $request)
         // Return the result as an integer (in minutes)
         return (int) $diffInMinutes;
     }
+
+    public function getRouteDetailsByOrderId($orderId)
+    {
+        // Log the beginning of the request with the timestamp
+        Log::info('Fetching route details for order ID ' . $orderId . ' started at: ' . Carbon::now()->toDateTimeString());
+
+        // Record the start time for performance tracking
+        $startTime = microtime(true);
+
+        try {
+            // Fetch the shipments based on the orders_id
+            $shipments = Shipment::where('orders_id', $orderId)->get();
+
+            if ($shipments->isEmpty()) {
+                return response()->json(['error' => 'No shipments found for this order ID.'], 404);
+            }
+
+            // Log the number of shipments retrieved
+            Log::info('Number of shipments found for order ID ' . $orderId . ': ' . $shipments->count());
+
+            // Initialize an array to hold the route details for the shipments
+            $routeDetailsForShipments = [];
+
+            foreach ($shipments as $shipment) {
+                // Fetch related route optimizations for the shipment
+                $routeOptimizations = RouteOptimization::where('shipments_id', $shipment->id)->get();
+
+                // Check if there are any related route optimizations for this shipment
+                if ($routeOptimizations->isEmpty()) {
+                    continue; // Skip shipments that have no route optimizations
+                }
+
+                foreach ($routeOptimizations as $routeOptimization) {
+                    // Fetch related route details for each route optimization
+                    $routeDetails = RouteDetail::where('route_optimization_id', $routeOptimization->id)->get();
+
+                    foreach ($routeDetails as $routeDetail) {
+                        // Add the route details to the response array
+                        $routeDetailsForShipments[] = $routeDetail;
+                    }
+                }
+            }
+
+            // Log the success message and the time taken to fetch the route details
+            $endTime = microtime(true);
+            $executionTime = round($endTime - $startTime, 2); // in seconds
+            Log::info("Route details fetched successfully. Time taken: {$executionTime} seconds.");
+
+            // Return only the route details
+            return response()->json($routeDetailsForShipments);
+
+        } catch (\Exception $e) {
+            // Log any errors that occur
+            Log::error('Error fetching route details: ' . $e->getMessage());
+            Log::error('Error stack trace: ' . $e->getTraceAsString());
+
+            // Return an error response
+            return response()->json(['error' => 'An error occurred while fetching route details.'], 500);
+        }
+    }
+
 }

@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 
 export const useVehicleStore = create((set, get) => ({
   vehicles: [],
+  routeDetailsWithCoordinates: [], // New state to store the route details by orderId
   isLoading: false,
   isError: false,
   errorMessage: '',
@@ -54,9 +55,31 @@ export const useVehicleStore = create((set, get) => ({
     }
   },
 
+  // New function to fetch route details by orderId
+  getRouteDetailsByOrderId: async (orderId) => {
+    set({ isLoading: true, isError: false, errorMessage: '' }); // Start loading
+    try {
+      const response = await axiosInstance.get(`/route-details/${orderId}`);
+      const routeDetailsWithCoordinates = response.data; // Assuming route details are in the response body
+      console.log(routeDetailsWithCoordinates);
+      set({
+        routeDetailsWithCoordinates: routeDetailsWithCoordinates, // Store route details in the state
+      });
+
+      toast.success('Route details fetched successfully'); // Success toast
+    } catch (err) {
+      const message = err.response?.data?.message || 'Error fetching route details.';
+      set({ isError: true, errorMessage: message }); // Set error state
+      toast.error(message); // Display error toast
+    } finally {
+      set({ isLoading: false }); // Set loading state to false
+    }
+  },
+
   // Function to reset the store values (if needed)
   reset: () => set({
     vehicles: [],
+    routeDetailsWithCoordinates: [], // Reset route details as well
     isLoading: false,
     isError: false,
     errorMessage: '',

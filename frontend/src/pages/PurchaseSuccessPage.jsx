@@ -6,6 +6,8 @@ import { useFeedbackFormStore } from "../stores/useFeedbackFormStore";
 import Confetti from "react-confetti";
 import FeedbackFormPublicView from "./FeedbackForm/FeedbackFormPublicView";
 import { Receipt,NotebookPenIcon,Package,Truck,Home,Calendar,Factory,CheckCircle, XCircleIcon } from "lucide-react";
+import MapboxMap from "./MapBoxMap";
+import useVehicleStore from "../stores/useVehicleStore";
 const PurchaseSuccessPage = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [currentFormIndex, setCurrentFormIndex] = useState(0); // Track which form is displayed
@@ -18,11 +20,18 @@ const PurchaseSuccessPage = () => {
     isLoading: state.isLoading,
     errorMessage: state.errorMessage
   }));
+  const {routeDetailsWithCoordinates, getRouteDetailsByOrderId } = useVehicleStore();
 
   const { orderIdFromURL } = useParams();
 
   const statuses = ['Route Optimization Created', 'Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered', 'Canceled'];
 
+  useEffect(() => {
+      if (!orderId) return;
+      // Fetch route details when the component mounts or orderId changes
+      getRouteDetailsByOrderId(orderId);
+    }, [orderId, getRouteDetailsByOrderId]);
+  
   const getStatusClass = (status) => {
     const index = statuses.indexOf(status);
     const currentIndex = statuses.indexOf(orderStatus);
@@ -95,6 +104,7 @@ const PurchaseSuccessPage = () => {
 
   if (errorMessage) return <div>{`Error: ${errorMessage}`}</div>;
 
+  console.log(routeDetailsWithCoordinates);
   const handleContinueForm = () => {
     if (currentFormIndex < feedbackForms.length - 1) {
       setCurrentFormIndex(currentFormIndex + 1); // Skip to the next form
@@ -263,7 +273,7 @@ const PurchaseSuccessPage = () => {
               ))}
             </div>
           </div>
-
+          {routeDetailsWithCoordinates?.length > 0 && <MapboxMap routeDetails={routeDetailsWithCoordinates} />}
           {/* Action Buttons */}
           <div className="space-y-6">
             <button

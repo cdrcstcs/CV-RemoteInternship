@@ -71,7 +71,8 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/payment/delivery/prepare', [PaymentController::class, 'prepareDelivery']);
         Route::get('/orders/{orderId}/status', [OrderController::class, 'getOrderStatusById']);
         Route::post('/create-payment-intent', [StripeController::class, 'createPaymentIntent']);
-            
+        Route::get('/route-details/{orderId}', [PaymentController::class, 'getRouteDetailsByOrderId']);
+
         Route::post('/connections/request/{userId}', [ConnectionRequestController::class, 'sendConnectionRequest']);
         Route::put('/connections/accept/{requestId}', [ConnectionRequestController::class, 'acceptConnectionRequest']);
         Route::put('/connections/reject/{requestId}', [ConnectionRequestController::class, 'rejectConnectionRequest']);
@@ -131,5 +132,4 @@ Route::middleware('custom_cors')->group(function () {
         Route::put('/route-details/{routeDetailId}', [DeliveryController::class, 'assignVehicle']);
         Route::get('/user/vehicle', [DeliveryController::class, 'getVehicleForAuthenticatedUser']);
     });
-
 });
