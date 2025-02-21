@@ -36,6 +36,7 @@ use App\Models\{
     Message,
     Conversation,
     Group,
+    Chatbot,
 };
 use Carbon\Carbon;
 
@@ -53,6 +54,13 @@ class DatabaseSeeder extends Seeder
         // Create 100 users
         $users = User::factory(100)->create(); 
 
+        foreach ($users as $user) {
+            // Create 5 chatbots for each user, passing the user_id
+            Chatbot::factory(5)->create([
+                'user_id' => $user->id
+            ]);
+        }
+        
         // Create 5 groups
         $groups = Group::factory(5)->create(); 
 

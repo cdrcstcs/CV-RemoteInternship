@@ -505,6 +505,11 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.8.tgz#21a907684723bbbaa5f0974cf7730bd797eb8e62"
   integrity sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==
 
+"@google/generative-ai@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.15.0.tgz#5df2455235a59b16d874f3cfae2bcb7ed7478b6d"
+  integrity sha512-zs37judcTYFJf1U7tnuqnh7gdzF6dcWj9pNRxjA5JTONRoiQ0htrRdbefRFiewOIfXwhun5t9hbd2ray7812eQ==
+
 "@googlemaps/js-api-loader@1.16.8":
   version "1.16.8"
   resolved "https://registry.yarnpkg.com/@googlemaps/js-api-loader/-/js-api-loader-1.16.8.tgz#1595a2af80ca07e551fc961d921a2437d1cb3643"
@@ -4020,6 +4025,19 @@ ignore@^5.2.0:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.3.2.tgz#3cd40e729f3643fd87cb04e50bf0eb722bc596f5"
   integrity sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==
 
+imagekit-javascript@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/imagekit-javascript/-/imagekit-javascript-3.0.2.tgz#31e69b97beeda1ab3c5ed9010e71fe124039837b"
+  integrity sha512-lTlLBrb+96eDy20zz3AIZtSs4nhozoa+kRcz3Yhl/TLAvciMmKXQe2kFOWM/j8KurvG5jLeDuMI6sCp+w7y2IA==
+
+imagekitio-react@^4.1.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/imagekitio-react/-/imagekitio-react-4.2.0.tgz#71028b90840a4e850156c6d49b06274cf8130c2c"
+  integrity sha512-g6aBeOPXnU7WNjCAKx82tevSKKWoKlg8xS+BITOZn+Mk2MoyDbj8jLbyP5aiMCtMWzduabgf72wPcMaeEq++lw==
+  dependencies:
+    imagekit-javascript "^3.0.2"
+    prop-types "^15.7.2"
+
 immer@^10.0.3:
   version "10.1.1"
   resolved "https://registry.yarnpkg.com/immer/-/immer-10.1.1.tgz#206f344ea372d8ea176891545ee53ccc062db7bc"
@@ -6251,6 +6269,11 @@ react-transition-group@^4.4.5:
     dom-helpers "^5.0.1"
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
+
+react-type-animation@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/react-type-animation/-/react-type-animation-3.2.0.tgz#6863d5d60e3beb237f2bd690cceb585402c47e6a"
+  integrity sha512-WXTe0i3rRNKjmggPvT5ntye1QBt0ATGbijeW6V3cQe2W0jaMABXXlPPEdtofnS9tM7wSRHchEvI9SUw+0kUohw==
 
 react-virtuoso@^2.10.2, react-virtuoso@^2.16.5:
   version "2.19.1"
