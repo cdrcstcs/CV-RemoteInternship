@@ -28,14 +28,12 @@ class ChatbotFactory extends Factory
                 'parts' => [
                     ['text' => 'Hi, I need help with my account.']
                 ],
-                'img' => null,
             ],
             [
                 'role' => 'model',
                 'parts' => [
                     ['text' => 'Hello! How can I assist you today?']
                 ],
-                'img' => null,
             ],
             // Account-related issue
             [
@@ -43,28 +41,24 @@ class ChatbotFactory extends Factory
                 'parts' => [
                     ['text' => 'I’m having trouble logging in.']
                 ],
-                'img' => null,
             ],
             [
                 'role' => 'model',
                 'parts' => [
                     ['text' => 'I see. Are you receiving any error messages?']
                 ],
-                'img' => null,
             ],
             [
                 'role' => 'user',
                 'parts' => [
                     ['text' => 'Yes, it says my password is incorrect.']
                 ],
-                'img' => null,
             ],
             [
                 'role' => 'model',
                 'parts' => [
                     ['text' => 'Got it. Have you tried resetting your password yet?']
                 ],
-                'img' => null,
             ],
             // Resetting password flow with a slight variance
             [
@@ -72,14 +66,12 @@ class ChatbotFactory extends Factory
                 'parts' => [
                     ['text' => 'I tried, but I didn’t get the reset email.']
                 ],
-                'img' => null,
             ],
             [
                 'role' => 'model',
                 'parts' => [
                     ['text' => 'Hmm, that’s strange. Please check your spam folder.']
                 ],
-                'img' => null,
             ],
             // Offering assistance with further issues
             [
@@ -87,28 +79,24 @@ class ChatbotFactory extends Factory
                 'parts' => [
                     ['text' => 'I checked, and it’s not there. What should I do next?']
                 ],
-                'img' => null,
             ],
             [
                 'role' => 'model',
                 'parts' => [
                     ['text' => 'I can help you with that. Let me escalate the issue.']
                 ],
-                'img' => null,
             ],
             [
                 'role' => 'user',
                 'parts' => [
                     ['text' => 'Thanks for your help!']
                 ],
-                'img' => null,
             ],
             [
                 'role' => 'model',
                 'parts' => [
                     ['text' => 'You’re welcome! Let me know if you need anything else.']
                 ],
-                'img' => null,
             ],
         ];
 

@@ -24,6 +24,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\FeedbackFormController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ChatBotController;
+
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
 
@@ -50,6 +52,12 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/group/store', [GroupController::class, 'store']);
         Route::put('/group/update/{groupId}', [GroupController::class, 'update']);
         Route::delete('/group/destroy/{groupId}', [GroupController::class, 'destroy']);
+
+        Route::post('/chats', [ChatBotController::class, 'storeChat']);
+        Route::get('/userchats', [ChatBotController::class, 'getUserChats']);
+        Route::get('/chats/{id}', [ChatBotController::class, 'getChatById']);
+        Route::put('/chats/{id}', [ChatBotController::class, 'updateChat']);
+
     });
     
     // Route::middleware(['role:Administration,Customer,Customer Support Staff,Product Saler'])->group(function () {

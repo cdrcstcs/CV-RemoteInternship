@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useChatBotStore } from "../../stores/useChatBotStore"; // Import the Zustand store
-
+import useChatBotStore from "../../stores/useChatBotStore";
 const DashboardPage = () => {
   const [text, setText] = useState("");
   const navigate = useNavigate();

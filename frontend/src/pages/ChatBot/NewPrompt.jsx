@@ -43,7 +43,7 @@ const NewPrompt = ({ data }) => {
       }
 
       // Update the chat with the new answer
-      await updateChat(data._id, question, accumulatedText, null); // No image to upload
+      await updateChat(data._id, question, accumulatedText); // No image to upload
     } catch (err) {
       console.log(err);
     }

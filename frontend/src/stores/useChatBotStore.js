@@ -64,12 +64,12 @@ export const useChatBotStore = create((set) => ({
   },
 
   // Update an existing chat
-  updateChat: async (chatId, question, answer, imgFilePath) => {
+  updateChat: async (chatId, question, answer) => {
     set({ isLoading: true, isError: false, errorMessage: "" });
     try {
       const response = await axiosInstance.put(
         `/api/chats/${chatId}`,
-        { question, answer, img: imgFilePath }
+        { question, answer }
       );
       const updatedChat = response.data;
       toast.success("Chat updated successfully!");
