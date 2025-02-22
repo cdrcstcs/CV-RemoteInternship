@@ -105,6 +105,11 @@ class User extends Authenticatable  // Extend Authenticatable
         return $this->hasMany(UserConnection::class, 'user_id');
     }
 
+    public function chats()
+    {
+        return $this->hasMany(ChatBot::class, 'user_id');
+    }
+
     // Define a relationship for connected users
     public function connectedUsers()
     {

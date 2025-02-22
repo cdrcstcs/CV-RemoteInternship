@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios"; // Assuming you have axiosInstance configured
 import { toast } from "react-hot-toast";
-
+import { useNavigate } from "react-router-dom";
 // Define the store
 export const useChatBotStore = create((set) => ({
   chats: [], // Store the chat data here
@@ -14,7 +14,7 @@ export const useChatBotStore = create((set) => ({
   fetchUserChats: async () => {
     set({ isLoading: true, isError: false, errorMessage: "" });
     try {
-      const response = await axiosInstance.get("/api/userchats");
+      const response = await axiosInstance.get("/userchats");
       const chats = response.data;
       set({ chats });
     } catch (err) {
@@ -27,17 +27,15 @@ export const useChatBotStore = create((set) => ({
   },
 
   // Create a new chat
-  createChat: async (text, navigate) => {
+  createChat: async (text) => {
     set({ isLoading: true, isError: false, errorMessage: "" });
     try {
-      const response = await axiosInstance.post(
-        "/api/chats",
-        { text }
-      );
+      const navigate = useNavigate();
+      const response = await axiosInstance.post("/chats",{ text });
       const chat = response.data;
       set((state) => ({ chats: [...state.chats, chat] }));
       toast.success("Chat created successfully!");
-      navigate(`/dashboard/chats/${chat._id}`);
+      navigate(`/chatbot/chats/${chat._id}`);
     } catch (err) {
       const message = err.response?.data?.message || "Error creating chat.";
       set({ isError: true, errorMessage: message });
@@ -51,7 +49,7 @@ export const useChatBotStore = create((set) => ({
   fetchChat: async (chatId) => {
     set({ isLoading: true, isError: false, errorMessage: "" });
     try {
-      const response = await axiosInstance.get(`/api/chats/${chatId}`);
+      const response = await axiosInstance.get(`/chats/${chatId}`);
       const chat = response.data;
       set({ chat });
     } catch (err) {
@@ -67,10 +65,7 @@ export const useChatBotStore = create((set) => ({
   updateChat: async (chatId, question, answer) => {
     set({ isLoading: true, isError: false, errorMessage: "" });
     try {
-      const response = await axiosInstance.put(
-        `/api/chats/${chatId}`,
-        { question, answer }
-      );
+      const response = await axiosInstance.put(`/chats/${chatId}`,{ question, answer });
       const updatedChat = response.data;
       toast.success("Chat updated successfully!");
       return updatedChat;

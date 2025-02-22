@@ -39,6 +39,9 @@ import SocialMediaPage from "./pages/SocialMedia/SocialMediaPage.jsx";
 import NotificationsPage from "./pages/SocialMedia/NotificationsPage.jsx";
 import NetworkPage from "./pages/SocialMedia/NetworkPage.jsx";
 import ChatWrapper from "./pages/Chat/ChatWrapper.jsx";
+import DashboardLayout from "./pages/ChatBot/DashboardLayout.jsx";
+import DashboardPage from "./pages/ChatBot/DashboardPage.jsx";
+import ChatPage from "./pages/ChatBot/ChatPage.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -120,6 +123,11 @@ function App() {
             <Route path="edit" element={<EditProfilePage />} />
             <Route path="change-password" element={<ChangePasswordPage />} />
             <Route path="address" element={<UserAddressesPage />} />
+          </Route>
+
+          <Route path="/chatbot" element={user ? <DashboardLayout /> : <Navigate to="/login" />}>
+            <Route index element={<DashboardPage />} />  {/* This handles the "/chatbot" path */}
+            <Route path="chats/:id" element={<ChatPage />} />  {/* This handles "/chatbot/chats/:id" */}
           </Route>
 
           <Route path="/feedback-forms/create" element={user ? <CreateFeedbackForm /> : <Navigate to="/login" />} />
