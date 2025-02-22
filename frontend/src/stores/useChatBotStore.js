@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios"; // Assuming you have axiosInstance configured
 import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+
 // Define the store
 export const useChatBotStore = create((set) => ({
   chats: [], // Store the chat data here
@@ -27,15 +27,14 @@ export const useChatBotStore = create((set) => ({
   },
 
   // Create a new chat
-  createChat: async (text) => {
+  createChat: async (text, navigate) => {
     set({ isLoading: true, isError: false, errorMessage: "" });
     try {
-      const navigate = useNavigate();
       const response = await axiosInstance.post("/chats",{ text });
       const chat = response.data;
       set((state) => ({ chats: [...state.chats, chat] }));
       toast.success("Chat created successfully!");
-      navigate(`/chatbot/chats/${chat._id}`);
+      navigate(`/chatbot/chats/${chat.id}`);
     } catch (err) {
       const message = err.response?.data?.message || "Error creating chat.";
       set({ isError: true, errorMessage: message });

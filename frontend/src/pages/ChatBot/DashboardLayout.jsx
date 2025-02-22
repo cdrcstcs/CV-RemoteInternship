@@ -1,12 +1,16 @@
 import { Outlet } from "react-router-dom";
 import ChatList from "./ChatList";
+
 const DashboardLayout = () => {
   return (
-    <div className="flex gap-12 pt-5 h-full">
-      <div className="flex-1">
+    <div className="h-screen flex flex-col lg:flex-row">
+      {/* Sidebar (Chat List) */}
+      <div className="w-full lg:w-1/4 p-5">
         <ChatList />
       </div>
-      <div className="flex-4 bg-[#12101b]">
+
+      {/* Main content area */}
+      <div className="w-full lg:w-3/4 p-5">
         <Outlet />
       </div>
     </div>

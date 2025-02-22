@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useChatBotStore from "../../stores/useChatBotStore";
 const DashboardPage = () => {
   const [text, setText] = useState("");
+  const navigate = useNavigate();
 
   // Get the necessary state and actions from your Zustand store
   const { createChat, isLoading } = useChatBotStore();
@@ -9,7 +11,8 @@ const DashboardPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text) return;
-    createChat(text); // Call the createChat action from the store
+
+    createChat(text, navigate); // Call the createChat action from the store
   };
 
   return (

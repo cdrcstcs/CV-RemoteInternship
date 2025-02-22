@@ -9,9 +9,9 @@ const ChatList = () => {
     // Fetch user chats when the component mounts
     fetchUserChats();
   }, [fetchUserChats]);
-
+  console.log(chats);
   return (
-    <div className="flex flex-col h-full">
+    <div className="pt-12 flex flex-col h-full">
       <Link to="/chatbot" className="p-2 rounded-md hover:bg-gray-700">
         Create a new Chat
       </Link>
@@ -24,11 +24,11 @@ const ChatList = () => {
           ? 'Something went wrong!'
           : chats?.map((chat) => (
               <Link
-                to={`/chatbot/chats/${chat._id}`}
-                key={chat._id}
-                className="p-2 rounded-md hover:bg-gray-700"
+                to={`/chatbot/chats/${chat.id}`}
+                key={chat.id}
+                className="p-2 rounded-md hover:bg-gray-700 text-white"
               >
-                {chat.title}
+              {chat.history[chat.history.length - 1]?.parts[0]?.text}
               </Link>
             ))}
       </div>

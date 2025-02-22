@@ -7,13 +7,16 @@ const NewPrompt = ({ data }) => {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
 
-  const chat = model.startChat({
-    history: [
-      data?.history.map(({ role, parts }) => ({
+  // Ensure the first entry in the history has a role of 'user'
+  const formattedHistory = data?.history?.length > 0
+    ? data.history.map(({ role, parts }) => ({
         role,
         parts: [{ text: parts[0].text }],
-      })),
-    ],
+      }))
+    : [{ role: 'user', parts: [{ text: "Hello, how can I assist you?" }] }];
+
+  const chat = model.startChat({
+    history: formattedHistory,
     generationConfig: {
       // maxOutputTokens: 100,
     },
@@ -43,7 +46,7 @@ const NewPrompt = ({ data }) => {
       }
 
       // Update the chat with the new answer
-      await updateChat(data._id, question, accumulatedText); // No image to upload
+      await updateChat(data.id, question, accumulatedText); // No image to upload
     } catch (err) {
       console.log(err);
     }
@@ -73,12 +76,12 @@ const NewPrompt = ({ data }) => {
   return (
     <>
       {/* ADD NEW CHAT */}
-      {question && <div className="message user">{question}</div>}
-      {answer && (
+      {/* {question && <div className="message user">{question}</div>} */}
+      {/* {answer && (
         <div className="message">
           <Markdown>{answer}</Markdown>
         </div>
-      )}
+      )} */}
       <div className="endChat" ref={endRef}></div>
       <form
         className="newForm flex items-center gap-5 px-5 py-2 absolute bottom-0 bg-[#2c2937] rounded-2xl w-1/2"
