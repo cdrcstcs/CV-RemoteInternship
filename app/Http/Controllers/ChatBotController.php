@@ -1,14 +1,55 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
+use App\Models\Product;
+use App\Models\Post;
+use App\Models\Coupon;
 use App\Models\ChatBot;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ChatBotController extends Controller
 {
+
+    /**
+     * Gather necessary information for the AI chatbot.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function gatherChatbotContext()
+    {
+        // Fetch latest comments for each post (if needed)
+        $comments = Comment::with('post', 'user')->get();
+
+        // Fetch products data
+        $products = Product::with('supplier', 'categories', 'coupons')->get();
+
+        // Fetch posts and their associated comments and likes
+        $posts = Post::with(['author', 'comments', 'likes'])->get();
+
+        // Fetch coupons (products and users associated with them)
+        $coupons = Coupon::with('users', 'products')->get();
+
+        // Fetch roles and permissions (assuming this is relevant to your context)
+        $roles = Role::with('permissions')->get();
+
+        // Optional: You can combine all the data into a single structure to make it easy to pass
+        $contextData = [
+            'comments' => $comments,
+            'products' => $products,
+            'posts' => $posts,
+            'coupons' => $coupons,
+            'roles' => $roles,
+        ];
+
+        // Return the gathered data (or format as necessary)
+        return response()->json($contextData);
+    }
+
     // Store a new chat
     public function storeChat(Request $request)
     {

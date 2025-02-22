@@ -30,13 +30,23 @@ const NewPrompt = ({ data }) => {
   }, [data, question, answer]);
 
   // Use the Zustand store
-  const { updateChat } = useChatBotStore();
+  const { updateChat, fetchChatbotContext, chatbotContext } = useChatBotStore();
+
+  useEffect(() => {
+    fetchChatbotContext();
+  }, [fetchChatbotContext]);
 
   const add = async (text, isInitial) => {
     if (!isInitial) setQuestion(text);
 
     try {
-      const result = await chat.sendMessageStream([text]);
+      // Prepare the context data before sending the user prompt
+      const contextMessage = `Here is the context data for you: ${chatbotContext}. Now, based on this context, please answer the following question:`;
+
+      // Combine context and user prompt
+      const combinedMessage = `${contextMessage} ${text}`;
+      
+      const result = await chat.sendMessageStream([combinedMessage]);
       let accumulatedText = "";
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();

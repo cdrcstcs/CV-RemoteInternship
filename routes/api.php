@@ -57,6 +57,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/userchats', [ChatBotController::class, 'getUserChats']);
         Route::get('/chats/{id}', [ChatBotController::class, 'getChatById']);
         Route::put('/chats/{id}', [ChatBotController::class, 'updateChat']);
+        Route::get('/chatbot/context', [ChatbotController::class, 'gatherChatbotContext']);
 
     });
     
