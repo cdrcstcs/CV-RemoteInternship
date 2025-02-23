@@ -8,6 +8,7 @@ import FeedbackFormPublicView from "./FeedbackForm/FeedbackFormPublicView";
 import { Receipt,NotebookPenIcon,Package,Truck,Home,Calendar,Factory,CheckCircle, XCircleIcon } from "lucide-react";
 import MapboxMap from "./MapBoxMap";
 import useVehicleStore from "../stores/useVehicleStore";
+import useMailStore from "../stores/useMailStore";
 const PurchaseSuccessPage = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [currentFormIndex, setCurrentFormIndex] = useState(0); // Track which form is displayed
@@ -20,12 +21,43 @@ const PurchaseSuccessPage = () => {
     isLoading: state.isLoading,
     errorMessage: state.errorMessage
   }));
+  const { sendMail, isProcessingMail, isErrorMail, errorMessageMail, isSuccessMail } = useMailStore();
+
+  const orderData = {
+    cart: cart,
+    orderId: orderId,
+    routeDetails: routeDetails,
+    totalAmount: totalAmount,
+    discountAmount: discountAmount,
+    totalAfterDiscount: totalAfterDiscount,
+    orderStatus: orderStatus,
+    totalDistance: totalDistance, // Replace with actual value
+    feedbackForms: feedbackForms, // Replace with actual feedback forms if any
+  };
+
   const {routeDetailsWithCoordinates, getRouteDetailsByOrderId } = useVehicleStore();
 
   const { orderIdFromURL } = useParams();
 
   const statuses = ['Route Optimization Created', 'Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered', 'Canceled'];
 
+  useEffect(() => {
+    if (
+      orderId != null &&
+      cart != null &&
+      routeDetails != null &&
+      totalAmount != null &&
+      discountAmount != null &&
+      totalAfterDiscount != null &&
+      orderStatus != null &&
+      totalDistance != null &&
+      feedbackForms != null
+    ) {
+      sendMail(orderData); // Call the sendMail function only if all values are non-null
+    }
+  }, [orderData, sendMail]);
+  
+  
   useEffect(() => {
       if (!orderId) return;
       // Fetch route details when the component mounts or orderId changes
@@ -103,6 +135,19 @@ const PurchaseSuccessPage = () => {
   if (isProcessing || isLoading || isLoadingForm) return <div>Processing...</div>;
 
   if (errorMessage) return <div>{`Error: ${errorMessage}`}</div>;
+
+  if (isProcessingMail) {
+    return <div>Processing...</div>;
+  }
+
+  if (isErrorMail) {
+    return <div>{`Error: ${errorMessageMail}`}</div>;
+  }
+
+  if (isSuccessMail) {
+    return <div>Order processed and email sent successfully!</div>;
+  }
+
 
   console.log(routeDetailsWithCoordinates);
   const handleContinueForm = () => {

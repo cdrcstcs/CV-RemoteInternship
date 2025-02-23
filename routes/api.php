@@ -25,6 +25,7 @@ use App\Http\Controllers\FeedbackFormController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ChatBotController;
+use App\Http\Controllers\MailController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -58,6 +59,7 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/chats/{id}', [ChatBotController::class, 'getChatById']);
         Route::put('/chats/{id}', [ChatBotController::class, 'updateChat']);
         Route::get('/chatbot/context', [ChatbotController::class, 'gatherChatbotContext']);
+        Route::post('/send-email', [MailController::class, 'sendEMail']);
 
     });
     
