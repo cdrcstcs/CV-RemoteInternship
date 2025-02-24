@@ -12,6 +12,7 @@ import useMailStore from "../stores/useMailStore";
 const PurchaseSuccessPage = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [currentFormIndex, setCurrentFormIndex] = useState(0); // Track which form is displayed
+  const [isMailSent, setIsMailSent] = useState(false);
   const { cart, orderId, clearCart, routeDetails, totalDistance, totalAmount, discountAmount, totalAfterDiscount } = useCartStore();
   const { getFeedbackFormsForOrder, isLoadingForm, feedbackForms } = useFeedbackFormStore();
   const { orderStatus, getOrderStatusById, listenForOrderStatusUpdates, isLoading, errorMessage } = useOrderStore(state => ({
@@ -23,17 +24,6 @@ const PurchaseSuccessPage = () => {
   }));
   const { sendMail, isProcessingMail, isErrorMail, errorMessageMail, isSuccessMail } = useMailStore();
 
-  const orderData = {
-    cart: cart,
-    orderId: orderId,
-    routeDetails: routeDetails,
-    totalAmount: totalAmount,
-    discountAmount: discountAmount,
-    totalAfterDiscount: totalAfterDiscount,
-    orderStatus: orderStatus,
-    totalDistance: totalDistance, // Replace with actual value
-    feedbackForms: feedbackForms, // Replace with actual feedback forms if any
-  };
 
   const {routeDetailsWithCoordinates, getRouteDetailsByOrderId } = useVehicleStore();
 
@@ -41,21 +31,33 @@ const PurchaseSuccessPage = () => {
 
   const statuses = ['Route Optimization Created', 'Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered', 'Canceled'];
 
-  useEffect(() => {
-    if (
-      orderId != null &&
-      cart != null &&
-      routeDetails != null &&
-      totalAmount != null &&
-      discountAmount != null &&
-      totalAfterDiscount != null &&
-      orderStatus != null &&
-      totalDistance != null &&
-      feedbackForms != null
-    ) {
-      sendMail(orderData); // Call the sendMail function only if all values are non-null
-    }
-  }, [orderData, sendMail]);
+  // const orderData = {
+  //   cart: cart,
+  //   orderId: orderId,
+  //   routeDetails: routeDetails,
+  //   totalAmount: totalAmount,
+  //   discountAmount: discountAmount,
+  //   totalAfterDiscount: totalAfterDiscount,
+  //   orderStatus: orderStatus,
+  //   totalDistance: totalDistance, // Replace with actual value
+  // };
+  // useEffect(() => {
+  //   // Prevent sending mail again if it's already been sent or there's an error
+  //   if (
+  //     orderId != null &&
+  //     cart != null &&
+  //     routeDetails != null &&
+  //     totalAmount != null &&
+  //     discountAmount != null &&
+  //     totalAfterDiscount != null &&
+  //     orderStatus != null &&
+  //     totalDistance != null &&
+  //     !isMailSent && errorMessageMail === "" && !isErrorMail 
+  //   ) {
+  //     sendMail(orderData); // Call the sendMail function only if all values are non-null
+  //     setIsMailSent(true); // Mark the mail as sent
+  //   }
+  // }, [orderData, isMailSent, errorMessageMail, isErrorMail]); // Adding isMailSent and errorMessageMail to dependencies ensures the effect only runs once when these change
   
   
   useEffect(() => {

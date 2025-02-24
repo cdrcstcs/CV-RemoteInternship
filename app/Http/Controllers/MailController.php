@@ -21,7 +21,6 @@ class MailController extends Controller
             'totalAfterDiscount' => $request->input('totalAfterDiscount'),
             'orderStatus' => $request->input('orderStatus'),
             'totalDistance' => $request->input('totalDistance'),
-            'feedbackForms' => $request->input('feedbackForms')
         ]);
 
         // Validate the incoming request
@@ -34,7 +33,6 @@ class MailController extends Controller
             'totalAfterDiscount' => 'required|numeric',
             'orderStatus' => 'required|string',
             'totalDistance' => 'required|numeric',
-            'feedbackForms' => 'required|array',
         ]);
 
         // Extract variables from request
@@ -46,7 +44,6 @@ class MailController extends Controller
         $totalAfterDiscount = $validatedData['totalAfterDiscount'];
         $orderStatus = $validatedData['orderStatus'];
         $totalDistance = $validatedData['totalDistance'];
-        $feedbackForms = $validatedData['feedbackForms'];
 
         // Log extracted data after validation
         Log::info('Validated order data', [
@@ -58,7 +55,6 @@ class MailController extends Controller
             'totalAfterDiscount' => $totalAfterDiscount,
             'orderStatus' => $orderStatus,
             'totalDistance' => $totalDistance,
-            'feedbackFormsCount' => count($feedbackForms)
         ]);
 
         // Format the cart items
@@ -92,7 +88,6 @@ class MailController extends Controller
             'totalAfterDiscount' => number_format($totalAfterDiscount, 2),
             'orderStatus' => $orderStatus ?: 'Pending',
             'totalDistance' => $totalDistance ?: '0',
-            'feedbackFormsAvailable' => count($feedbackForms) > 0 ? count($feedbackForms) : 0,
         ];
 
         // Log order summary before sending email
@@ -103,7 +98,6 @@ class MailController extends Controller
             'orderSummary' => $orderSummary,
             'cartItems' => $cartItems,
             'routeDetails' => $routeDetailsFormatted,
-            'feedbackFormsAvailable' => count($feedbackForms) > 0,
         ];
 
         // Send the order confirmation email
