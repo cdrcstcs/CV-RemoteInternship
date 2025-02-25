@@ -44,6 +44,7 @@
 		"jwt-decode": "^4.0.0",
 		"lucide-react": "^0.435.0",
 		"mapbox-gl": "^3.9.3",
+		"metered": "^0.3.1",
 		"next": "14.2.4",
 		"nodemailer": "^6.10.0",
 		"numeral": "^2.0.6",
@@ -68,6 +69,7 @@
 		"stream-chat": "^8.54.0",
 		"stream-chat-react": "^12.10.0",
 		"tesseract.js": "^6.0.0",
+		"twilio-video": "^2.29.0",
 		"uuid": "^10.0.0",
 		"zustand": "^4.5.5"
 	},

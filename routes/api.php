@@ -26,6 +26,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\VideoChatController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -61,6 +62,8 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/chatbot/context', [ChatbotController::class, 'gatherChatbotContext']);
         Route::post('/send-email', [MailController::class, 'sendEMail']);
 
+        Route::get('/video-chat/access_token', [VideoChatController::class, 'generateToken']);
+    
     });
     
     // Route::middleware(['role:Administration,Customer,Customer Support Staff,Product Saler'])->group(function () {
