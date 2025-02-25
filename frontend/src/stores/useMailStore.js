@@ -11,19 +11,24 @@ export const useMailStore = create((set, get) => ({
 
   // Function to process the order and send the email
   sendMail: async (orderData) => {
+    const { isProcessingMail } = get();
+
+    // Prevent sending mail if one is already being processed
+    if (isProcessingMail) return;
+
     set({ isProcessingMail: true, isErrorMail: false, errorMessageMail: "", isSuccessMail: false });
 
     try {
       // Send the order data to the backend
       const response = await axiosInstance.post("/send-email", orderData); // Replace with your backend URL
 
-        set({
-          orderData: response.data, // Store the order data in the state
-          isProcessingMail: false,
-          isSuccessMail: true,
-        });
-        toast.success("Email sent successfully!");
-      
+      set({
+        orderData: response.data, // Store the order data in the state
+        isProcessingMail: false,
+        isSuccessMail: true,
+      });
+      toast.success("Email sent successfully!");
+    
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Error sending mail";
       set({
