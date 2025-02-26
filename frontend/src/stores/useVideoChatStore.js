@@ -64,10 +64,10 @@ export const useVideoChatStore = create((set, get) => ({
     try {
       const room = await connect(token, { audio: true, video: { width: 640, height: 640 } });
 
-      // Store the room and participants in the state
+      // Store the room and participants in the state (convert Map to Array)
       set({
         room: room,
-        participants: room.participants,
+        participants: Array.from(room.participants.values()), // Convert Map to an array
         isProcessingChat: false,
         isSuccessChat: true,
       });
@@ -99,8 +99,15 @@ export const useVideoChatStore = create((set, get) => ({
 
     // Handle track subscription for remote participants
     participant.on('trackSubscribed', track => {
-      // Logic to display the participant's video
-      // You can add the track to your state here if you need to manage it
+      if (track.kind === 'video') {
+        // Render the video track for remote participant
+        const videoElement = document.createElement("video");
+        videoElement.srcObject = new MediaStream([track.mediaStreamTrack]);
+        videoElement.autoplay = true;
+        videoElement.playsInline = true;
+        const videoContainer = document.getElementById(participant.sid);
+        videoContainer.appendChild(videoElement);
+      }
     });
   },
 
