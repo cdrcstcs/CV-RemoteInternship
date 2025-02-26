@@ -42,6 +42,7 @@ import ChatWrapper from "./pages/Chat/ChatWrapper.jsx";
 import DashboardLayout from "./pages/ChatBot/DashboardLayout.jsx";
 import DashboardPage from "./pages/ChatBot/DashboardPage.jsx";
 import ChatPage from "./pages/ChatBot/ChatPage.jsx";
+import VideoChat from "./pages/Livestream/VideoChat.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -133,6 +134,8 @@ function App() {
           <Route path="/feedback-forms/create" element={user ? <CreateFeedbackForm /> : <Navigate to="/login" />} />
 
           <Route path="/chat" element={<ChatWrapper />} />
+
+          <Route path="/video-chat" element={user ? <VideoChat /> : <Navigate to="/login" />} />
 
           
         </Routes>

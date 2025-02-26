@@ -20,6 +20,7 @@
         "spatie/laravel-sluggable": "^3.7",
         "stripe/stripe-php": "^16.4",
         "taylanunutmaz/agora-token-builder": "^1.1",
+        "twilio/sdk": "^8.3",
         "tymon/jwt-auth": "^2.1"
     },
     "require-dev": {
