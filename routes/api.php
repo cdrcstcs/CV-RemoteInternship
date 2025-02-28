@@ -27,6 +27,11 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\VideoChatController;
+use App\Http\Controllers\BlockController;
+use App\Http\Controllers\FollowController;
+use App\Http\Controllers\LiveKitController;
+use App\Http\Controllers\StreamController;
+use App\Http\Controllers\ViewerController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -106,6 +111,23 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/feedback-forms/view/{id}', [FeedbackFormController::class, 'showFeedbackForm']);
         Route::post('/feedback-forms/{id}/answer', [FeedbackFormController::class, 'storeAnswer']);
 
+        Route::post('/block/{id}', [BlockController::class, 'blockUser']);
+        Route::post('/unblock/{id}', [BlockController::class, 'unblockUser']);
+        Route::get('/blocked-users', [BlockController::class, 'getBlockedUsers']);
+        Route::get('/is-blocked/{id}', [BlockController::class, 'isBlockedByUser']);
+
+        Route::post('/follow/{id}', [FollowController::class, 'followUser']);
+        Route::post('/unfollow/{id}', [FollowController::class, 'unfollowUser']);
+        Route::get('/is-following/{id}', [FollowController::class, 'isFollowingUser']);
+        Route::get('/followed-users', [FollowController::class, 'getFollowedUsers']);
+
+        Route::post('/livekit/create-ingress/{ingressType}', [LiveKitController::class, 'createIngress']);
+        Route::post('/livekit/reset-ingresses/{hostIdentity}', [LiveKitController::class, 'resetIngresses']);
+        Route::get('/livekit/create-token/{roomName}', [LiveKitController::class, 'createAccessToken']);
+
+        Route::post('/stream/update', [StreamController::class, 'updateStream']);
+
+        Route::get('/livekit/create-viewer-token/{hostIdentity}', [ViewerController::class, 'createViewerToken']);
     });
     Route::middleware(['auth:sanctum','role:Administration,ProductSaler'])->group(function () {
         Route::post('/feedback-forms', [FeedbackFormController::class, 'storeFeedbackForm']);

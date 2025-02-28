@@ -143,6 +143,71 @@ class User extends Authenticatable  // Extend Authenticatable
     {
         return $this->belongsToMany(Group::class, 'group_users');
     }
+    // New relationships for following and blocking
+    // New relationships for following and blocking
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id')
+            ->withTimestamps()
+            ->as('follow');
+    }
 
+    public function followedBy()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')
+            ->withTimestamps()
+            ->as('follow');
+    }
 
+    public function blocking()
+    {
+        return $this->belongsToMany(User::class, 'blocks', 'blocker_id', 'blocked_id')
+            ->withTimestamps()
+            ->as('block');
+    }
+
+    public function blockedBy()
+    {
+        return $this->belongsToMany(User::class, 'blocks', 'blocked_id', 'blocker_id')
+            ->withTimestamps()
+            ->as('block');
+    }
+
+    // Add a follow relationship
+    public function follow($userId)
+    {
+        if (!$this->following()->where('followed_id', $userId)->exists()) {
+            $this->following()->attach($userId);
+        }
+    }
+
+    // Remove a follow relationship
+    public function unfollow($userId)
+    {
+        if ($this->following()->where('followed_id', $userId)->exists()) {
+            $this->following()->detach($userId);
+        }
+    }
+
+    // Add a block relationship
+    public function block($userId)
+    {
+        if (!$this->blocking()->where('blocked_id', $userId)->exists()) {
+            $this->blocking()->attach($userId);
+        }
+    }
+
+    // Remove a block relationship
+    public function unblock($userId)
+    {
+        if ($this->blocking()->where('blocked_id', $userId)->exists()) {
+            $this->blocking()->detach($userId);
+        }
+    }
+
+    // Add a stream relationship if needed
+    public function stream()
+    {
+        return $this->hasOne(Stream::class, 'user_id');
+    }
 }
