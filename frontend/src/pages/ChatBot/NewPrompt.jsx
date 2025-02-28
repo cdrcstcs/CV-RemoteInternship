@@ -44,7 +44,7 @@ const NewPrompt = ({ data }) => {
       const contextMessage = `Here is the context data for you: ${chatbotContext}. Now, based on this context, please answer the following question:`;
 
       // Combine context and user prompt
-      const combinedMessage = `${contextMessage} ${text}`;
+      const combinedMessage = `${contextMessage} ${text} and give response in a professional way, means that don't sound like a robot`;
       
       const result = await chat.sendMessageStream([combinedMessage]);
       let accumulatedText = "";

@@ -47,9 +47,6 @@ const Navbar = () => {
             <Link to={"/chatbot"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Chat Bot
             </Link>
-            <Link to={"/video-chat"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              LiveStream
-            </Link>
             {user && (
               <Link
                 to={"/cart"}

@@ -62,8 +62,6 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/chatbot/context', [ChatbotController::class, 'gatherChatbotContext']);
         Route::post('/send-email', [MailController::class, 'sendEMail']);
 
-        Route::get('/video-chat/access_token', [VideoChatController::class, 'generateToken']);
-    
     });
     
     // Route::middleware(['role:Administration,Customer,Customer Support Staff,Product Saler'])->group(function () {
