@@ -16,7 +16,6 @@ use App\Http\Controllers\VehicleManagerController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\LicensePlateController;
-use App\Http\Controllers\StreamTokenController;
 use App\Http\Controllers\ConnectionRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
@@ -49,7 +48,6 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/user/addresses', [UserProfileController::class, 'getUserAddresses']);  // Get all addresses
         Route::post('/user/addresses', [UserProfileController::class, 'storeUserAddress']); // Create a new address
         Route::put('/user/addresses/{id}', [UserProfileController::class, 'updateUserAddress']); // Update an existing address
-        Route::get('/get-token', [StreamTokenController::class, 'getToken']);
 
         Route::get('/user/conversations', [MessageController::class, 'getConversationsForSidebar']);
         Route::get('/conversations/{conversationId}/messages', [MessageController::class, 'getMessages']);
