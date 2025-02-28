@@ -126,6 +126,9 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/livekit/create-token/{roomName}', [LiveKitController::class, 'createAccessToken']);
 
         Route::post('/stream/update', [StreamController::class, 'updateStream']);
+        Route::get('/streams', [StreamController::class, 'getStreams']);
+        Route::get('/recommended-users/stream', [StreamController::class, 'getRecommendedUsers']);
+        Route::get('/search-streams', [StreamController::class, 'searchStreams']);
 
         Route::get('/livekit/create-viewer-token/{hostIdentity}', [ViewerController::class, 'createViewerToken']);
     });
