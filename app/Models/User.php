@@ -210,4 +210,11 @@ class User extends Authenticatable  // Extend Authenticatable
     {
         return $this->hasOne(Stream::class, 'user_id');
     }
+
+    // Define the "blocks" relationship to the Block model (where a user is blocking others)
+    public function blocks()
+    {
+        return $this->hasMany(Block::class, 'blocker_id'); // assuming 'blocker_id' is the foreign key in the 'blocks' table
+    }
+
 }

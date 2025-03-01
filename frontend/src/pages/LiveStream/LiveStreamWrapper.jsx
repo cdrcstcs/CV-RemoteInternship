@@ -27,7 +27,7 @@ const DashboardLayout = () => {
       <div
         className={`${
           isDarkMode ? "dark" : "light"
-        } flex bg-gray-900 text-gray-900 w-full h-full`}
+        } flex bg-gray-900 text-gray-900 w-full h-screen`}
       >
         <Sidebar onStreamSelect={handleStreamSelect} /> {/* Pass down the handler to Sidebar */}
         <main

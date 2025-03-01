@@ -46,11 +46,11 @@ const Sidebar = ({ onStreamSelect }) => {
       </div>
 
       {/* Stream List Section */}
-      <div className={`mt-6 ${isSidebarCollapsed ? "hidden" : "block"}`}>
+      <div className={`mt-6 ${isSidebarCollapsed ? "hidden" : "block"} overflow-y-auto`}>
         <h3 className="text-white font-bold text-lg mb-4 px-4">Active Streams</h3>
         {/* Render a list of streams if available */}
         {streamData && streamData.length > 0 ? (
-          <ul className="space-y-3 px-4">
+          <ul className="space-y-3 px-4 max-h-[calc(100vh-120px)] overflow-y-auto">
             {streamData.map((stream) => (
               <li
                 key={stream.id}

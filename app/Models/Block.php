@@ -20,4 +20,6 @@ class Block extends Model
     {
         return $this->belongsTo(User::class, 'blocked_id');
     }
+    // Define the inverse of the 'blocks' relationship
+    
 }
