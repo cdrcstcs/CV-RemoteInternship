@@ -3,8 +3,7 @@ import { Track } from "livekit-client";
 import { useTracks } from "@livekit/components-react";
 
 import { VolumeControl } from "./VolumeControl";
-import { FullscreenControl } from "./FullscreenControl";
-
+import FullscreenControl from "./FullscreenControl";
 const LiveVideo = ({ participant }) => {
   const videoRef = useRef(null);
   const wrapperRef = useRef(null);

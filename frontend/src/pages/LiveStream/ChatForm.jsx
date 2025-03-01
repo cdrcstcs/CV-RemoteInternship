@@ -75,7 +75,7 @@ export const ChatForm = ({
   );
 };
 
-export const ChatInfo = ({ isDelayed, isFollowersOnly }) => {
+export const ChatFormSkeleton = ({ isDelayed, isFollowersOnly }) => {
   return (
     <div className="text-sm text-gray-500 mb-2">
       {isDelayed && <p>Message delay is active...</p>}

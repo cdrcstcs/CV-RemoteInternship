@@ -115,7 +115,7 @@ class FollowController extends Controller
 
         Log::info("User {$self->id} checked follow status of user {$id}: " . ($existingFollow !== null ? 'Following' : 'Not Following'));
 
-        return response()->json(['isFollowing' => $existingFollow !== null]);
+        return response()->json($existingFollow !== null);
     }
 
     // Get the list of users that the current user is following

@@ -1,6 +1,5 @@
 import { Pencil } from "lucide-react";
-import { InfoModal } from "./InfoModal";
-
+import InfoModal from "./InfoModal";
 const InfoCard = ({ name, thumbnailUrl, hostIdentity, viewerIdentity }) => {
   const hostAsViewer = `Host-${hostIdentity}`;
   const isHost = viewerIdentity === hostAsViewer;

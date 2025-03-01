@@ -1,8 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useParticipants } from "@livekit/components-react"; // Using useParticipants hook
 
-import { CommunityItem } from "./CommunityItem"; // Assuming you have this component for individual items
-
+import CommunityItem from "./CommunityItem";
 export const ChatCommunity = ({
   hostName,
   viewerName,

@@ -53,10 +53,6 @@ class UserController extends Controller
         ]);
 
         // Return a success response
-        return response()->json([
-            'success' => true,
-            'message' => 'Profile updated successfully.',
-            'user' => $user,
-        ]);
+        return response()->json($user);
     }
 }

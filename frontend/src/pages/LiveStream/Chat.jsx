@@ -7,8 +7,7 @@ import {
   useRemoteParticipant,
 } from "@livekit/components-react";
 
-import { ChatVariant, useChatSidebar } from "@/store/use-chat-sidebar";
-
+import { useChatSidebarStore } from "../../stores/useChatSideBarStore";
 import { ChatForm, ChatFormSkeleton } from "./ChatForm";
 import { ChatList, ChatListSkeleton } from "./ChatList";
 import { ChatHeader, ChatHeaderSkeleton } from "./ChatHeader";
@@ -23,6 +22,8 @@ const Chat = ({
   isChatDelayed,
   isChatFollowersOnly,
 }) => {
+  const { ChatVariant, useChatSidebar } = useChatSidebarStore();
+
   const matches = useMediaQuery("(max-width: 1024px)");
   const { variant, onExpand } = useChatSidebar((state) => state);
   const connectionState = useConnectionState();

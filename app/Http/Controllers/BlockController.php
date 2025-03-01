@@ -69,7 +69,7 @@ class BlockController extends Controller
             Log::warning("User {$id} was not in the room or failed to remove from room.");
         }
 
-        return response()->json(['message' => 'User blocked successfully', 'block' => $block]);
+        return response()->json($block);
     }
 
     // Unblock a user
@@ -125,7 +125,7 @@ class BlockController extends Controller
 
         Log::info("User {$self->id} checked block status of user {$id}: " . ($existingBlock !== null ? 'Blocked' : 'Not Blocked'));
 
-        return response()->json(['isBlocked' => $existingBlock !== null]);
+        return response()->json($existingBlock !== null);
     }
 
     // Get all blocked users

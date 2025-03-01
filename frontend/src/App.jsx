@@ -96,14 +96,15 @@ function App() {
               </Elements>
             ) : <Navigate to="/login" />}
           />
+          
+          <Route path="/social-media" element={user ? <SocialMediaPage /> : <Navigate to="/login" />} />
+          <Route path="/notification" element={user ? <NotificationsPage /> : <Navigate to="/login" />} />
+          <Route path="/network" element={user ? <NetworkPage /> : <Navigate to="/login" />} />
 
           <Route
             path="/map"
             element={user ? <WrapperMap /> : <Navigate to="/login" />}
           />
-            <Route path="/social-media" element={user ? <SocialMediaPage /> : <Navigate to="/login" />} />
-            <Route path="/notification" element={user ? <NotificationsPage /> : <Navigate to="/login" />} />
-            <Route path="/network" element={user ? <NetworkPage /> : <Navigate to="/login" />} />
             
             <Route path="/warehouse" element={user ? <Wrapper/> : <Navigate to="/login" />}>
             <Route index element={<Expenses />} />

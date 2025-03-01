@@ -9,24 +9,21 @@ const Navbar = () => {
   const { cart } = useCartStore();
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-gray-900 border-b border-emerald-800">
+    <header className="fixed top-0 left-0 w-full bg-gray-900 border-b border-emerald-800 mb-10">
       <div className="container mx-auto px-4 py-3">
-        <div className="flex flex-wrap justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-emerald-400 items-center space-x-2 flex">
-            E-Commerce
-          </Link>
-
-          <nav className="flex flex-wrap items-center gap-4">
+        <div className="flex justify-between items-center">
+          {/* Navigation bar with no wrapping and horizontal scrolling */}
+          <nav className="flex items-center gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">
             <Link to={"/"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Home
             </Link>
             <Link to={"/warehouse"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Warehouse
             </Link>
-			      <Link to={"/vehicle"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+            <Link to={"/vehicle"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Vehicle
             </Link>
-			      <Link to={"/map"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+            <Link to={"/map"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Map
             </Link>
             <Link to={"/feedback-forms/create"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">

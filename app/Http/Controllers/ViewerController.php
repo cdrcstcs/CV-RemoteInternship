@@ -68,7 +68,7 @@ class ViewerController extends Controller
             Log::info("Viewer token created for user {$self->id} for room {$host->id}.");
 
             // Return the JWT token
-            return response()->json(['token' => $token->toJwt()]);
+            return response()->json($token->toJwt());
         } catch (\Exception $e) {
             Log::error("Error creating viewer token: " . $e->getMessage());
             return response()->json(['error' => 'Internal error: ' . $e->getMessage()], 500);
