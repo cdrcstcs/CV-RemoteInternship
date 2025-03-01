@@ -1,11 +1,9 @@
 import { MessageSquare, Users } from "lucide-react";
-import { Hint } from "@/components/hint";
-import { Button } from "@/components/ui/button";
-import { ChatVariant, useChatSidebar } from "@/store/use-chat-sidebar";
+import Hint from "./Hint";
+import { useChatSidebarStore } from "../../stores/useChatSideBarStore";
 
 export const VariantToggle = () => {
-  const { variant, onChangeVariant } = useChatSidebar((state) => state);
-
+  const { ChatVariant, variant, onChangeVariant } = useChatSidebarStore();
   const isChat = variant === ChatVariant.CHAT;
 
   const Icon = isChat ? Users : MessageSquare;
@@ -19,13 +17,12 @@ export const VariantToggle = () => {
 
   return (
     <Hint label={label} side="left" asChild>
-      <Button
+      <button
         onClick={onToggle}
-        variant="ghost"
-        className="h-auto p-2 hover:bg-white/10 hover:text-primary bg-transparent"
+        className="h-auto p-2 hover:bg-white/10 hover:text-primary bg-transparent border-none cursor-pointer"
       >
         <Icon className="h-4 w-4" />
-      </Button>
+      </button>
     </Hint>
   );
 };

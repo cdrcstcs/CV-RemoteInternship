@@ -1,7 +1,5 @@
 import { Volume1, Volume2, VolumeX } from "lucide-react";
-
-import { Hint } from "@/components/hint";
-import { Slider } from "@/components/ui/slider";
+import Hint from "./Hint";
 
 export const VolumeControl = ({ onToggle, onChange, value }) => {
   const isMuted = value === 0;
@@ -17,8 +15,8 @@ export const VolumeControl = ({ onToggle, onChange, value }) => {
 
   const label = isMuted ? "Unmute" : "Mute";
 
-  const handleChange = (value) => {
-    onChange(value[0]);
+  const handleChange = (event) => {
+    onChange(+event.target.value); // `+` is used to convert the value to a number
   };
 
   return (
@@ -31,12 +29,15 @@ export const VolumeControl = ({ onToggle, onChange, value }) => {
           <Icon className="h-6 w-6" />
         </button>
       </Hint>
-      <Slider
-        className="w-[8rem] cursor-pointer"
-        onValueChange={handleChange}
-        value={[value]}
-        max={100}
-        step={1}
+
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        value={value}
+        onChange={handleChange}
+        className="w-[8rem] cursor-pointer appearance-none bg-gray-400 rounded-full h-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
   );

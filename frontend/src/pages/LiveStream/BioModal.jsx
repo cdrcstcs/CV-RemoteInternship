@@ -1,70 +1,86 @@
-"use client";
-
-import { toast } from "sonner";
-import { useState, useTransition, useRef } from "react";
-
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { updateUser } from "@/actions/user";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-
-export const BioModal = ({ initialValue }) => {
+import { useState, useTransition, useRef, useEffect } from "react";
+import useLiveStreamStore from "../../stores/useLiveStreamStore";
+export const BioModal = ({ initialHeadline, initialAbout }) => {
   const closeRef = useRef(null);
-
   const [isPending, startTransition] = useTransition();
-  const [value, setValue] = useState(initialValue || "");
+  const [headline, setHeadline] = useState(initialHeadline || "");
+  const [about, setAbout] = useState(initialAbout || "");
 
+  // Access the Zustand store's functions and state
+  const { updateUserHeadlineAndAbout, isProcessingUpdate, isErrorUpdate, errorMessageUpdate } = useLiveStreamStore();
+
+  // Handle form submission
   const onSubmit = (e) => {
     e.preventDefault();
 
+    // If update is already processing, prevent submitting
+    if (isProcessingUpdate) return;
+
     startTransition(() => {
-      updateUser({ bio: value })
-        .then(() => {
-          toast.success("User bio updated");
-          closeRef.current?.click();
-        })
-        .catch(() => toast.error("Something went wrong"));
+      updateUserHeadlineAndAbout(headline, about);
     });
   };
 
+  // Show error messages if there is an error
+  useEffect(() => {
+    if (isErrorUpdate) {
+      // You can use any alert or UI component here to display the error
+      alert(errorMessageUpdate || "Something went wrong while updating.");
+    }
+  }, [isErrorUpdate, errorMessageUpdate]);
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="link" size="sm" className="ml-auto">
-          Edit
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit user bio</DialogTitle>
-        </DialogHeader>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-6 rounded-lg w-full max-w-md">
+        <h2 className="text-2xl font-semibold mb-4">Edit user profile</h2>
         <form onSubmit={onSubmit} className="space-y-4">
-          <Textarea
-            placeholder="User bio"
-            onChange={(e) => setValue(e.target.value)}
-            value={value}
-            disabled={isPending}
-            className="resize-none"
-          />
-          <div className="flex justify-between">
-            <DialogClose ref={closeRef} asChild>
-              <Button type="button" variant="ghost">
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button disabled={isPending} type="submit" variant="primary">
-              Save
-            </Button>
+          <div>
+            <label htmlFor="headline" className="block text-sm font-medium text-gray-700">Headline</label>
+            <input
+              id="headline"
+              type="text"
+              value={headline}
+              onChange={(e) => setHeadline(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              disabled={isPending || isProcessingUpdate}
+              placeholder="Enter your headline"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="about" className="block text-sm font-medium text-gray-700">About</label>
+            <textarea
+              id="about"
+              value={about}
+              onChange={(e) => setAbout(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm resize-none"
+              rows="4"
+              disabled={isPending || isProcessingUpdate}
+              placeholder="Tell us something about you"
+            />
+          </div>
+
+          <div className="flex justify-between mt-4">
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={() => closeRef.current?.click()}
+              className="bg-gray-300 text-gray-700 hover:bg-gray-400 py-2 px-4 rounded-md"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isPending || isProcessingUpdate}
+              className={`${
+                isPending || isProcessingUpdate ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
+              } text-white py-2 px-4 rounded-md`}
+            >
+              {isPending || isProcessingUpdate ? "Saving..." : "Save"}
+            </button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };

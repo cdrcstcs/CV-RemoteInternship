@@ -27,4 +27,36 @@ class UserController extends Controller
             return response()->json(['message' => 'Server error'], 500);
         }
     }
+    public function updateHeadlineAndAbout(Request $request)
+    {
+        // Validate the incoming request data
+        $validator = Validator::make($request->all(), [
+            'headline' => 'nullable|string|max:255',
+            'about' => 'nullable|string|max:1000',
+        ]);
+
+        // If validation fails, return an error response
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        // Get the currently authenticated user
+        $user = $request->user();
+
+        // Update the user's headline and about attributes
+        $user->update([
+            'headline' => $request->input('headline', $user->headline),
+            'about' => $request->input('about', $user->about),
+        ]);
+
+        // Return a success response
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully.',
+            'user' => $user,
+        ]);
+    }
 }

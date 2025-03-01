@@ -1,11 +1,7 @@
-import { toast } from "sonner";
 import { useTransition } from "react";
 import { MinusCircle } from "lucide-react";
-
-import { Hint } from "@/components/hint";
-import { onBlock } from "@/actions/block";
-import { cn, stringToColor } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import useLiveStreamStore from "../../stores/useLiveStreamStore";
+import { cn, stringToColor } from "../../helpers";
 
 const CommunityItem = ({
   hostName,
@@ -15,6 +11,19 @@ const CommunityItem = ({
 }) => {
   const [isPending, startTransition] = useTransition();
 
+  // Access the blockUser method and the block-related states from the store
+  const {
+    blockUser,
+    isProcessingBlock,
+    isErrorBlock,
+    errorMessageBlock
+  } = useLiveStreamStore((state) => ({
+    blockUser: state.blockUser,
+    isProcessingBlock: state.isProcessingBlock,
+    isErrorBlock: state.isErrorBlock,
+    errorMessageBlock: state.errorMessageBlock,
+  }));
+
   const color = stringToColor(participantName || "");
   const isSelf = participantName === viewerName;
   const isHost = viewerName === hostName;
@@ -23,9 +32,7 @@ const CommunityItem = ({
     if (!participantName || isSelf || !isHost) return;
 
     startTransition(() => {
-      onBlock(participantIdentity)
-        .then(() => toast.success(`Blocked ${participantName}`))
-        .catch(() => toast.error("Something went wrong"));
+      blockUser(participantIdentity);
     });
   };
 
@@ -33,21 +40,28 @@ const CommunityItem = ({
     <div
       className={cn(
         "group flex items-center justify-between w-full p-2 rounded-md text-sm hover:bg-white/5",
-        isPending && "opacity-50 pointer-events-none"
+        isPending || isProcessingBlock ? "opacity-50 pointer-events-none" : ""
       )}
     >
       <p style={{ color: color }}>{participantName}</p>
-      {isHost && !isSelf && (
-        <Hint label="Block">
-          <Button
-            variant="ghost"
-            disabled={isPending}
-            onClick={handleBlock}
-            className="h-auto w-auto p-1 opacity-0 group-hover:opacity-100 transition"
-          >
-            <MinusCircle className="h-4 w-4 text-muted-foreground" />
-          </Button>
-        </Hint>
+      {isHost && !isSelf && !isProcessingBlock && !isErrorBlock && (
+        <div
+          title="Block"
+          onClick={handleBlock}
+          className="h-auto w-auto p-1 opacity-0 group-hover:opacity-100 transition cursor-pointer"
+        >
+          <MinusCircle className="h-4 w-4 text-muted-foreground" />
+        </div>
+      )}
+
+      {/* Display an error message if blocking fails */}
+      {isErrorBlock && errorMessageBlock && (
+        <p className="text-xs text-red-500">{errorMessageBlock}</p>
+      )}
+
+      {/* Show loading state */}
+      {isProcessingBlock && (
+        <p className="text-xs text-muted-foreground">Blocking...</p>
       )}
     </div>
   );

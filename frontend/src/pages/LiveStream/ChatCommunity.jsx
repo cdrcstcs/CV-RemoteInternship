@@ -1,10 +1,7 @@
-import { useMemo, useState } from "react";
-import { useDebounce } from "usehooks-ts";
-import { useParticipants } from "@livekit/components-react";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMemo, useState, useEffect } from "react";
+import { useParticipants } from "@livekit/components-react"; // Using useParticipants hook
 
-import { CommunityItem } from "./CommunityItem";
+import { CommunityItem } from "./CommunityItem"; // Assuming you have this component for individual items
 
 export const ChatCommunity = ({
   hostName,
@@ -12,7 +9,18 @@ export const ChatCommunity = ({
   isHidden,
 }) => {
   const [value, setValue] = useState("");
-  const debouncedValue = useDebounce(value, 500);
+  const [debouncedValue, setDebouncedValue] = useState("");
+
+  // Debouncing logic: Update the debounced value after a delay of 500ms
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler); // Cleanup the previous timeout on value change
+    };
+  }, [value]);
 
   const participants = useParticipants();
 
@@ -46,15 +54,17 @@ export const ChatCommunity = ({
 
   return (
     <div className="p-4">
-      <Input
+      <input
+        type="text"
+        value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search community"
-        className="border-white/10"
+        className="border border-gray-300 p-2 rounded-md w-full"
       />
-      <ScrollArea className="gap-y-2 mt-4">
-        <p className="text-center text-sm text-muted-foreground hidden last:block p-2">
-          No results
-        </p>
+      <div className="gap-y-2 mt-4 overflow-y-auto max-h-60">
+        {filteredParticipants.length === 0 && (
+          <p className="text-center text-sm text-muted-foreground p-2">No results</p>
+        )}
         {filteredParticipants.map((participant) => (
           <CommunityItem
             key={participant.identity}
@@ -64,7 +74,7 @@ export const ChatCommunity = ({
             participantIdentity={participant.identity}
           />
         ))}
-      </ScrollArea>
+      </div>
     </div>
   );
 };

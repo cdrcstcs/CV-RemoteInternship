@@ -1,41 +1,23 @@
-import { toast } from "sonner";
 import { useState, useTransition, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
-import Image from "next/image";
-
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Hint } from "@/components/hint";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { updateStream } from "@/actions/stream";
-import { UploadDropzone } from "@/lib/uploadthing";
+import Hint from "./Hint";
+import useLiveStreamStore from "../../stores/useLiveStreamStore";
 
 const InfoModal = ({ initialName, initialThumbnailUrl }) => {
-  const router = useRouter();
   const closeRef = useRef(null);
   const [isPending, startTransition] = useTransition();
 
+  // Access stream state from the store
+  const { streamData, isProcessingStream, isErrorStream, errorMessageStream, updateStream } = useLiveStreamStore();
+
   const [name, setName] = useState(initialName);
   const [thumbnailUrl, setThumbnailUrl] = useState(initialThumbnailUrl);
+  const [newThumbnail, setNewThumbnail] = useState(null); // State for new thumbnail file
 
   const onRemove = () => {
     startTransition(() => {
-      updateStream({ thumbnail: null })
-        .then(() => {
-          toast.success("Thumbnail removed");
-          setThumbnailUrl("");
-          closeRef?.current?.click();
-        })
-        .catch(() => toast.error("Something went wrong"));
+        updateStream({ thumbnail: null });
+        closeRef?.current?.click();
     });
   };
 
@@ -43,12 +25,8 @@ const InfoModal = ({ initialName, initialThumbnailUrl }) => {
     e.preventDefault();
 
     startTransition(() => {
-      updateStream({ title: name })
-        .then(() => {
-          toast.success("Stream updated");
-          closeRef?.current?.click();
-        })
-        .catch(() => toast.error("Something went wrong"));
+        updateStream({ title: name });
+        closeRef?.current?.click();
     });
   };
 
@@ -56,84 +34,135 @@ const InfoModal = ({ initialName, initialThumbnailUrl }) => {
     setName(e.target.value);
   };
 
+  const onThumbnailChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewThumbnail(URL.createObjectURL(file)); // Preview the image locally before upload
+    }
+  };
+
+  const onUploadThumbnail = () => {
+    if (newThumbnail) {
+      // Assuming you have an API endpoint to upload the thumbnail
+      startTransition(() => {
+          updateStream({ thumbnail: newThumbnail });
+          closeRef?.current?.click();
+        });
+    }
+  };
+
+  // If there is an error, show it
+  const renderError = () => {
+    if (isErrorStream) {
+      return (
+        <div className="text-red-500 mt-4">
+          <strong>Error:</strong> {errorMessageStream}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="link" size="sm" className="ml-auto">
-          Edit
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit stream info</DialogTitle>
-        </DialogHeader>
+    <div className="dialog">
+      <button
+        type="button"
+        className="link-button"
+        onClick={() => {}}
+      >
+        Edit
+      </button>
+      <div className="dialog-content">
+        <div className="dialog-header">
+          <h2>Edit stream info</h2>
+        </div>
         <form onSubmit={onSubmit} className="space-y-14">
           <div className="space-y-2">
-            <Label>Name</Label>
-            <Input
-              disabled={isPending}
+            <label htmlFor="name">Name</label>
+            <input
+              id="name"
+              disabled={isProcessingStream || isPending} // Disable input if processing or transition is pending
               placeholder="Stream name"
               onChange={onChange}
               value={name}
+              className="input"
             />
           </div>
+          
+          {/* Display current stream name from streamData */}
+          {streamData && streamData.title && !name && (
+            <div className="text-sm text-gray-500">
+              Current Name: {streamData.title}
+            </div>
+          )}
+
           <div className="space-y-2">
-            <Label>Thumbnail</Label>
-            {thumbnailUrl ? (
-              <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10">
-                <div className="absolute top-2 right-2 z-[10]">
-                  <Hint label="Remove thumbnail" asChild side="left">
-                    <Button
-                      type="button"
-                      disabled={isPending}
-                      onClick={onRemove}
-                      className="h-auto w-auto p-1.5"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </Hint>
-                </div>
-                <Image
-                  alt="Thumbnail"
-                  src={thumbnailUrl}
-                  fill
-                  className="object-cover"
-                />
+            <label>Thumbnail</label>
+            <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10">
+              <div className="absolute top-2 right-2 z-[10]">
+                <Hint label="Remove thumbnail" asChild side="left">
+                  <button
+                    type="button"
+                    disabled={isProcessingStream || isPending} // Disable button if processing or transition is pending
+                    onClick={onRemove}
+                    className="button-remove-thumbnail"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </button>
+                </Hint>
               </div>
-            ) : (
-              <div className="rounded-xl border outline-dashed outline-muted">
-                <UploadDropzone
-                  endpoint="thumbnailUploader"
-                  appearance={{
-                    label: {
-                      color: "#FFFFFF",
-                    },
-                    allowedContent: {
-                      color: "#FFFFFF",
-                    },
-                  }}
-                  onClientUploadComplete={(res) => {
-                    setThumbnailUrl(res?.[0]?.url);
-                    router.refresh();
-                    closeRef?.current?.click();
-                  }}
+              <img
+                alt="Thumbnail"
+                src={thumbnailUrl}
+                className="object-cover w-full h-full"
+              />
+            </div>
+          </div>
+
+          {/* File upload input for a new thumbnail */}
+          <div className="space-y-2">
+            <label htmlFor="thumbnail">Upload New Thumbnail</label>
+            <input
+              type="file"
+              accept="image/*"
+              disabled={isProcessingStream || isPending} // Disable input if processing or transition is pending
+              onChange={onThumbnailChange}
+              id="thumbnail"
+              className="input-file"
+            />
+            {newThumbnail && (
+              <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10 mt-2">
+                <img
+                  alt="New Thumbnail Preview"
+                  src={newThumbnail}
+                  className="object-cover w-full h-full"
                 />
               </div>
             )}
           </div>
+
           <div className="flex justify-between">
-            <DialogClose ref={closeRef} asChild>
-              <Button type="button" variant="ghost">
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button disabled={isPending} variant="primary" type="submit">
-              Save
-            </Button>
+            <button ref={closeRef} type="button" className="ghost-button">
+              Cancel
+            </button>
+            <button
+              disabled={isProcessingStream || isPending || !newThumbnail} // Disable if processing, pending, or no new thumbnail
+              type="button"
+              onClick={onUploadThumbnail}
+              className="primary-button"
+            >
+              {isPending ? "Uploading..." : "Upload Thumbnail"} {/* Show uploading state */}
+            </button>
+            <button disabled={isProcessingStream || isPending} type="submit" className="primary-button">
+              {isPending ? "Saving..." : "Save"} {/* Show saving state */}
+            </button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+
+        {/* Display error message if exists */}
+        {renderError()}
+      </div>
+    </div>
   );
 };
 

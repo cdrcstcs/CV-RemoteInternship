@@ -1,13 +1,9 @@
 import { toast } from "sonner";
 import { Heart } from "lucide-react";
 import { useTransition } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { onFollow, onUnfollow } from "@/actions/follow";
+import { cn } from "../../helpers";
+import { useUserStore } from "../../stores/useUserStore";
+import useLiveStreamStore from "../../stores/useLiveStreamStore";
 
 export const Actions = ({
   hostIdentity,
@@ -15,32 +11,37 @@ export const Actions = ({
   isHost,
 }) => {
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
-  const { userId } = useAuth();
+  const { followUser, unfollowUser } = useLiveStreamStore(); // Fetch the store's actions
+  const { user } = useUserStore(); // Get user data from the user store
+  const userId = user.id;
 
-  const handleFollow = () => {
+  const handleFollow = async () => {
     startTransition(() => {
-      onFollow(hostIdentity)
-        .then((data) =>
-          toast.success(`You are now following ${data.following.username}`)
-        )
-        .catch(() => toast.error("Something went wrong"));
+      try {
+        const data = followUser(hostIdentity); 
+        // Update toast to show first_name and last_name
+        toast.success(`You are now following ${data.following.first_name} ${data.following.last_name}`);
+      } catch (error) {
+        toast.error("Something went wrong");
+      }
     });
   };
 
-  const handleUnfollow = () => {
+  const handleUnfollow = async () => {
     startTransition(() => {
-      onUnfollow(hostIdentity)
-        .then((data) =>
-          toast.success(`You have unfollowed ${data.following.username}`)
-        )
-        .catch(() => toast.error("Something went wrong"));
+      try {
+        const data = unfollowUser(hostIdentity); 
+        // Update toast to show first_name and last_name
+        toast.success(`You have unfollowed ${data.following.first_name} ${data.following.last_name}`);
+      } catch (error) {
+        toast.error("Something went wrong");
+      }
     });
   };
 
   const toggleFollow = () => {
     if (!userId) {
-      return router.push("/sign-in");
+      return alert("You need to sign in first"); // Replaced Next.js router with a simple alert
     }
 
     if (isHost) return;
@@ -53,21 +54,38 @@ export const Actions = ({
   };
 
   return (
-    <Button
+    <button
       disabled={isPending || isHost}
       onClick={toggleFollow}
-      variant="primary"
-      size="sm"
-      className="w-full lg:w-auto"
+      style={{
+        width: "100%",
+        maxWidth: "auto",
+        padding: "8px 16px",
+        backgroundColor: "#007BFF",
+        color: "white",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+      }}
     >
       <Heart
         className={cn("h-4 w-4 mr-2", isFollowing ? "fill-white" : "fill-none")}
       />
       {isFollowing ? "Unfollow" : "Follow"}
-    </Button>
+    </button>
   );
 };
 
 export const ActionsSkeleton = () => {
-  return <Skeleton className="h-10 w-full lg:w-24" />;
+  return (
+    <div
+      style={{
+        height: "40px",
+        width: "100%",
+        maxWidth: "100px",
+        backgroundColor: "#e0e0e0",
+        borderRadius: "4px",
+      }}
+    />
+  );
 };

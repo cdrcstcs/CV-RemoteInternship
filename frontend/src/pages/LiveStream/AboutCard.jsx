@@ -1,6 +1,5 @@
-import { VerifiedMark } from "@/components/verified-mark";
+import { VerifiedMark } from "./VerifiedMark";
 import { BioModal } from "./BioModal";
-
 export const AboutCard = ({
   hostName,
   hostIdentity,

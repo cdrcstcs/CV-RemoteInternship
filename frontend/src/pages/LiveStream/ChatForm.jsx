@@ -1,13 +1,5 @@
-"use client";
-
 import { useState } from "react";
-
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-
-import { ChatInfo } from "./ChatInfo";
+import { cn } from "../../helpers";  // Assuming you have a helper function for conditional classnames
 
 export const ChatForm = ({
   onSubmit,
@@ -51,35 +43,43 @@ export const ChatForm = ({
       className="flex flex-col items-center gap-y-4 p-3"
     >
       <div className="w-full">
+        {/* Chat Info */}
         <ChatInfo isDelayed={isDelayed} isFollowersOnly={isFollowersOnly} />
-        <Input
+
+        <input
           onChange={(e) => onChange(e.target.value)}
           value={value}
           disabled={isDisabled}
           placeholder="Send a message"
           className={cn(
-            "border-white/10",
-            (isFollowersOnly || isDelayed) && "rounded-t-none border-t-0"
+            "w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+            (isFollowersOnly || isDelayed) && "rounded-t-none border-t-0",
+            isDisabled && "bg-gray-300 cursor-not-allowed"
           )}
         />
       </div>
+
       <div className="ml-auto">
-        <Button type="submit" variant="primary" size="sm" disabled={isDisabled}>
+        <button
+          type="submit"
+          disabled={isDisabled}
+          className={cn(
+            "px-4 py-2 text-white bg-blue-600 rounded-md",
+            isDisabled ? "bg-gray-400 cursor-not-allowed" : "hover:bg-blue-700"
+          )}
+        >
           Chat
-        </Button>
+        </button>
       </div>
     </form>
   );
 };
 
-export const ChatFormSkeleton = () => {
+export const ChatInfo = ({ isDelayed, isFollowersOnly }) => {
   return (
-    <div className="flex flex-col items-center gap-y-4 p-3">
-      <Skeleton className="w-full h-10" />
-      <div className="flex items-center gap-x-2 ml-auto">
-        <Skeleton className="h-7 w-7" />
-        <Skeleton className="h-7 w-12" />
-      </div>
+    <div className="text-sm text-gray-500 mb-2">
+      {isDelayed && <p>Message delay is active...</p>}
+      {isFollowersOnly && <p>Followers only mode</p>}
     </div>
   );
 };

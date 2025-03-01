@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import { Participant, Track } from "livekit-client";
+import { Track } from "livekit-client";
 import { useTracks } from "@livekit/components-react";
-import { useEventListener } from "usehooks-ts";
 
 import { VolumeControl } from "./VolumeControl";
 import { FullscreenControl } from "./FullscreenControl";
@@ -49,7 +48,15 @@ const LiveVideo = ({ participant }) => {
     setIsFullscreen(isCurrentlyFullscreen);
   };
 
-  useEventListener("fullscreenchange", handleFullscreenChange, wrapperRef);
+  useEffect(() => {
+    // Adding the fullscreen change event listener
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    // Cleanup the event listener when the component unmounts
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   useTracks([Track.Source.Camera, Track.Source.Microphone])
     .filter((track) => track.participant.identity === participant.identity)

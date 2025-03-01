@@ -1,10 +1,8 @@
 import { UserIcon } from "lucide-react";
 import { useParticipants, useRemoteParticipant } from "@livekit/components-react";
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { VerifiedMark } from "@/components/verified-mark";
-import { UserAvatar, UserAvatarSkeleton } from "@/components/user-avatar";
-
+import { VerifiedMark } from "./VerifiedMark";
+import { UserAvatar, UserAvatarSkeleton } from "./UserAvatar";
 import { Actions, ActionsSkeleton } from "./Actions";
 
 const Header = ({
@@ -70,8 +68,8 @@ const HeaderSkeleton = () => {
       <div className="flex items-center gap-x-2">
         <UserAvatarSkeleton size="lg" />
         <div className="space-y-2">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-4 w-24" />
+          <UserAvatarSkeleton size="md" />
+          <UserAvatarSkeleton size="sm" />
         </div>
       </div>
       <ActionsSkeleton />

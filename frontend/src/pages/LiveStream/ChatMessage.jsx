@@ -1,6 +1,5 @@
 import moment from "moment";
-import { stringToColor } from "@/lib/utils";
-
+import { stringToColor } from "../../helpers";
 export const ChatMessage = ({ data }) => {
   const color = stringToColor(data.from?.name || "");
 

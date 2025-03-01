@@ -1,5 +1,4 @@
-import { cn } from "@/lib/utils";
-
+import { cn } from "../../helpers";
 const LiveBadge = ({ className }) => {
   return (
     <div

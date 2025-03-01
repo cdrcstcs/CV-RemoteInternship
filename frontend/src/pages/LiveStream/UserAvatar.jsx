@@ -1,8 +1,6 @@
 import { cva } from "class-variance-authority";
-import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LiveBadge } from "@/components/live-badge";
+import { cn } from "../../helpers";
+import LiveBadge from "./LiveBadge";
 
 const avatarSizes = cva("", {
   variants: {
@@ -27,18 +25,26 @@ const UserAvatar = ({
 
   return (
     <div className="relative">
-      <Avatar
+      <div
         className={cn(
           isLive && "ring-2 ring-rose-500 border border-background",
-          avatarSizes({ size })
+          avatarSizes({ size }),
+          "rounded-full overflow-hidden" // This makes the avatar circular
         )}
       >
-        <AvatarImage src={imageUrl} className="object-cover" />
-        <AvatarFallback>
-          {username[0]}
-          {username[username.length - 1]}
-        </AvatarFallback>
-      </Avatar>
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={`${username}'s avatar`}
+            className="object-cover w-full h-full"
+          />
+        ) : (
+          <span className="flex items-center justify-center w-full h-full text-white bg-gray-400">
+            {username[0]}
+            {username[username.length - 1]}
+          </span>
+        )}
+      </div>
       {canShowBadge && (
         <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
           <LiveBadge />
@@ -49,7 +55,14 @@ const UserAvatar = ({
 };
 
 const UserAvatarSkeleton = ({ size }) => {
-  return <Skeleton className={cn("rounded-full", avatarSizes({ size }))} />;
+  return (
+    <div
+      className={cn(
+        "bg-gray-300 animate-pulse rounded-full",
+        avatarSizes({ size })
+      )}
+    />
+  );
 };
 
 export { UserAvatar, UserAvatarSkeleton };

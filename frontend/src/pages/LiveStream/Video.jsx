@@ -5,11 +5,9 @@ import {
   useTracks,
 } from "@livekit/components-react";
 
-import { Skeleton } from "@/components/ui/skeleton";
-
-import { OfflineVideo } from "./OfflineVideo";
-import { LoadingVideo } from "./LoadingVideo";
-import { LiveVideo } from "./LiveVideo";
+import OfflineVideo from "./OfflineVideo";
+import LoadingVideo from "./LoadingVideo";
+import LiveVideo from "./LiveVideo";
 
 export const Video = ({ hostName, hostIdentity }) => {
   const connectionState = useConnectionState();
@@ -34,8 +32,8 @@ export const Video = ({ hostName, hostIdentity }) => {
 
 export const VideoSkeleton = () => {
   return (
-    <div className="aspect-video border-x border-background">
-      <Skeleton className="h-full w-full rounded-none" />
+    <div className="aspect-video border-x border-background relative">
+      <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-md" />
     </div>
   );
 };

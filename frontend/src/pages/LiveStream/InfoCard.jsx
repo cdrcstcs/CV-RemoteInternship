@@ -1,8 +1,4 @@
-import Image from "next/image";
 import { Pencil } from "lucide-react";
-
-import { Separator } from "@/components/ui/separator";
-
 import { InfoModal } from "./InfoModal";
 
 const InfoCard = ({ name, thumbnailUrl, hostIdentity, viewerIdentity }) => {
@@ -28,7 +24,10 @@ const InfoCard = ({ name, thumbnailUrl, hostIdentity, viewerIdentity }) => {
           </div>
           <InfoModal initialName={name} initialThumbnailUrl={thumbnailUrl} />
         </div>
-        <Separator />
+        
+        {/* Replaced Separator with a simple horizontal line */}
+        <div className="border-t border-white/10 my-4"></div>
+
         <div className="p-4 lg:p-6 space-y-4">
           <div>
             <h3 className="text-sm text-muted-foreground mb-2">Name</h3>
@@ -38,11 +37,10 @@ const InfoCard = ({ name, thumbnailUrl, hostIdentity, viewerIdentity }) => {
             <h3 className="text-sm text-muted-foreground mb-2">Thumbnail</h3>
             {thumbnailUrl && (
               <div className="relative aspect-video rounded-md overflow-hidden w-[200px] border border-white/10">
-                <Image
-                  fill
+                <img
                   src={thumbnailUrl}
                   alt={name}
-                  className="object-cover"
+                  className="object-cover w-full h-full"
                 />
               </div>
             )}

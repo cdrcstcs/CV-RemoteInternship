@@ -1,8 +1,8 @@
 import { LiveKitRoom } from "@livekit/components-react";
-import { cn } from "@/lib/utils";
-import { useChatSidebar } from "@/store/use-chat-sidebar";
-import { useViewerToken } from "@/hooks/use-viewer-token";
-import { InfoCard } from "./InfoCard";
+import { cn } from "../../helpers";
+import { useChatSidebarStore } from "../../stores/useChatSideBarStore";
+import { useViewerTokenStore } from "../../stores/useViewerTokenStore";
+import InfoCard from "./InfoCard";
 import { AboutCard } from "./AboutCard";
 import { ChatToggle } from "./ChatToggle";
 import { Chat, ChatSkeleton } from "./chat";
@@ -10,8 +10,8 @@ import { Video, VideoSkeleton } from "./video";
 import { Header, HeaderSkeleton } from "./header";
 
 const StreamPlayer = ({ user, stream, isFollowing }) => {
-  const { token, name, identity } = useViewerToken(user.id);
-  const { collapsed } = useChatSidebar((state) => state);
+  const { token, name, identity } = useViewerTokenStore(user.id);
+  const { collapsed } = useChatSidebarStore();
 
   if (!token || !name || !identity) {
     return <StreamPlayerSkeleton />;
@@ -26,7 +26,7 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
       )}
       <LiveKitRoom
         token={token}
-        serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_WS_URL}
+        serverUrl={process.env.VITE_PUBLIC_LIVEKIT_WS_URL}
         className={cn(
           "grid grid-cols-1 lg:gap-y-0 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 h-full",
           collapsed && "lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2"

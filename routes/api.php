@@ -129,6 +129,8 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/search-streams', [StreamController::class, 'searchStreams']);
 
         Route::get('/livekit/create-viewer-token/{hostIdentity}', [ViewerController::class, 'createViewerToken']);
+
+        Route::put('/user/headline-about', [UserController::class, 'updateHeadlineAndAbout']);
     });
     Route::middleware(['auth:sanctum','role:Administration,ProductSaler'])->group(function () {
         Route::post('/feedback-forms', [FeedbackFormController::class, 'storeFeedbackForm']);

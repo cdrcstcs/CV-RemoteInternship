@@ -1,10 +1,15 @@
-import Image from "next/image";
-import { Skeleton } from "@/components/ui/skeleton";
-import { LiveBadge } from "@/components/live-badge";
-import { UserAvatar } from "@/components/user-avatar";
+import { useState } from "react";
+import LiveBadge from "./LiveBadge";
+import { UserAvatar } from "./UserAvatar";
 
 const Thumbnail = ({ src, fallback, isLive, username }) => {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
   let content;
+
+  const handleImageLoad = () => {
+    setIsImageLoaded(true);
+  };
 
   if (!src) {
     content = (
@@ -20,11 +25,11 @@ const Thumbnail = ({ src, fallback, isLive, username }) => {
     );
   } else {
     content = (
-      <Image
+      <img
         src={src}
-        fill
         alt="Thumbnail"
-        className="object-cover transition-transform group-hover:translate-x-2 group-hover:-translate-y-2 rounded-md"
+        onLoad={handleImageLoad}
+        className={`object-cover transition-transform group-hover:translate-x-2 group-hover:-translate-y-2 rounded-md ${isImageLoaded ? "opacity-100" : "opacity-0"}`}
       />
     );
   }
@@ -42,12 +47,4 @@ const Thumbnail = ({ src, fallback, isLive, username }) => {
   );
 };
 
-const ThumbnailSkeleton = () => {
-  return (
-    <div className="group aspect-video relative rounded-xl cursor-pointer">
-      <Skeleton className="h-full w-full" />
-    </div>
-  );
-};
-
-export { Thumbnail, ThumbnailSkeleton };
+export { Thumbnail };
