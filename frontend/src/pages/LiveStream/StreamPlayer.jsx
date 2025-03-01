@@ -5,9 +5,9 @@ import { useViewerTokenStore } from "../../stores/useViewerTokenStore";
 import InfoCard from "./InfoCard";
 import { AboutCard } from "./AboutCard";
 import { ChatToggle } from "./ChatToggle";
-import { Chat, ChatSkeleton } from "./chat";
-import { Video, VideoSkeleton } from "./video";
-import { Header, HeaderSkeleton } from "./header";
+import { Chat, ChatSkeleton } from "./Chat";
+import { Video, VideoSkeleton } from "./Video";
+import { Header, HeaderSkeleton } from "./Header";
 
 const StreamPlayer = ({ user, stream, isFollowing }) => {
   const { token, name, identity } = useViewerTokenStore(user.id);
@@ -16,6 +16,9 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
   if (!token || !name || !identity) {
     return <StreamPlayerSkeleton />;
   }
+
+  // Concatenate first name and last name for the full name
+  const fullName = `${user.first_name} ${user.last_name}`;
 
   return (
     <>
@@ -33,9 +36,9 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
         )}
       >
         <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">
-          <Video hostName={user.username} hostIdentity={user.id} />
+          <Video hostName={fullName} hostIdentity={user.id} />
           <Header
-            hostName={user.username}
+            hostName={fullName} // Use full name here
             hostIdentity={user.id}
             viewerIdentity={identity}
             imageUrl={user.imageUrl}
@@ -49,7 +52,7 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
             thumbnailUrl={stream.thumbnail}
           />
           <AboutCard
-            hostName={user.username}
+            hostName={fullName} // Use full name here
             hostIdentity={user.id}
             viewerIdentity={identity}
             bio={user.bio}
@@ -59,7 +62,7 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
         <div className={cn("col-span-1", collapsed && "hidden")}>
           <Chat
             viewerName={name}
-            hostName={user.username}
+            hostName={fullName} // Use full name here
             hostIdentity={user.id}
             isFollowing={isFollowing}
             isChatEnabled={stream.isChatEnabled}

@@ -253,6 +253,9 @@ export const useLiveStreamStore = create((set, get) => ({
     errorMessageFollow: "",
     errorMessageIngress: "",
     errorMessageStream: "",
+    isProcessingUpdate: false,
+    isErrorUpdate: false,
+    errorMessageUpdate: "",
   }),
 }));
 

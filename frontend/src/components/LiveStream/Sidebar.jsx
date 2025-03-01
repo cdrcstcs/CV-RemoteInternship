@@ -1,0 +1,82 @@
+import React, { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../pages/State/Redux";
+import { setIsSidebarCollapsed } from "../../pages/State/State";
+import { Menu } from "lucide-react";
+import useLiveStreamStore from "../../stores/useLiveStreamStore";
+
+const Sidebar = ({ onStreamSelect }) => {
+  const dispatch = useAppDispatch();
+  const isSidebarCollapsed = useAppSelector(
+    (state) => state.global.isSidebarCollapsed
+  );
+
+  const { streamData, getStreams } = useLiveStreamStore(); // Destructure the store methods and state
+
+  useEffect(() => {
+    getStreams(); // Fetch streams when the sidebar is mounted
+  }, [getStreams]);
+
+  // Toggle the sidebar's collapse state
+  const toggleSidebar = () => {
+    dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
+  };
+
+  const sidebarClassNames = `fixed flex flex-col ${
+    isSidebarCollapsed ? "w-0 md:w-16" : "w-72 md:w-64"
+  } bg-emerald-400 transition-all duration-300 overflow-hidden h-full shadow-md z-40`;
+
+  const handleStreamClick = (stream) => {
+    onStreamSelect(stream); // Pass the selected stream to the parent component
+  };
+
+  return (
+    <div className={sidebarClassNames}>
+      {/* TOP LOGO */}
+      <div
+        className={`flex gap-3 justify-between md:justify-normal items-center pt-8 ${
+          isSidebarCollapsed ? "px-5" : "px-8"
+        }`}
+      >
+        <button
+          className="md:hidden px-3 py-3 bg-gray-100 rounded-full hover:bg-gray-900"
+          onClick={toggleSidebar}
+        >
+          <Menu className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Stream List Section */}
+      <div className={`mt-6 ${isSidebarCollapsed ? "hidden" : "block"}`}>
+        <h3 className="text-white font-bold text-lg mb-4 px-4">Active Streams</h3>
+        {/* Render a list of streams if available */}
+        {streamData && streamData.length > 0 ? (
+          <ul className="space-y-3 px-4">
+            {streamData.map((stream) => (
+              <li
+                key={stream.id}
+                className="flex items-center text-white cursor-pointer hover:bg-gray-600 py-2 px-3 rounded-lg"
+                onClick={() => handleStreamClick(stream)} // Handle stream click
+              >
+                <img
+                  src={stream.thumbnail}
+                  alt={stream.title}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+                <div className="ml-3">
+                  <p className="font-semibold">{stream.title}</p>
+                  <p className="text-sm text-gray-200">
+                    {stream.user.first_name} {stream.user.last_name}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="text-white text-sm text-center">No active streams</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Sidebar;

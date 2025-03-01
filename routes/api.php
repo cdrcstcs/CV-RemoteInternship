@@ -127,6 +127,8 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/streams', [StreamController::class, 'getStreams']);
         Route::get('/recommended-users/stream', [StreamController::class, 'getRecommendedUsers']);
         Route::get('/search-streams', [StreamController::class, 'searchStreams']);
+        Route::get('/user/stream', [StreamController::class, 'fetchUserStream']);
+
 
         Route::get('/livekit/create-viewer-token/{hostIdentity}', [ViewerController::class, 'createViewerToken']);
 

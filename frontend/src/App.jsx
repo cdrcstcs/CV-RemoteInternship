@@ -42,6 +42,7 @@ import ChatWrapper from "./pages/Chat/ChatWrapper.jsx";
 import DashboardLayout from "./pages/ChatBot/DashboardLayout.jsx";
 import DashboardPage from "./pages/ChatBot/DashboardPage.jsx";
 import ChatPage from "./pages/ChatBot/ChatPage.jsx";
+import LiveStreamWrapper from "./pages/LiveStream/LiveStreamWrapper.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   
@@ -132,8 +133,12 @@ function App() {
 
           <Route path="/feedback-forms/create" element={user ? <CreateFeedbackForm /> : <Navigate to="/login" />} />
 
-          <Route path="/chat" element={<ChatWrapper />} />
-          
+          <Route path="/chat" element={user ? <ChatWrapper/> : <Navigate to="/login" />} />
+
+          <Route
+            path="/live-stream"
+            element={user ? <LiveStreamWrapper/> : <Navigate to="/login" />}
+          />
         </Routes>
       </div>
       <Toaster />
