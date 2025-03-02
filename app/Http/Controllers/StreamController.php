@@ -28,7 +28,7 @@ class StreamController extends Controller
             env('LIVEKIT_API_SECRET')
         );
 
-        $this->ingressServiceClient = new IngressServiceClient(env('LIVEKIT_URL')); // Updated to IngressServiceClient
+        $this->ingressServiceClient = new IngressServiceClient(env('LIVEKIT_URL'),env('LIVEKIT_API_KEY'),env('LIVEKIT_API_SECRET')); // Updated to IngressServiceClient
     }
 
     // Create a new stream for the authenticated user
@@ -75,7 +75,7 @@ class StreamController extends Controller
         $stream = Stream::create([
             'user_id' => $self->id,
             'ingressId' => $ingress->ingressId,
-            'serverUrl' => $ingress->url,
+            'serverUrl' => $ingress->getUrl(),
             'streamKey' => $ingress->streamKey,
             'isLive' => true,
             'isChatEnabled' => true, // You can customize the chat settings
