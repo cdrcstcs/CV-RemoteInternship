@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Map/Navbar";
 import Sidebar from "../../components/Map/Sidebar";
-import StoreProvider, { useAppSelector } from "../State/Redux";
+import { useAppSelector } from "../State/Redux";
 import useDeliveryStore from "../../stores/useDeliveryStore";
 import MapboxMap from "./MapBoxMap";
 import RouteDetailPage from "./RouteDetailPage";
@@ -75,9 +75,7 @@ const DashboardLayout = () => {
 
 const WrapperMap = ({ children }) => {
   return (
-    <StoreProvider>
-      <DashboardLayout>{children}</DashboardLayout>
-    </StoreProvider>
+    <DashboardLayout>{children}</DashboardLayout>
   );
 };
 

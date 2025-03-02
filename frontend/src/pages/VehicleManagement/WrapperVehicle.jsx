@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import Navbar from "../../components/Vehicle/Navbar";
 import Sidebar from "../../components/Vehicle/Sidebar";
-import StoreProvider, { useAppSelector } from "../State/Redux";
+import { useAppSelector } from "../State/Redux";
 import { Outlet } from "react-router-dom"; // Import Outlet for nested routes
 
 const DashboardLayout = () => {
@@ -41,9 +41,7 @@ const DashboardLayout = () => {
 
 const WrapperVehicle = ({ children }) => {
   return (
-    <StoreProvider>
       <DashboardLayout>{children}</DashboardLayout>
-    </StoreProvider>
   );
 };
 

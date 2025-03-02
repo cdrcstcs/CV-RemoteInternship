@@ -1,14 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ConnectionState } from "livekit-client";
-import { useMediaQuery } from "usehooks-ts";
 import {
   useChat,
   useConnectionState,
   useRemoteParticipant,
 } from "@livekit/components-react";
 
-import { useAppDispatch, useAppSelector } from "../../pages/State/Redux"; // Add Redux hooks
-import { setIsSidebarCollapsed } from "../../pages/State/State"; // Import action
 import { ChatForm, ChatFormSkeleton } from "./ChatForm";
 import { ChatList, ChatListSkeleton } from "./ChatList";
 import { ChatHeader, ChatHeaderSkeleton } from "./ChatHeader";
@@ -23,12 +20,7 @@ const Chat = ({
   isChatDelayed,
   isChatFollowersOnly,
 }) => {
-  const dispatch = useAppDispatch(); // Use dispatch for Redux
-  const isSidebarCollapsed = useAppSelector(
-    (state) => state.global.isSidebarCollapsed
-  ); // Get sidebar state from Redux
 
-  const matches = useMediaQuery("(max-width: 1024px)");
   const connectionState = useConnectionState();
   const participant = useRemoteParticipant(hostIdentity);
 
@@ -38,14 +30,6 @@ const Chat = ({
 
   const [value, setValue] = useState("");
   const { chatMessages: messages, send } = useChat();
-
-  useEffect(() => {
-    if (matches) {
-      dispatch(setIsSidebarCollapsed(true)); // Collapse sidebar when on mobile
-    } else {
-      dispatch(setIsSidebarCollapsed(false)); // Expand sidebar when on larger screens
-    }
-  }, [matches, dispatch]); // Dependency array includes dispatch and matches
 
   const reversedMessages = useMemo(() => {
     return messages.sort((a, b) => b.timestamp - a.timestamp);

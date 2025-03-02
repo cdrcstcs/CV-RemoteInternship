@@ -13,9 +13,6 @@ class Stream extends Model
     protected $fillable = [
         'title',
         'thumbnail',
-        'ingressId',
-        'serverUrl',
-        'streamKey',
         'isLive',
         'isChatEnabled',
         'isChatDelayed',

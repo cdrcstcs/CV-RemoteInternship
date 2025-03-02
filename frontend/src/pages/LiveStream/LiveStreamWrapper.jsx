@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Navbar from "../../components/LiveStream/Navbar";
 import Sidebar from "../../components/LiveStream/Sidebar";
 import { useAppSelector } from "../State/Redux";
@@ -12,15 +12,6 @@ const DashboardLayout = () => {
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed
   );
-  const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
 
   const handleStreamSelect = (stream) => {
     setSelectedStream(stream);
@@ -32,9 +23,7 @@ const DashboardLayout = () => {
 
   return (
     <div
-      className={`${
-        isDarkMode ? "dark" : "light"
-      } flex bg-gray-900 text-gray-900 w-full h-screen`}
+      className="flex bg-gray-900 text-gray-900 w-full h-screen"
     >
       <Sidebar onStreamSelect={handleStreamSelect} onCreateStreamClick={handleCreateStreamClick} />
       <main
@@ -47,7 +36,7 @@ const DashboardLayout = () => {
         {isCreateStreamVisible ? (
           <StreamCreationForm />
         ) : selectedStream ? (
-          <StreamPlayer user={selectedStream.user} stream={selectedStream} isFollowing />
+          <StreamPlayer user={selectedStream.user} stream={selectedStream} isFollowing={true} />
         ) : (
           <div className="text-white text-center">Select a stream to watch</div>
         )}

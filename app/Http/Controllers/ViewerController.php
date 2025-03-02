@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Agence104\LiveKit\AccessToken;
-use Agence104\LiveKit\AccessTokenOptions;
 use Agence104\LiveKit\VideoGrant;
 use App\Models\Block;
 
@@ -71,7 +70,7 @@ class ViewerController extends Controller
             return response()->json($token->toJwt());
         } catch (\Exception $e) {
             Log::error("Error creating viewer token: " . $e->getMessage());
-            return response()->json(['error' => 'Internal error: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Internal error: ' . $e->getMessage()], 500);
         }
     }
 

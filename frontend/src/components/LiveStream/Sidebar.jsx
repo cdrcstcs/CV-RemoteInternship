@@ -10,7 +10,7 @@ const Sidebar = ({ onStreamSelect, onCreateStreamClick }) => {
     (state) => state.global.isSidebarCollapsed
   );
 
-  const { streamData, getStreams } = useLiveStreamStore();
+  const { streams, getStreams } = useLiveStreamStore();
 
   useEffect(() => {
     getStreams();
@@ -57,9 +57,9 @@ const Sidebar = ({ onStreamSelect, onCreateStreamClick }) => {
       {/* Stream List Section */}
       <div className={`mt-6 ${isSidebarCollapsed ? "hidden" : "block"} overflow-y-auto`}>
         <h3 className="text-white font-bold text-lg mb-4 px-4">Active Streams</h3>
-        {streamData && streamData.length > 0 ? (
+        {streams && streams.length > 0 ? (
           <ul className="space-y-3 px-4 max-h-[calc(100vh-120px)] overflow-y-auto">
-            {streamData.map((stream) => (
+            {streams.map((stream) => (
               <li
                 key={stream.id}
                 className="flex items-center text-white cursor-pointer hover:bg-gray-600 py-2 px-3 rounded-lg"

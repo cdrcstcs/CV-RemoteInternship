@@ -8,89 +8,91 @@ use App\Models\Stream;
 use App\Models\Block;
 use App\Models\User;
 use App\Models\Follow;
-use Agence104\LiveKit\RoomServiceClient;
-use Agence104\LiveKit\IngressServiceClient;
 use Agence104\LiveKit\AccessToken;
 use Agence104\LiveKit\AccessTokenOptions;
-use Agence104\LiveKit\VideoGrant;
-
+use App\Integrations\files\CloudinaryImageClient; // Use the custom Cloudinary client
 
 class StreamController extends Controller
 {
-    protected $roomService;
-    protected $ingressServiceClient; // Changed to IngressServiceClient
+    protected $cloudinaryClient;
 
     public function __construct()
     {
-        $this->roomService = new RoomServiceClient(
-            env('LIVEKIT_URL'),
-            env('LIVEKIT_API_KEY'),
-            env('LIVEKIT_API_SECRET')
-        );
-
-        $this->ingressServiceClient = new IngressServiceClient(env('LIVEKIT_URL'),env('LIVEKIT_API_KEY'),env('LIVEKIT_API_SECRET')); // Updated to IngressServiceClient
+        $this->cloudinaryClient = new CloudinaryImageClient();
     }
-
-    // Create a new stream for the authenticated user
+    
+    
     public function createStream(Request $request)
     {
         $self = $request->user(); // Get the authenticated user
-
+    
         Log::info("User {$self->id} is attempting to create a new stream");
-
+    
         // Check if the user already has an active stream
         $existingStream = Stream::where('user_id', $self->id)->where('isLive', true)->first();
         if ($existingStream) {
             Log::warning("User {$self->id} already has an active stream.");
-            return response()->json(['error' => 'You already have an active stream.'], 400);
+            return response()->json(['message' => 'You already have an active stream.'], 400);
         }
-        // Create a new ingress for the stream
-        $inputType = 0;  // Set to the correct input type (replace 0 with the appropriate value)
-        $name = $self->first_name . ' ' . $self->last_name;
-        $roomName = $self->id;  // The room name will be the user ID (this could be customized)
-        $participantName = $self->first_name . ' ' . $self->last_name;
-        $participantIdentity = $self->id;
-
-        // Create the ingress using the updated IngressServiceClient
-        try {
-            $ingress = $this->ingressServiceClient->createIngress(
-                $inputType,
-                $name,
-                $roomName,
-                $participantIdentity,
-                $participantName,
-            );
-        } catch (\Exception $e) {
-            Log::error("Failed to create ingress for user {$self->id}: " . $e->getMessage());
-            return response()->json(['error' => 'Failed to create stream.'], 500);
+    
+        // Validate the request input for title, thumbnail (file upload), and chat settings
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',  // Ensure the thumbnail is a valid image and limit file size
+            'isChatEnabled' => 'nullable|boolean', // Allow this to be optional
+            'isChatDelayed' => 'nullable|boolean', // Allow this to be optional
+            'isChatFollowersOnly' => 'nullable|boolean', // Allow this to be optional
+        ]);
+    
+        $title = $validatedData['title'];
+    
+        // Set default chat settings if not provided
+        $isChatEnabled = $validatedData['isChatEnabled'] ?? true;
+        $isChatDelayed = $validatedData['isChatDelayed'] ?? false;
+        $isChatFollowersOnly = $validatedData['isChatFollowersOnly'] ?? false;
+    
+        // Handle the thumbnail upload if present
+        $thumbnailPath = 'default-thumbnail.jpg';  // Default thumbnail if no file is uploaded
+        if ($request->hasFile('thumbnail')) {
+            $uploadedFile = $request->file('thumbnail'); // Get the uploaded file
+            
+            // Get MIME type and content of the uploaded file
+            $mimeType = $uploadedFile->getClientMimeType();
+            $base64Contents = base64_encode($uploadedFile->get());
+    
+            try {
+                // Upload image using custom Cloudinary client (ensure $this->cloudinaryClient is configured properly)
+                $uploadResult = $this->cloudinaryClient->uploadImage($mimeType, $base64Contents);
+    
+                // If the upload is successful, we get the secure URL
+                if ($uploadResult->isSuccess) {
+                    $thumbnailPath = $uploadResult->secureUrl; // Use the Cloudinary URL
+                    Log::info('Product image uploaded to Cloudinary', ['image_url' => $thumbnailPath]);
+                } else {
+                    throw new \Exception("Cloudinary image upload failed: " . $uploadResult->msg);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error uploading image to Cloudinary: ' . $e->getMessage());
+                return response()->json(['message' => 'Failed to upload thumbnail image'], 500);
+            }
         }
-
-        // Check if ingress was successfully created
-        if (!$ingress || !$ingress->url || !$ingress->streamKey) {
-            Log::error("Ingress creation failed for user {$self->id}");
-            return response()->json(['error' => 'Failed to create ingress'], 500);
-        }
-
+    
         // Store the stream information in the database
         $stream = Stream::create([
             'user_id' => $self->id,
-            'ingressId' => $ingress->ingressId,
-            'serverUrl' => $ingress->getUrl(),
-            'streamKey' => $ingress->streamKey,
+            'title' => $title,  // Use the title from the request input
+            'thumbnail' => $thumbnailPath,  // Save the Cloudinary URL or default
             'isLive' => true,
-            'isChatEnabled' => true, // You can customize the chat settings
-            'isChatDelayed' => false,
-            'isChatFollowersOnly' => false,
+            'isChatEnabled' => $isChatEnabled, // Chat setting from the request
+            'isChatDelayed' => $isChatDelayed, // Chat setting from the request
+            'isChatFollowersOnly' => $isChatFollowersOnly, // Chat setting from the request
         ]);
-
+    
         Log::info("Stream created successfully for user {$self->id}, stream ID: {$stream->id}");
-
-        return response()->json([
-            'message' => 'Stream created successfully',
-            'stream' => $stream
-        ]);
+    
+        return response()->json($stream);
     }
-
+    
     // Stop the stream (mark as not live)
     public function stopStream(Request $request)
     {
@@ -161,7 +163,7 @@ class StreamController extends Controller
             return response()->json($streams);
         } catch (\Exception $e) {
             Log::error("An error occurred during stream search: {$e->getMessage()}");
-            return response()->json(['error' => 'Internal error: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Internal error: ' . $e->getMessage()], 500);
         }
     }
 
@@ -216,7 +218,7 @@ class StreamController extends Controller
             return response()->json($users);
         } catch (\Exception $e) {
             Log::error("An error occurred while fetching recommended users: {$e->getMessage()}");
-            return response()->json(['error' => 'Internal error: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Internal error: ' . $e->getMessage()], 500);
         }
     }
 
@@ -263,7 +265,7 @@ class StreamController extends Controller
             return response()->json($streams);
         } catch (\Exception $e) {
             Log::error("An error occurred while fetching streams: {$e->getMessage()}");
-            return response()->json(['error' => 'Something went wrong: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
 
@@ -311,7 +313,7 @@ class StreamController extends Controller
             // Log the exception error
             Log::error("An error occurred while updating stream for user {$request->user()->id}: {$e->getMessage()}");
 
-            return response()->json(['error' => 'Internal Error'], 500);
+            return response()->json(['message' => 'Internal Error'], 500);
         }
     }
 }

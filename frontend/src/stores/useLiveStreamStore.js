@@ -30,14 +30,14 @@ export const useLiveStreamStore = create((set, get) => ({
   isBlocked: false,
   viewerToken:"",
   // Function to create a new stream
-  createStream: async () => {
+  createStream: async (formData) => {
     const { isProcessingStream } = get();
     if (isProcessingStream) return;
 
     set({ isProcessingStream: true, isErrorStream: false, errorMessageStream: "" });
 
     try {
-      const response = await axiosInstance.post("/create-stream");
+      const response = await axiosInstance.post("/create-stream",formData);
       set({ streamData: response.data, streams: [...get().streams, response.data], isProcessingStream: false });
       toast.success("Stream created successfully!");
     } catch (error) {
@@ -211,6 +211,7 @@ export const useLiveStreamStore = create((set, get) => ({
   getStreams: async () => {
     try {
       const response = await axiosInstance.get("/streams");
+      console.log(response.data);
       set({ streams: response.data });
     } catch (error) {
       toast.error("Error fetching streams");

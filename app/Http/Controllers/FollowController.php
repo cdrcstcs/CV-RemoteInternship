@@ -65,13 +65,13 @@ class FollowController extends Controller
 
         if (!$userToUnfollow) {
             Log::error("User {$self->id} tried to unfollow a non-existing user {$id}");
-            return response()->json(['error' => 'User not found'], 404);
+            return response()->json(['message' => 'User not found'], 404);
         }
 
         // Ensure a user cannot unfollow themselves
         if ($self->id === $userToUnfollow->id) {
             Log::warning("User {$self->id} tried to unfollow themselves.");
-            return response()->json(['error' => 'Cannot unfollow yourself'], 400);
+            return response()->json(['message' => 'Cannot unfollow yourself'], 400);
         }
 
         // Check if already following
@@ -81,7 +81,7 @@ class FollowController extends Controller
 
         if (!$existingFollow) {
             Log::info("User {$self->id} is not following user {$id}.");
-            return response()->json(['error' => 'Not following'], 400);
+            return response()->json(['message' => 'Not following'], 400);
         }
 
         // Delete the follow relationship
