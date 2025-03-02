@@ -16,12 +16,9 @@ const PaymentPage = () => {
     processPayment,
     isPaymentProcessing,
     paymentMessage,
-    prepareDelivery,
-    routeDetails,
-    totalDistance,
-    resetRouteDetails,
     createStripePaymentIntent, // Ensure this is available in your store
     stripeClientSecret,
+    setUserLocation,
   } = useCartStore();
 
   const { userAddresses, getUserAddresses } = useUserStore();
@@ -35,7 +32,6 @@ const PaymentPage = () => {
   const [currency, setCurrency] = useState('USD');
   const navigate = useNavigate();
   const [isPaid, setIsPaid] = useState(false);
-  const [isDeliveryPreparing, setIsDeliveryPreparing] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(userAddresses[0] || null);
 
   // Stripe Elements hooks
@@ -89,19 +85,12 @@ const PaymentPage = () => {
       }
     }
   };
-
-  // Trigger delivery preparation
-  const handlePrepareDelivery = () => {
-    resetRouteDetails();
-    if (!selectedAddress) {
-      alert('Please select a delivery address');
-      return;
-    }
+  
+  useEffect(() => {
+    if (!selectedAddress) return;
     const userLocation = `${selectedAddress.address_line1}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}, ${selectedAddress.postal_code}`;
-    setIsDeliveryPreparing(true);
-    prepareDelivery(userLocation);
-    setIsDeliveryPreparing(false);
-  };
+    setUserLocation(userLocation);
+  }, [selectedAddress]);
 
   useEffect(() => {
     console.log(paymentMessage)
@@ -249,39 +238,6 @@ const PaymentPage = () => {
                 ))}
               </select>
             </div>
-
-            {/* Prepare Delivery Button */}
-            <button
-              onClick={handlePrepareDelivery}
-              disabled={isDeliveryPreparing || isPaymentProcessing || !selectedAddress}
-              className="w-full mt-6 py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-300 disabled:bg-gray-600 transition-all"
-            >
-              {isDeliveryPreparing ? 'Preparing Delivery...' : 'Prepare Delivery'}
-            </button>
-
-            {/* Route Details */}
-            {routeDetails.length > 0 && !isDeliveryPreparing && (
-              <div className="mt-6">
-                <h4 className="text-xl font-semibold">Expected Delivery Routes</h4>
-                <ul className="space-y-4 text-white mt-4">
-                  {routeDetails.map((route, index) => (
-                    <li key={index} className="bg-gray-700 p-3 rounded-md">
-                      <p><strong>Route Name:</strong> {route.route_name}</p>
-                      {route.supplier_name && (<p><strong>Supplier:</strong> {route.supplier_name}</p>)}
-                      <p><strong>Warehouse:</strong> {route.warehouse_name_1}</p>
-                      {route.warehouse_name_2 && (<p><strong>Warehouse:</strong> {route.warehouse_name_2}</p>)}
-                      <p><strong>Start Location</strong> {route.start_location}</p>
-                      <p><strong>Destination Location</strong> {route.end_location}</p>
-                      <p><strong>Estimated Time</strong> {route.estimated_time}</p>
-                      <p><strong>Distance:</strong> {route.distance} km</p>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4">
-                  <p><strong>Total Distance:</strong> {totalDistance} km</p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

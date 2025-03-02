@@ -1,20 +1,20 @@
 import { ArrowLeftFromLine, ArrowRightFromLine } from "lucide-react";
-import { useChatSidebarStore } from "../../stores/useChatSideBarStore";
+import { useAppDispatch, useAppSelector } from "../../pages/State/Redux"; // Use Redux hooks
+import { setIsSidebarCollapsed } from "../../pages/State/State"; // Import the action
 
 export const ChatToggle = () => {
-  const { collapsed, onExpand, onCollapse } = useChatSidebarStore();
+  const dispatch = useAppDispatch(); // Get dispatch method from Redux
+  const isSidebarCollapsed = useAppSelector(
+    (state) => state.global.isSidebarCollapsed
+  ); // Get the current sidebar state from Redux
 
-  const Icon = collapsed ? ArrowLeftFromLine : ArrowRightFromLine;
+  const Icon = isSidebarCollapsed ? ArrowLeftFromLine : ArrowRightFromLine;
 
   const onToggle = () => {
-    if (collapsed) {
-      onExpand();
-    } else {
-      onCollapse();
-    }
+    dispatch(setIsSidebarCollapsed(!isSidebarCollapsed)); // Dispatch action to toggle the sidebar state
   };
 
-  const label = collapsed ? "Expand" : "Collapse";
+  const label = isSidebarCollapsed ? "Expand" : "Collapse"; // Tooltip label based on the sidebar state
 
   return (
     <div

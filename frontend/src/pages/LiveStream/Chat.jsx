@@ -7,7 +7,8 @@ import {
   useRemoteParticipant,
 } from "@livekit/components-react";
 
-import { useChatSidebarStore } from "../../stores/useChatSideBarStore";
+import { useAppDispatch, useAppSelector } from "../../pages/State/Redux"; // Add Redux hooks
+import { setIsSidebarCollapsed } from "../../pages/State/State"; // Import action
 import { ChatForm, ChatFormSkeleton } from "./ChatForm";
 import { ChatList, ChatListSkeleton } from "./ChatList";
 import { ChatHeader, ChatHeaderSkeleton } from "./ChatHeader";
@@ -22,10 +23,12 @@ const Chat = ({
   isChatDelayed,
   isChatFollowersOnly,
 }) => {
-  const { ChatVariant, useChatSidebar } = useChatSidebarStore();
+  const dispatch = useAppDispatch(); // Use dispatch for Redux
+  const isSidebarCollapsed = useAppSelector(
+    (state) => state.global.isSidebarCollapsed
+  ); // Get sidebar state from Redux
 
   const matches = useMediaQuery("(max-width: 1024px)");
-  const { variant, onExpand } = useChatSidebar((state) => state);
   const connectionState = useConnectionState();
   const participant = useRemoteParticipant(hostIdentity);
 
@@ -38,9 +41,11 @@ const Chat = ({
 
   useEffect(() => {
     if (matches) {
-      onExpand();
+      dispatch(setIsSidebarCollapsed(true)); // Collapse sidebar when on mobile
+    } else {
+      dispatch(setIsSidebarCollapsed(false)); // Expand sidebar when on larger screens
     }
-  }, [matches, onExpand]);
+  }, [matches, dispatch]); // Dependency array includes dispatch and matches
 
   const reversedMessages = useMemo(() => {
     return messages.sort((a, b) => b.timestamp - a.timestamp);
@@ -60,27 +65,21 @@ const Chat = ({
   return (
     <div className="flex flex-col bg-background border-l border-b pt-0 h-[calc(100vh-80px)]">
       <ChatHeader />
-      {variant === ChatVariant.CHAT && (
-        <>
-          <ChatList messages={reversedMessages} isHidden={isHidden} />
-          <ChatForm
-            onSubmit={onSubmit}
-            value={value}
-            onChange={onChange}
-            isHidden={isHidden}
-            isFollowersOnly={isChatFollowersOnly}
-            isDelayed={isChatDelayed}
-            isFollowing={isFollowing}
-          />
-        </>
-      )}
-      {variant === ChatVariant.COMMUNITY && (
-        <ChatCommunity
-          viewerName={viewerName}
-          hostName={hostName}
-          isHidden={isHidden}
-        />
-      )}
+      <ChatList messages={reversedMessages} isHidden={isHidden} />
+      <ChatForm
+        onSubmit={onSubmit}
+        value={value}
+        onChange={onChange}
+        isHidden={isHidden}
+        isFollowersOnly={isChatFollowersOnly}
+        isDelayed={isChatDelayed}
+        isFollowing={isFollowing}
+      />
+      <ChatCommunity
+        viewerName={viewerName}
+        hostName={hostName}
+        isHidden={isHidden}
+      />
     </div>
   );
 };

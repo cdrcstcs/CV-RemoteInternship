@@ -12,8 +12,9 @@ import useMailStore from "../stores/useMailStore";
 const PurchaseSuccessPage = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [currentFormIndex, setCurrentFormIndex] = useState(0); // Track which form is displayed
+  const [isDeliveryPreparing, setIsDeliveryPreparing] = useState(false);
   const [isMailSent, setIsMailSent] = useState(false);
-  const { cart, orderId, clearCart, routeDetails, totalDistance, totalAmount, discountAmount, totalAfterDiscount } = useCartStore();
+  const { cart, orderId, clearCart, routeDetails, totalDistance, totalAmount, discountAmount, totalAfterDiscount, prepareDelivery, userLocation, resetRouteDetails } = useCartStore();
   const { getFeedbackFormsForOrder, isLoadingForm, feedbackForms } = useFeedbackFormStore();
   const { orderStatus, getOrderStatusById, listenForOrderStatusUpdates, isLoading, errorMessage } = useOrderStore(state => ({
     orderStatus: state.orderStatus,
@@ -59,12 +60,21 @@ const PurchaseSuccessPage = () => {
   //   }
   // }, [orderData, isMailSent, errorMessageMail, isErrorMail]); // Adding isMailSent and errorMessageMail to dependencies ensures the effect only runs once when these change
   
-  
   useEffect(() => {
-      if (!orderId) return;
+    if (!userLocation) return;
+    resetRouteDetails();
+    console.log(userLocation);
+    // Fetch route details when the component mounts or orderId changes
+    setIsDeliveryPreparing(true);
+    prepareDelivery(userLocation);
+    setIsDeliveryPreparing(false);  
+  }, [userLocation]);
+
+  useEffect(() => {
+      if (!orderId || !routeDetails) return;
       // Fetch route details when the component mounts or orderId changes
       getRouteDetailsByOrderId(orderId);
-    }, [orderId, getRouteDetailsByOrderId]);
+    }, [orderId, routeDetails, getRouteDetailsByOrderId]);
   
   const getStatusClass = (status) => {
     const index = statuses.indexOf(status);
@@ -134,7 +144,7 @@ const PurchaseSuccessPage = () => {
     }
   }, [orderId, orderIdFromURL, getOrderStatusById, listenForOrderStatusUpdates]); // Re-run if orderId or orderIdFromURL changes
 
-  if (isProcessing || isLoading || isLoadingForm) return <div>Processing...</div>;
+  if (isProcessing || isLoading || isLoadingForm || isDeliveryPreparing) return <div>Processing...</div>;
 
   if (errorMessage) return <div>{`Error: ${errorMessage}`}</div>;
 
@@ -233,7 +243,7 @@ const PurchaseSuccessPage = () => {
           )}
 
           {/* Route Details */}
-          {routeDetails.length > 0  && (
+          {routeDetails.length > 0 && routeDetails  && (
             <div className="mt-6">
               <h4 className="text-xl font-semibold">Expected Delivery Routes</h4>
               <ul className="space-y-4 text-white mt-4">

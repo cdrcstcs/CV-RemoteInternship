@@ -22,7 +22,11 @@ export const useCartStore = create((set, get) => ({
   routeDetails: [], // Stores the route details for delivery
   totalDistance: 0, // Total distance for the delivery
   stripeClientSecret: "", // Stores the Stripe client secret for the payment
+  userLocation:"",
   // Prepare delivery: Get the route details and shipment data
+
+  setUserLocation: (location) => set({ userLocation: location }),
+
   resetRouteDetails: () => set({ routeDetails: [] }),
 
   processPayment: async (paymentMethod, paymentGateway, currency) => {
