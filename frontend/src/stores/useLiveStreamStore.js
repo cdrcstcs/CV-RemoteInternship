@@ -15,14 +15,9 @@ export const useLiveStreamStore = create((set, get) => ({
   isErrorFollow: false,
   errorMessageFollow: "",
 
-  // LiveKit-related state
-  ingressData: null,
-  isProcessingIngress: false,
-  isErrorIngress: false,
-  errorMessageIngress: "",
-
   // Stream-related state
-  streamData: null,
+  streamData: null, // Store a single stream
+  streams: [], // Store many streams
   isProcessingStream: false,
   isErrorStream: false,
   errorMessageStream: "",
@@ -32,6 +27,44 @@ export const useLiveStreamStore = create((set, get) => ({
   isErrorUpdate: false,
   errorMessageUpdate: "",
 
+  isBlocked: false,
+  viewerToken:"",
+  // Function to create a new stream
+  createStream: async () => {
+    const { isProcessingStream } = get();
+    if (isProcessingStream) return;
+
+    set({ isProcessingStream: true, isErrorStream: false, errorMessageStream: "" });
+
+    try {
+      const response = await axiosInstance.post("/create-stream");
+      set({ streamData: response.data, streams: [...get().streams, response.data], isProcessingStream: false });
+      toast.success("Stream created successfully!");
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Error creating stream";
+      set({ isProcessingStream: false, isErrorStream: true, errorMessageStream: errorMessage });
+      toast.error(errorMessage);
+    }
+  },
+
+  // Function to stop the stream
+  stopStream: async () => {
+    const { isProcessingStream, streamData } = get();
+    if (isProcessingStream || !streamData) return;
+
+    set({ isProcessingStream: true, isErrorStream: false, errorMessageStream: "" });
+
+    try {
+      const response = await axiosInstance.post("/stop-stream");
+      set({ streamData: null, streams: get().streams.filter(stream => stream.id !== streamData.id), isProcessingStream: false });
+      toast.success("Stream stopped successfully!");
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Error stopping stream";
+      set({ isProcessingStream: false, isErrorStream: true, errorMessageStream: errorMessage });
+      toast.error(errorMessage);
+    }
+  },
+  
   // Function to update user's headline and about
   updateUserHeadlineAndAbout: async (headline, about) => {
     const { isProcessingUpdate } = get();
@@ -53,6 +86,7 @@ export const useLiveStreamStore = create((set, get) => ({
       toast.error(errorMessage);
     }
   },
+  
   // Function to block a user
   blockUser: async (id) => {
     const { isProcessingBlock } = get();
@@ -103,10 +137,9 @@ export const useLiveStreamStore = create((set, get) => ({
   isBlockedByUser: async (id) => {
     try {
       const response = await axiosInstance.get(`/is-blocked/${id}`);
-      return response.data; // Return directly to be used in the component
+      set({ isBlocked: response.data });
     } catch (error) {
       toast.error("Error checking if user is blocked");
-      return false;
     }
   },
 
@@ -156,35 +189,6 @@ export const useLiveStreamStore = create((set, get) => ({
     }
   },
 
-  // Function to create ingress for live stream
-  createIngress: async (ingressType) => {
-    const { isProcessingIngress } = get();
-    if (isProcessingIngress) return;
-
-    set({ isProcessingIngress: true, isErrorIngress: false, errorMessageIngress: "" });
-
-    try {
-      const response = await axiosInstance.post(`/livekit/create-ingress/${ingressType}`);
-      set({ ingressData: response.data, isProcessingIngress: false });
-      toast.success("Ingress created successfully!");
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Error creating ingress";
-      set({ isProcessingIngress: false, isErrorIngress: true, errorMessageIngress: errorMessage });
-      toast.error(errorMessage);
-    }
-  },
-
-  // Function to create stream token
-  createStreamToken: async (roomName) => {
-    try {
-      const response = await axiosInstance.get(`/livekit/create-token/${roomName}`);
-      return response.data; // Return directly to be used in the component
-    } catch (error) {
-      toast.error("Error creating stream token");
-      return null;
-    }
-  },
-
   // Function to update stream
   updateStream: async (streamData) => {
     const { isProcessingStream } = get();
@@ -207,7 +211,7 @@ export const useLiveStreamStore = create((set, get) => ({
   getStreams: async () => {
     try {
       const response = await axiosInstance.get("/streams");
-      set({ streamData: response.data });
+      set({ streams: response.data });
     } catch (error) {
       toast.error("Error fetching streams");
     }
@@ -217,10 +221,9 @@ export const useLiveStreamStore = create((set, get) => ({
   searchStreams: async (query) => {
     try {
       const response = await axiosInstance.get(`/search-streams?q=${query}`);
-      return response.data; // Return directly to be used in the component
+      set({ streams: response.data });
     } catch (error) {
       toast.error("Error searching streams");
-      return [];
     }
   },
 
@@ -228,10 +231,9 @@ export const useLiveStreamStore = create((set, get) => ({
   createViewerToken: async (hostIdentity) => {
     try {
       const response = await axiosInstance.get(`/livekit/create-viewer-token/${hostIdentity}`);
-      return response.data; // Return directly to be used in the component
+      set({ viewerToken: response.data });
     } catch (error) {
       toast.error("Error creating viewer token");
-      return null;
     }
   },
 
@@ -239,23 +241,22 @@ export const useLiveStreamStore = create((set, get) => ({
   reset: () => set({
     blockedUsers: null,
     followedUsers: null,
-    ingressData: null,
-    streamData: null,
+    streamData: null, // Reset single stream
+    streams: [], // Reset multiple streams
     isProcessingBlock: false,
     isProcessingFollow: false,
-    isProcessingIngress: false,
     isProcessingStream: false,
     isErrorBlock: false,
     isErrorFollow: false,
-    isErrorIngress: false,
     isErrorStream: false,
     errorMessageBlock: "",
     errorMessageFollow: "",
-    errorMessageIngress: "",
     errorMessageStream: "",
     isProcessingUpdate: false,
     isErrorUpdate: false,
     errorMessageUpdate: "",
+    isBlocked: false,
+    viewerToken:"",
   }),
 }));
 

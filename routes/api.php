@@ -123,6 +123,9 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/livekit/reset-ingresses/{hostIdentity}', [LiveKitController::class, 'resetIngresses']);
         Route::get('/livekit/create-token/{roomName}', [LiveKitController::class, 'createAccessToken']);
 
+        Route::post('create-stream', [StreamController::class, 'createStream']);  // Create a new stream
+        Route::post('stop-stream', [StreamController::class, 'stopStream']); // Stop the stream
+
         Route::post('/stream/update', [StreamController::class, 'updateStream']);
         Route::get('/streams', [StreamController::class, 'getStreams']);
         Route::get('/recommended-users/stream', [StreamController::class, 'getRecommendedUsers']);

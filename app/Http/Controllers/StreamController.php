@@ -8,9 +8,113 @@ use App\Models\Stream;
 use App\Models\Block;
 use App\Models\User;
 use App\Models\Follow;
+use Agence104\LiveKit\RoomServiceClient;
+use Agence104\LiveKit\IngressServiceClient;
+use Agence104\LiveKit\AccessToken;
+use Agence104\LiveKit\AccessTokenOptions;
+use Agence104\LiveKit\VideoGrant;
+
 
 class StreamController extends Controller
 {
+    protected $roomService;
+    protected $ingressServiceClient; // Changed to IngressServiceClient
+
+    public function __construct()
+    {
+        $this->roomService = new RoomServiceClient(
+            env('LIVEKIT_URL'),
+            env('LIVEKIT_API_KEY'),
+            env('LIVEKIT_API_SECRET')
+        );
+
+        $this->ingressServiceClient = new IngressServiceClient(env('LIVEKIT_URL')); // Updated to IngressServiceClient
+    }
+
+    // Create a new stream for the authenticated user
+    public function createStream(Request $request)
+    {
+        $self = $request->user(); // Get the authenticated user
+
+        Log::info("User {$self->id} is attempting to create a new stream");
+
+        // Check if the user already has an active stream
+        $existingStream = Stream::where('user_id', $self->id)->where('isLive', true)->first();
+        if ($existingStream) {
+            Log::warning("User {$self->id} already has an active stream.");
+            return response()->json(['error' => 'You already have an active stream.'], 400);
+        }
+        // Create a new ingress for the stream
+        $inputType = 0;  // Set to the correct input type (replace 0 with the appropriate value)
+        $name = $self->first_name . ' ' . $self->last_name;
+        $roomName = $self->id;  // The room name will be the user ID (this could be customized)
+        $participantName = $self->first_name . ' ' . $self->last_name;
+        $participantIdentity = $self->id;
+
+        // Create the ingress using the updated IngressServiceClient
+        try {
+            $ingress = $this->ingressServiceClient->createIngress(
+                $inputType,
+                $name,
+                $roomName,
+                $participantIdentity,
+                $participantName,
+            );
+        } catch (\Exception $e) {
+            Log::error("Failed to create ingress for user {$self->id}: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to create stream.'], 500);
+        }
+
+        // Check if ingress was successfully created
+        if (!$ingress || !$ingress->url || !$ingress->streamKey) {
+            Log::error("Ingress creation failed for user {$self->id}");
+            return response()->json(['error' => 'Failed to create ingress'], 500);
+        }
+
+        // Store the stream information in the database
+        $stream = Stream::create([
+            'user_id' => $self->id,
+            'ingressId' => $ingress->ingressId,
+            'serverUrl' => $ingress->url,
+            'streamKey' => $ingress->streamKey,
+            'isLive' => true,
+            'isChatEnabled' => true, // You can customize the chat settings
+            'isChatDelayed' => false,
+            'isChatFollowersOnly' => false,
+        ]);
+
+        Log::info("Stream created successfully for user {$self->id}, stream ID: {$stream->id}");
+
+        return response()->json([
+            'message' => 'Stream created successfully',
+            'stream' => $stream
+        ]);
+    }
+
+    // Stop the stream (mark as not live)
+    public function stopStream(Request $request)
+    {
+        $self = $request->user(); // Get the authenticated user
+
+        Log::info("User {$self->id} is attempting to stop their stream");
+
+        // Find the active stream for the user
+        $stream = Stream::where('user_id', $self->id)->where('isLive', true)->first();
+
+        if (!$stream) {
+            Log::warning("User {$self->id} does not have an active stream.");
+            return response()->json(['error' => 'No active stream found'], 400);
+        }
+
+        // Mark the stream as not live
+        $stream->isLive = false;
+        $stream->save();
+
+        Log::info("Stream stopped successfully for user {$self->id}");
+
+        return response()->json(['message' => 'Stream stopped successfully']);
+    }
+
     // Method to search streams based on a term
     public function searchStreams(Request $request)
     {

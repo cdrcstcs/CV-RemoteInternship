@@ -10,7 +10,7 @@ const Header = ({
   hostName,
   hostIdentity,
   viewerIdentity,
-  isFollowing,
+  isFollowing = false,
   name,
 }) => {
   const participants = useParticipants();

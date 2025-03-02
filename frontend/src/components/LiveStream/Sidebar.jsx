@@ -4,19 +4,18 @@ import { setIsSidebarCollapsed } from "../../pages/State/State";
 import { Menu } from "lucide-react";
 import useLiveStreamStore from "../../stores/useLiveStreamStore";
 
-const Sidebar = ({ onStreamSelect }) => {
+const Sidebar = ({ onStreamSelect, onCreateStreamClick }) => {
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed
   );
 
-  const { streamData, getStreams } = useLiveStreamStore(); // Destructure the store methods and state
+  const { streamData, getStreams } = useLiveStreamStore();
 
   useEffect(() => {
-    getStreams(); // Fetch streams when the sidebar is mounted
+    getStreams();
   }, [getStreams]);
 
-  // Toggle the sidebar's collapse state
   const toggleSidebar = () => {
     dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
   };
@@ -26,7 +25,7 @@ const Sidebar = ({ onStreamSelect }) => {
   } bg-emerald-400 transition-all duration-300 overflow-hidden h-full shadow-md z-40`;
 
   const handleStreamClick = (stream) => {
-    onStreamSelect(stream); // Pass the selected stream to the parent component
+    onStreamSelect(stream);
   };
 
   return (
@@ -45,17 +44,26 @@ const Sidebar = ({ onStreamSelect }) => {
         </button>
       </div>
 
+      {/* Create Stream Button */}
+      <div className={`mt-6 ${isSidebarCollapsed ? "hidden" : "block"} px-4`}>
+        <button
+          className="w-full bg-blue-500 text-white py-2 rounded-md"
+          onClick={onCreateStreamClick}
+        >
+          Create Stream
+        </button>
+      </div>
+
       {/* Stream List Section */}
       <div className={`mt-6 ${isSidebarCollapsed ? "hidden" : "block"} overflow-y-auto`}>
         <h3 className="text-white font-bold text-lg mb-4 px-4">Active Streams</h3>
-        {/* Render a list of streams if available */}
         {streamData && streamData.length > 0 ? (
           <ul className="space-y-3 px-4 max-h-[calc(100vh-120px)] overflow-y-auto">
             {streamData.map((stream) => (
               <li
                 key={stream.id}
                 className="flex items-center text-white cursor-pointer hover:bg-gray-600 py-2 px-3 rounded-lg"
-                onClick={() => handleStreamClick(stream)} // Handle stream click
+                onClick={() => handleStreamClick(stream)}
               >
                 <img
                   src={stream.thumbnail}

@@ -44,7 +44,7 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
             hostName={fullName} // Use full name here
             hostIdentity={user.id}
             viewerIdentity={identity}
-            imageUrl={user.imageUrl}
+            imageUrl={user.profile_picture}
             isFollowing={isFollowing}
             name={stream.title || "Untitled Stream"}
           />
