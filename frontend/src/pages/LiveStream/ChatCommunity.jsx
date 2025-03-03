@@ -1,7 +1,16 @@
 import { useMemo, useState, useEffect } from "react";
 import { useParticipants } from "@livekit/components-react"; // Using useParticipants hook
+import { User } from "lucide-react"; // Example icon import
 
-import CommunityItem from "./CommunityItem";
+const CommunityItem = ({ participantName, participantIdentity }) => {
+  return (
+    <div className="flex items-center p-2 border-b border-white text-emerald-400">
+      <User className="h-5 w-5 text-emerald-400" /> {/* Apply emerald color to icon */}
+      <p className="ml-2">{participantName}</p>
+    </div>
+  );
+};
+
 export const ChatCommunity = ({
   hostName,
   viewerName,
@@ -45,20 +54,20 @@ export const ChatCommunity = ({
 
   if (isHidden) {
     return (
-      <div className="flex flex-1 items-center justify-center">
+      <div className="flex flex-1 items-center justify-center bg-transparent border-2 border-white p-4 text-emerald-400">
         <p className="text-sm text-muted-foreground">Community is disabled</p>
       </div>
     );
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 bg-transparent border-2 border-white text-emerald-400">
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search community"
-        className="border border-gray-300 p-2 rounded-md w-full"
+        className="border-2 border-white p-2 rounded-md w-full text-emerald-400 bg-transparent focus:ring-emerald-400 focus:border-emerald-400"
       />
       <div className="gap-y-2 mt-4 overflow-y-auto max-h-60">
         {filteredParticipants.length === 0 && (

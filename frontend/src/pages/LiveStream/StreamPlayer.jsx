@@ -5,11 +5,34 @@ import { AboutCard } from "./AboutCard";
 import { Chat, ChatSkeleton } from "./Chat";
 import { Video, VideoSkeleton } from "./Video";
 import { Header, HeaderSkeleton } from "./Header";
+import { useEffect, useState } from "react";
+
 const StreamPlayer = ({ user, stream, isFollowing }) => {
-  const { token, name, identity } = useViewerTokenStore(user?.id);
+  const [loading, setLoading] = useState(true); // Add loading state to handle asynchronous token fetching
+  const { token, name, identity, fetchViewerToken } = useViewerTokenStore((state) => ({
+    token: state.token,
+    name: state.name,
+    identity: state.identity,
+    fetchViewerToken: state.fetchViewerToken, // Extract the fetch function
+  }));
+  console.log(stream, loading, token, name, identity, user);
+  // Fetch viewer token when user.id changes
+  useEffect(() => {
+    if (user?.id) {
+      fetchViewerToken(user.id); // Fetch the token using user.id
+      setLoading(true); // Start loading
+    }
+  }, [user?.id, fetchViewerToken]); // Trigger useEffect whenever user.id changes
+
+  // Once the token is fetched, set loading to false
+  useEffect(() => {
+    if (token) {
+      setLoading(false); // Set loading to false once the token is available
+    }
+  }, [token]); // Watch the token for when it's fetched
 
   // Handle case when user or stream or other critical data is null or undefined
-  if (!user || !stream || !token || !name || !identity) {
+  if (loading || !user || !stream || !token || !name || !identity) {
     return <StreamPlayerSkeleton />;
   }
 
@@ -20,7 +43,7 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
     <>
       <LiveKitRoom
         token={token}
-        serverUrl={process.env.VITE_PUBLIC_LIVEKIT_WS_URL}
+        serverUrl={import.meta.env.VITE_PUBLIC_LIVEKIT_WS_URL}
         className="grid grid-cols-1 lg:gap-y-0 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 h-full"
       >
         <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">
@@ -43,7 +66,8 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
             hostName={fullName} // Use full name here
             hostIdentity={user.id}
             viewerIdentity={identity}
-            bio={user.bio || "No bio available"}
+            headline={user.headline}
+            about={user.about}
             followedByCount={user._count?.followedBy || 0}
           />
         </div>
@@ -64,6 +88,7 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
 };
 
 const StreamPlayerSkeleton = () => {
+  console.log("skeleton");
   return (
     <div className="grid grid-cols-1 lg:gap-y-0 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 h-full">
       <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">

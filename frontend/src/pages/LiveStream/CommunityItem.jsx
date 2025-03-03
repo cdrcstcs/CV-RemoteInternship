@@ -16,7 +16,7 @@ const CommunityItem = ({
     blockUser,
     isProcessingBlock,
     isErrorBlock,
-    errorMessageBlock
+    errorMessageBlock,
   } = useLiveStreamStore((state) => ({
     blockUser: state.blockUser,
     isProcessingBlock: state.isProcessingBlock,
@@ -39,18 +39,23 @@ const CommunityItem = ({
   return (
     <div
       className={cn(
-        "group flex items-center justify-between w-full p-2 rounded-md text-sm hover:bg-white/5",
+        "group flex items-center justify-between w-full p-2 rounded-md text-sm border-2 border-white bg-transparent hover:bg-white/5",
         isPending || isProcessingBlock ? "opacity-50 pointer-events-none" : ""
       )}
     >
-      <p style={{ color: color }}>{participantName}</p>
+      {/* Participant Name */}
+      <p className="text-emerald-400" style={{ color: color }}>
+        {participantName}
+      </p>
+
+      {/* Block Button */}
       {isHost && !isSelf && !isProcessingBlock && !isErrorBlock && (
         <div
           title="Block"
           onClick={handleBlock}
           className="h-auto w-auto p-1 opacity-0 group-hover:opacity-100 transition cursor-pointer"
         >
-          <MinusCircle className="h-4 w-4 text-muted-foreground" />
+          <MinusCircle className="h-4 w-4 text-emerald-400" />
         </div>
       )}
 

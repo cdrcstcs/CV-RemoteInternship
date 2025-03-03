@@ -13,24 +13,23 @@ export const useViewerTokenStore = create((set, get) => ({
 
     try {
       // Make a GET request to fetch the viewer token, passing hostIdentity as a query parameter
-      const response = await axiosInstance.get(`/livekit/create-viewer-token`, {
-        params: { hostIdentity } // Pass hostIdentity as a query parameter
-      });
+      const response = await axiosInstance.get(`/livekit/create-viewer-token/${hostIdentity}`);
+
 
       const viewerToken = response.data;
-
-      set({ token: viewerToken });
-
+      console.log(viewerToken);
+      
       const decodedToken = jwtDecode(viewerToken);
       const name = decodedToken?.name;
       const identity = decodedToken?.jti;
 
-      if (identity) {
-        set({ identity });
-      }
-      if (name) {
-        set({ name });
-      }
+      // Set the token, name, and identity all at once
+      set({
+        token: viewerToken,
+        name,
+        identity,
+      });
+
     } catch (e) {
       toast.error("Failed to create token");
       console.error("Error fetching viewer token:", e); // Log the error for debugging

@@ -23,7 +23,7 @@ const Header = ({
   const isHost = viewerIdentity === hostAsViewer;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-y-4 lg:gap-y-0 items-start justify-between px-4">
+    <div className="flex flex-col lg:flex-row gap-y-4 lg:gap-y-0 items-start justify-between px-4 bg-transparent border-2 border-white">
       <div className="flex items-center gap-x-3">
         <UserAvatar
           imageUrl={imageUrl}
@@ -34,20 +34,20 @@ const Header = ({
         />
         <div className="space-y-1">
           <div className="flex items-center gap-x-2">
-            <h2 className="text-lg font-semibold">{hostName}</h2>
+            <h2 className="text-lg font-semibold text-emerald-400">{hostName}</h2>
             <VerifiedMark />
           </div>
-          <p className="text-sm font-semibold">{name}</p>
+          <p className="text-sm font-semibold text-emerald-400">{name}</p>
           {isLive ? (
-            <div className="font-semibold flex gap-x-1 items-center text-xs text-rose-500">
-              <UserIcon className="h-4 w-4" />
+            <div className="font-semibold flex gap-x-1 items-center text-xs text-emerald-400">
+              <UserIcon className="h-4 w-4 text-emerald-400" />
               <p>
                 {participantCount}{" "}
                 {participantCount === 1 ? "viewer" : "viewers"}
               </p>
             </div>
           ) : (
-            <p className="font-semibold text-xs text-muted-foreground">
+            <p className="font-semibold text-xs text-emerald-400">
               Offline
             </p>
           )}
@@ -64,7 +64,7 @@ const Header = ({
 
 const HeaderSkeleton = () => {
   return (
-    <div className="flex flex-col lg:flex-row gap-y-4 lg:gap-y-0 items-start justify-between px-4">
+    <div className="flex flex-col lg:flex-row gap-y-4 lg:gap-y-0 items-start justify-between px-4 bg-transparent border-2 border-white">
       <div className="flex items-center gap-x-2">
         <UserAvatarSkeleton size="lg" />
         <div className="space-y-2">

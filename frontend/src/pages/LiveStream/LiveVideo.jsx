@@ -4,6 +4,7 @@ import { useTracks } from "@livekit/components-react";
 
 import { VolumeControl } from "./VolumeControl";
 import FullscreenControl from "./FullscreenControl";
+
 const LiveVideo = ({ participant }) => {
   const videoRef = useRef(null);
   const wrapperRef = useRef(null);
@@ -66,18 +67,23 @@ const LiveVideo = ({ participant }) => {
     });
 
   return (
-    <div ref={wrapperRef} className="relative h-full flex">
+    <div
+      ref={wrapperRef}
+      className="relative h-full flex bg-transparent border-2 border-white"
+    >
       <video ref={videoRef} width="100%" />
       <div className="absolute top-0 h-full w-full opacity-0 hover:opacity-100 hover:transition-all">
-        <div className="absolute bottom-0 flex h-14 w-full items-center justify-between bg-gradient-to-r from-neutral-900 px-4">
+        <div className="absolute bottom-0 flex h-14 w-full items-center justify-between bg-gradient-to-r from-transparent px-4">
           <VolumeControl
             onChange={onVolumeChange}
             value={volume}
             onToggle={toggleMute}
+            className="text-emerald-400 border-2 border-white"
           />
           <FullscreenControl
             isFullscreen={isFullscreen}
             onToggle={toggleFullscreen}
+            className="text-emerald-400 border-2 border-white"
           />
         </div>
       </div>

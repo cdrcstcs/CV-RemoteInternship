@@ -20,7 +20,6 @@ const Chat = ({
   isChatDelayed,
   isChatFollowersOnly,
 }) => {
-
   const connectionState = useConnectionState();
   const participant = useRemoteParticipant(hostIdentity);
 
@@ -47,7 +46,7 @@ const Chat = ({
   };
 
   return (
-    <div className="flex flex-col bg-background border-l border-b pt-0 h-[calc(100vh-80px)]">
+    <div className="flex flex-col bg-transparent border-2 border-white pt-0 h-[calc(100vh-80px)] text-emerald-400">
       <ChatHeader />
       <ChatList messages={reversedMessages} isHidden={isHidden} />
       <ChatForm
@@ -70,7 +69,7 @@ const Chat = ({
 
 const ChatSkeleton = () => {
   return (
-    <div className="flex flex-col border-l border-b pt-0 h-[calc(100vh-80px)] border-2">
+    <div className="flex flex-col bg-transparent border-2 border-white pt-0 h-[calc(100vh-80px)] text-emerald-400">
       <ChatHeaderSkeleton />
       <ChatListSkeleton />
       <ChatFormSkeleton />

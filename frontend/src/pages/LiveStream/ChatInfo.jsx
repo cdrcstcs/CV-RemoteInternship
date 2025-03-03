@@ -39,9 +39,9 @@ export const ChatInfo = ({ isDelayed, isFollowersOnly }) => {
   }
 
   return (
-    <div className="p-2 text-muted-foreground bg-white/5 border border-white/10 w-full rounded-t-md flex items-center gap-x-2">
+    <div className="p-2 text-emerald-400 bg-transparent border-2 border-white w-full rounded-t-md flex items-center gap-x-2">
       {/* Use title attribute for tooltip */}
-      <Info className="h-4 w-4" title={hint} />
+      <Info className="h-4 w-4 text-emerald-400" title={hint} />
       <p className="text-xs font-semibold">{label}</p>
     </div>
   );

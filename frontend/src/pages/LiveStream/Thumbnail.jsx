@@ -13,7 +13,7 @@ const Thumbnail = ({ src, fallback, isLive, username }) => {
 
   if (!src) {
     content = (
-      <div className="bg-background flex flex-col items-center justify-center gap-y-4 h-full w-full transition-transform group-hover:translate-x-2 group-hover:-translate-y-2 rounded-md">
+      <div className="bg-transparent flex flex-col items-center justify-center gap-y-4 h-full w-full transition-transform group-hover:translate-x-2 group-hover:-translate-y-2 rounded-md border-2 border-white">
         <UserAvatar
           size="lg"
           showBadge
@@ -35,12 +35,12 @@ const Thumbnail = ({ src, fallback, isLive, username }) => {
   }
 
   return (
-    <div className="group aspect-video relative rounded-md cursor-pointer">
-      <div className="rounded-md absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" />
+    <div className="group aspect-video relative rounded-md cursor-pointer border-2 border-white">
+      <div className="rounded-md absolute inset-0 bg-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center" />
       {content}
       {isLive && src && (
         <div className="absolute top-2 left-2 group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform">
-          <LiveBadge />
+          <LiveBadge className="text-emerald-400 border-2 border-white" />
         </div>
       )}
     </div>

@@ -24,9 +24,9 @@ export const VolumeControl = ({ onToggle, onChange, value }) => {
       <Hint label={label} asChild>
         <button
           onClick={onToggle}
-          className="text-white hover:bg-white/10 p-1.5 rounded-lg"
+          className="text-emerald-400 hover:bg-transparent p-1.5 rounded-lg border-2 border-white"
         >
-          <Icon className="h-6 w-6" />
+          <Icon className="h-6 w-6 text-emerald-400" />
         </button>
       </Hint>
 
@@ -37,7 +37,7 @@ export const VolumeControl = ({ onToggle, onChange, value }) => {
         step="1"
         value={value}
         onChange={handleChange}
-        className="w-[8rem] cursor-pointer appearance-none bg-gray-400 rounded-full h-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-[8rem] cursor-pointer appearance-none bg-transparent border-2 border-white rounded-full h-2 focus:outline-none focus:ring-2 focus:ring-emerald-400"
       />
     </div>
   );

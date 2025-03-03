@@ -5,6 +5,7 @@ import { useAppSelector } from "../State/Redux";
 import { StreamPlayer } from "./StreamPlayer";
 import StoreProvider from "../State/Redux";
 import StreamCreationForm from "./StreamCreationForm";
+
 const DashboardLayout = () => {
   const [selectedStream, setSelectedStream] = useState(null);
   const [isCreateStreamVisible, setIsCreateStreamVisible] = useState(false); // State to control the visibility of the Stream Creation form
@@ -23,13 +24,13 @@ const DashboardLayout = () => {
 
   return (
     <div
-      className="flex bg-gray-900 text-gray-900 w-full h-screen"
+      className="flex w-full h-screen text-emerald-400 bg-transparent border-2 border-white"
     >
       <Sidebar onStreamSelect={handleStreamSelect} onCreateStreamClick={handleCreateStreamClick} />
       <main
-        className={`flex flex-col w-full h-full py-7 px-9 bg-gray-900 ${
+        className={`flex flex-col w-full h-full py-7 px-9 ${
           isSidebarCollapsed ? "md:pl-24" : "md:pl-72"
-        }`}
+        } text-emerald-400 bg-transparent border-2 border-white`}
       >
         <Navbar />
         {/* Conditionally render StreamPlayer or StreamCreationForm */}
@@ -38,7 +39,7 @@ const DashboardLayout = () => {
         ) : selectedStream ? (
           <StreamPlayer user={selectedStream.user} stream={selectedStream} isFollowing={true} />
         ) : (
-          <div className="text-white text-center">Select a stream to watch</div>
+          <div className="text-emerald-400 text-center">Select a stream to watch</div>
         )}
       </main>
     </div>

@@ -16,8 +16,8 @@ const InfoModal = ({ initialName, initialThumbnailUrl }) => {
 
   const onRemove = () => {
     startTransition(() => {
-        updateStream({ thumbnail: null });
-        closeRef?.current?.click();
+      updateStream({ thumbnail: null });
+      closeRef?.current?.click();
     });
   };
 
@@ -25,8 +25,8 @@ const InfoModal = ({ initialName, initialThumbnailUrl }) => {
     e.preventDefault();
 
     startTransition(() => {
-        updateStream({ title: name });
-        closeRef?.current?.click();
+      updateStream({ title: name });
+      closeRef?.current?.click();
     });
   };
 
@@ -45,9 +45,9 @@ const InfoModal = ({ initialName, initialThumbnailUrl }) => {
     if (newThumbnail) {
       // Assuming you have an API endpoint to upload the thumbnail
       startTransition(() => {
-          updateStream({ thumbnail: newThumbnail });
-          closeRef?.current?.click();
-        });
+        updateStream({ thumbnail: newThumbnail });
+        closeRef?.current?.click();
+      });
     }
   };
 
@@ -64,31 +64,31 @@ const InfoModal = ({ initialName, initialThumbnailUrl }) => {
   };
 
   return (
-    <div className="dialog">
+    <div className="dialog bg-transparent">
       <button
         type="button"
-        className="link-button"
+        className="link-button text-emerald-400"
         onClick={() => {}}
       >
         Edit
       </button>
-      <div className="dialog-content">
+      <div className="dialog-content bg-transparent border-2 border-white">
         <div className="dialog-header">
-          <h2>Edit stream info</h2>
+          <h2 className="text-emerald-400">Edit stream info</h2>
         </div>
         <form onSubmit={onSubmit} className="space-y-14">
           <div className="space-y-2">
-            <label htmlFor="name">Name</label>
+            <label htmlFor="name" className="text-emerald-400">Name</label>
             <input
               id="name"
               disabled={isProcessingStream || isPending} // Disable input if processing or transition is pending
               placeholder="Stream name"
               onChange={onChange}
               value={name}
-              className="input"
+              className="input text-emerald-400 border-2 border-white"
             />
           </div>
-          
+
           {/* Display current stream name from streamData */}
           {streamData && streamData.title && !name && (
             <div className="text-sm text-gray-500">
@@ -97,17 +97,17 @@ const InfoModal = ({ initialName, initialThumbnailUrl }) => {
           )}
 
           <div className="space-y-2">
-            <label>Thumbnail</label>
-            <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10">
+            <label className="text-emerald-400">Thumbnail</label>
+            <div className="relative aspect-video rounded-xl overflow-hidden border-2 border-white">
               <div className="absolute top-2 right-2 z-[10]">
                 <Hint label="Remove thumbnail" asChild side="left">
                   <button
                     type="button"
                     disabled={isProcessingStream || isPending} // Disable button if processing or transition is pending
                     onClick={onRemove}
-                    className="button-remove-thumbnail"
+                    className="button-remove-thumbnail text-emerald-400"
                   >
-                    <Trash className="h-4 w-4" />
+                    <Trash className="h-4 w-4 text-emerald-400" />
                   </button>
                 </Hint>
               </div>
@@ -121,17 +121,17 @@ const InfoModal = ({ initialName, initialThumbnailUrl }) => {
 
           {/* File upload input for a new thumbnail */}
           <div className="space-y-2">
-            <label htmlFor="thumbnail">Upload New Thumbnail</label>
+            <label htmlFor="thumbnail" className="text-emerald-400">Upload New Thumbnail</label>
             <input
               type="file"
               accept="image/*"
               disabled={isProcessingStream || isPending} // Disable input if processing or transition is pending
               onChange={onThumbnailChange}
               id="thumbnail"
-              className="input-file"
+              className="input-file text-emerald-400 border-2 border-white"
             />
             {newThumbnail && (
-              <div className="relative aspect-video rounded-xl overflow-hidden border border-white/10 mt-2">
+              <div className="relative aspect-video rounded-xl overflow-hidden border-2 border-white mt-2">
                 <img
                   alt="New Thumbnail Preview"
                   src={newThumbnail}
@@ -142,18 +142,18 @@ const InfoModal = ({ initialName, initialThumbnailUrl }) => {
           </div>
 
           <div className="flex justify-between">
-            <button ref={closeRef} type="button" className="ghost-button">
+            <button ref={closeRef} type="button" className="ghost-button text-emerald-400">
               Cancel
             </button>
             <button
               disabled={isProcessingStream || isPending || !newThumbnail} // Disable if processing, pending, or no new thumbnail
               type="button"
               onClick={onUploadThumbnail}
-              className="primary-button"
+              className="primary-button text-emerald-400 border-2 border-white"
             >
               {isPending ? "Uploading..." : "Upload Thumbnail"} {/* Show uploading state */}
             </button>
-            <button disabled={isProcessingStream || isPending} type="submit" className="primary-button">
+            <button disabled={isProcessingStream || isPending} type="submit" className="primary-button text-emerald-400 border-2 border-white">
               {isPending ? "Saving..." : "Save"} {/* Show saving state */}
             </button>
           </div>

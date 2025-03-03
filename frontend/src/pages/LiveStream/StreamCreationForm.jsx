@@ -38,13 +38,13 @@ const StreamCreationForm = () => {
   };
 
   return (
-    <div className="w-full mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg border border-gray-300">
-      <h2 className="text-3xl font-semibold text-gray-800 mb-6 text-center">Create Your Live Stream</h2>
+    <div className="w-full mx-auto mt-10 p-6 bg-transparent shadow-lg rounded-lg border-2 border-white">
+      <h2 className="text-3xl font-semibold text-emerald-400 mb-6 text-center">Create Your Live Stream</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Stream Title */}
         <div className="mb-6">
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="title" className="block text-sm font-medium text-emerald-400 mb-2">
             Stream Title
           </label>
           <input
@@ -52,14 +52,14 @@ const StreamCreationForm = () => {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition duration-300"
+            className="w-full p-4 border-2 border-white rounded-md focus:ring-2 focus:ring-emerald-400 transition duration-300 bg-transparent text-emerald-400"
             required
           />
         </div>
 
         {/* Thumbnail Upload */}
         <div className="mb-6">
-          <label htmlFor="thumbnail" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="thumbnail" className="block text-sm font-medium text-emerald-400 mb-2">
             Thumbnail (Upload Image)
           </label>
           <input
@@ -67,7 +67,7 @@ const StreamCreationForm = () => {
             type="file"
             accept="image/*" // Ensures only image files are accepted
             onChange={handleThumbnailChange}
-            className="w-full p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition duration-300"
+            className="w-full p-4 border-2 border-white rounded-md focus:ring-2 focus:ring-emerald-400 transition duration-300 bg-transparent text-emerald-400"
             required
           />
         </div>
@@ -80,9 +80,9 @@ const StreamCreationForm = () => {
               id="isChatEnabled"
               checked={isChatEnabled}
               onChange={() => setIsChatEnabled(!isChatEnabled)}
-              className="h-5 w-5 text-blue-500 border-gray-300 rounded-md"
+              className="h-5 w-5 text-emerald-400 border-white rounded-md"
             />
-            <label htmlFor="isChatEnabled" className="text-sm text-gray-700 ml-3">
+            <label htmlFor="isChatEnabled" className="text-sm text-emerald-400 ml-3">
               Enable Chat
             </label>
           </div>
@@ -93,9 +93,9 @@ const StreamCreationForm = () => {
               id="isChatFollowersOnly"
               checked={isChatFollowersOnly}
               onChange={() => setIsChatFollowersOnly(!isChatFollowersOnly)}
-              className="h-5 w-5 text-blue-500 border-gray-300 rounded-md"
+              className="h-5 w-5 text-emerald-400 border-white rounded-md"
             />
-            <label htmlFor="isChatFollowersOnly" className="text-sm text-gray-700 ml-3">
+            <label htmlFor="isChatFollowersOnly" className="text-sm text-emerald-400 ml-3">
               Followers Only Chat
             </label>
           </div>
@@ -106,9 +106,9 @@ const StreamCreationForm = () => {
               id="isChatDelayed"
               checked={isChatDelayed}
               onChange={() => setIsChatDelayed(!isChatDelayed)}
-              className="h-5 w-5 text-blue-500 border-gray-300 rounded-md"
+              className="h-5 w-5 text-emerald-400 border-white rounded-md"
             />
-            <label htmlFor="isChatDelayed" className="text-sm text-gray-700 ml-3">
+            <label htmlFor="isChatDelayed" className="text-sm text-emerald-400 ml-3">
               Delayed Chat
             </label>
           </div>
@@ -118,7 +118,7 @@ const StreamCreationForm = () => {
         <div className="mt-6">
           <button
             type="submit"
-            className="w-full py-3 bg-blue-600 text-white text-lg font-semibold rounded-md hover:bg-blue-700 transition duration-300"
+            className="w-full py-3 bg-emerald-400 text-white text-lg font-semibold rounded-md hover:bg-emerald-500 transition duration-300"
             disabled={isProcessingStream} // Disable the button while processing
           >
             {isProcessingStream ? 'Creating Stream...' : 'Create Stream'}

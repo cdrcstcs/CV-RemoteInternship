@@ -1,6 +1,7 @@
 import { useState, useTransition, useRef, useEffect } from "react";
 import useLiveStreamStore from "../../stores/useLiveStreamStore";
-export const BioModal = ({ initialHeadline, initialAbout }) => {
+
+export const BioModal = ({ initialHeadline, initialAbout, onClose }) => {
   const closeRef = useRef(null);
   const [isPending, startTransition] = useTransition();
   const [headline, setHeadline] = useState(initialHeadline || "");
@@ -28,6 +29,13 @@ export const BioModal = ({ initialHeadline, initialAbout }) => {
       alert(errorMessageUpdate || "Something went wrong while updating.");
     }
   }, [isErrorUpdate, errorMessageUpdate]);
+
+  // Close the modal when Cancel is clicked
+  const handleCancel = () => {
+    if (onClose) {
+      onClose(); // Call the onClose function passed from parent component
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -64,7 +72,7 @@ export const BioModal = ({ initialHeadline, initialAbout }) => {
             <button
               ref={closeRef}
               type="button"
-              onClick={() => closeRef.current?.click()}
+              onClick={handleCancel} // Close modal on Cancel
               className="bg-gray-300 text-gray-700 hover:bg-gray-400 py-2 px-4 rounded-md"
             >
               Cancel

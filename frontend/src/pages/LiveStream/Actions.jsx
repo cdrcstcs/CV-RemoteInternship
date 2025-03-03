@@ -57,19 +57,12 @@ export const Actions = ({
     <button
       disabled={isPending || isHost}
       onClick={toggleFollow}
-      style={{
-        width: "100%",
-        maxWidth: "auto",
-        padding: "8px 16px",
-        backgroundColor: "#007BFF",
-        color: "white",
-        border: "none",
-        borderRadius: "4px",
-        cursor: "pointer",
-      }}
+      className={`w-full max-w-full px-4 py-2 border-2 border-white text-emerald-400 bg-transparent rounded-md cursor-pointer flex items-center justify-center gap-2 ${
+        isPending || isHost ? "opacity-50 cursor-not-allowed" : ""
+      }`}
     >
       <Heart
-        className={cn("h-4 w-4 mr-2", isFollowing ? "fill-white" : "fill-none")}
+        className={cn("h-4 w-4", isFollowing ? "fill-emerald-400" : "fill-none")}
       />
       {isFollowing ? "Unfollow" : "Follow"}
     </button>
@@ -79,13 +72,8 @@ export const Actions = ({
 export const ActionsSkeleton = () => {
   return (
     <div
-      style={{
-        height: "40px",
-        width: "100%",
-        maxWidth: "100px",
-        backgroundColor: "#e0e0e0",
-        borderRadius: "4px",
-      }}
+      className="h-10 w-32 bg-gray-300 rounded-md"
+      style={{ height: "40px", width: "100%", maxWidth: "100px" }}
     />
   );
 };
