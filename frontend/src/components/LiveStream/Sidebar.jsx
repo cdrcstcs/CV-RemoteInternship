@@ -20,9 +20,10 @@ const Sidebar = ({ onStreamSelect, onCreateStreamClick }) => {
     dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
   };
 
+  // Class names with transparent background and white border
   const sidebarClassNames = `fixed flex flex-col ${
     isSidebarCollapsed ? "w-0 md:w-16" : "w-72 md:w-64"
-  } bg-emerald-400 transition-all duration-300 overflow-hidden h-full shadow-md z-40`;
+  } bg-transparent border-2 border-white transition-all duration-300 overflow-hidden h-full z-40`;
 
   const handleStreamClick = (stream) => {
     onStreamSelect(stream);
@@ -47,7 +48,7 @@ const Sidebar = ({ onStreamSelect, onCreateStreamClick }) => {
       {/* Create Stream Button */}
       <div className={`mt-6 ${isSidebarCollapsed ? "hidden" : "block"} px-4`}>
         <button
-          className="w-full bg-blue-500 text-white py-2 rounded-md"
+          className="w-full bg-emerald-400 text-white py-2 rounded-md"
           onClick={onCreateStreamClick}
         >
           Create Stream

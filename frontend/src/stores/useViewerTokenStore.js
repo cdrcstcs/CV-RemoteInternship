@@ -20,8 +20,10 @@ export const useViewerTokenStore = create((set, get) => ({
       console.log(viewerToken);
       
       const decodedToken = jwtDecode(viewerToken);
+      console.log(decodedToken);
       const name = decodedToken?.name;
       const identity = decodedToken?.jti;
+
 
       // Set the token, name, and identity all at once
       set({
