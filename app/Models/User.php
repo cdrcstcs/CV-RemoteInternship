@@ -208,7 +208,7 @@ class User extends Authenticatable  // Extend Authenticatable
     // Add a stream relationship if needed
     public function stream()
     {
-        return $this->hasOne(Stream::class, 'user_id');
+        return $this->hasMany(Stream::class, 'user_id');
     }
 
     // Define the "blocks" relationship to the Block model (where a user is blocking others)

@@ -36,13 +36,6 @@ class StreamController extends Controller
         $self = $request->user(); // Get the authenticated user
         Log::info("User {$self->id} is attempting to create a new stream");
 
-        // Check if the user already has an active stream
-        $existingStream = Stream::where('user_id', $self->id)->where('isLive', true)->first();
-        if ($existingStream) {
-            Log::warning("User {$self->id} already has an active stream.");
-            return response()->json(['message' => 'You already have an active stream.'], 400);
-        }
-
         // Validate the request input for title, thumbnail (file upload), and chat settings
         try {
             $validatedData = $request->validate([
@@ -135,7 +128,9 @@ class StreamController extends Controller
                 'isChatEnabled' => $isChatEnabled,
                 'isChatDelayed' => $isChatDelayed,
                 'isChatFollowersOnly' => $isChatFollowersOnly,
-            ]);            
+            ]);
+            // Eager load the 'user' relationship for the created stream
+            $stream->load('user');    
         } catch (\Exception $e) {
             Log::error("Error saving stream data to the database for user {$self->id}: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json(['message' => 'Failed to save stream data'], 500);
@@ -147,29 +142,41 @@ class StreamController extends Controller
     }
 
 
-    // Stop the stream (mark as not live)
     public function stopStream(Request $request)
     {
         $self = $request->user(); // Get the authenticated user
+        $streamId = $request->input('stream_id'); // Get the stream_id from the request, if available
 
-        Log::info("User {$self->id} is attempting to stop their stream");
+        Log::info("User {$self->id} is attempting to stop a stream");
 
-        // Find the active stream for the user
-        $stream = Stream::where('user_id', $self->id)->where('isLive', true)->first();
+        // Determine the stream to stop
+        $stream = null;
 
-        if (!$stream) {
-            Log::warning("User {$self->id} does not have an active stream.");
-            return response()->json(['message' => 'No active stream found'], 400);
+        if ($streamId) {
+            // If stream_id is provided, find the stream by stream_id
+            $stream = Stream::find($streamId);
+            if (!$stream) {
+                Log::warning("Stream with ID {$streamId} not found.");
+                return response()->json(['message' => 'Stream not found'], 400);
+            }
+        } else {
+            // If stream_id is not provided, find the active stream for the authenticated user
+            $stream = Stream::where('user_id', $self->id)->where('isLive', true)->first();
+            if (!$stream) {
+                Log::warning("User {$self->id} does not have an active stream.");
+                return response()->json(['message' => 'No active stream found'], 400);
+            }
         }
 
         // Mark the stream as not live
         $stream->isLive = false;
         $stream->save();
 
-        Log::info("Stream stopped successfully for user {$self->id}");
+        Log::info("Stream stopped successfully for user {$self->id}, Stream ID: {$stream->id}");
 
         return response()->json(['message' => 'Stream stopped successfully']);
     }
+
 
     // Method to search streams based on a term
     public function searchStreams(Request $request)
@@ -293,26 +300,14 @@ class StreamController extends Controller
                 ->with(['user'])  // Eager load the user relationship to avoid N+1 issues
                 ->orderBy('isLive', 'desc')
                 ->orderBy('updated_at', 'desc')
-                ->get([
-                    'id',
-                    'user_id',  // assuming user_id is stored in the streams table
-                    'isLive',
-                    'title',
-                    'thumbnail'
-                ]);
+                ->get();
                 Log::info("Streams fetched for authenticated user {$userId}.");
             } else {
                 // If no user is authenticated, fetch all streams
                 $streams = Stream::with(['user'])  // Eager load user relationship
                     ->orderBy('isLive', 'desc')
                     ->orderBy('updated_at', 'desc')
-                    ->get([
-                        'id',
-                        'user_id',  // assuming user_id is stored in the streams table
-                        'isLive',
-                        'title',
-                        'thumbnail'
-                    ]);
+                    ->get();
                 Log::info("Streams fetched for guest user.");
             }
 

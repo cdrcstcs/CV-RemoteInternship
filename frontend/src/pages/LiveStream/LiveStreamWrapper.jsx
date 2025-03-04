@@ -22,10 +22,13 @@ const DashboardLayout = () => {
     setIsCreateStreamVisible(true); // Show the stream creation form when the button is clicked
   };
 
+  const handleCloseCreateStreamClick = () => {
+    setIsCreateStreamVisible(false); // Close the stream creation form
+  };
+
   return (
-    <div
-      className="flex w-full h-screen text-emerald-400 bg-transparent border-2 border-white"
-    >
+    <div className="flex w-full h-screen text-emerald-400 bg-transparent border-2 border-white relative">
+      {/* Sidebar */}
       <Sidebar onStreamSelect={handleStreamSelect} onCreateStreamClick={handleCreateStreamClick} />
       <main
         className={`flex flex-col w-full h-full py-7 px-9 ${
@@ -33,12 +36,24 @@ const DashboardLayout = () => {
         } text-emerald-400 bg-transparent border-2 border-white`}
       >
         <Navbar />
-        {/* Conditionally render StreamPlayer or StreamCreationForm */}
-        {isCreateStreamVisible ? (
+        
+        {/* Separate condition for StreamCreationForm */}
+        {isCreateStreamVisible && (
           <StreamCreationForm />
-        ) : selectedStream ? (
-          <StreamPlayer user={selectedStream.user} stream={selectedStream} isFollowing={true} />
-        ) : (
+        )}
+
+        {/* Separate condition for StreamPlayer */}
+        {selectedStream && !isCreateStreamVisible && (
+          <StreamPlayer
+            user={selectedStream.user}
+            stream={selectedStream}
+            isFollowing={true}
+            onCloseCreateStream={handleCloseCreateStreamClick}
+          />
+        )}
+
+        {/* Fallback when no stream is selected and form is not visible */}
+        {!selectedStream && !isCreateStreamVisible && (
           <div className="text-emerald-400 text-center">Select a stream to watch</div>
         )}
       </main>

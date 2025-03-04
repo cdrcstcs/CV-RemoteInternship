@@ -22,6 +22,15 @@ export const useLiveStreamStore = create((set, get) => ({
   isErrorStream: false,
   errorMessageStream: "",
 
+  streams: [], // Store many streams
+  isProcessingStream: false,
+  isErrorStream: false,
+  errorMessageStream: "",
+
+  isStoppingStream: false,
+  isErrorStoppingStream: false,
+  errorMessageStoppingStream: "",
+
   // Update-related state
   isProcessingUpdate: false,
   isErrorUpdate: false,
@@ -56,7 +65,7 @@ export const useLiveStreamStore = create((set, get) => ({
       // Send the modified formData
       const response = await axiosInstance.post("/create-stream", formData);
   
-      set({ streamData: response.data, streams: [...get().streams, response.data], isProcessingStream: false });
+      set({ streams: [...get().streams, response.data], isProcessingStream: false });
       toast.success("Stream created successfully!");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Error creating stream";
@@ -65,23 +74,31 @@ export const useLiveStreamStore = create((set, get) => ({
     }
   },
   
-  // Function to stop the stream
-  stopStream: async () => {
-    const { isProcessingStream, streamData } = get();
-    if (isProcessingStream || !streamData) return;
-
-    set({ isProcessingStream: true, isErrorStream: false, errorMessageStream: "" });
-
+  stopStream: async (streamId = null) => {
+    const { isProcessingStream } = get();
+    if (isProcessingStream) return;
+  
+    set({ isStoppingStream: true, isErrorStoppingStream: false, errorMessageStoppingStream: "" });
+  
     try {
-      const response = await axiosInstance.post("/stop-stream");
-      set({ streamData: null, streams: get().streams.filter(stream => stream.id !== streamData.id), isProcessingStream: false });
+      // Make the API request with the optional streamId parameter
+      const requestPayload = streamId ? { stream_id: streamId } : {}; // If streamId is passed, include it in the request
+      const response = await axiosInstance.post("/stop-stream", requestPayload);
+  
+      // Filter out the stopped stream from the list of active streams
+      set({
+        streams: get().streams.filter(stream => stream.id !== response.data.id),
+        isStoppingStream: false,
+      });
+  
       toast.success("Stream stopped successfully!");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Error stopping stream";
-      set({ isProcessingStream: false, isErrorStream: true, errorMessageStream: errorMessage });
+      set({ isStoppingStream: false, isErrorStream: true, errorMessageStoppingStream: errorMessage });
       toast.error(errorMessage);
     }
   },
+  
   
   // Function to update user's headline and about
   updateUserHeadlineAndAbout: async (headline, about) => {
@@ -276,6 +293,9 @@ export const useLiveStreamStore = create((set, get) => ({
     errorMessageUpdate: "",
     isBlocked: false,
     viewerToken:"",
+    isStoppingStream: false,
+    isErrorStoppingStream: false,
+    errorMessageStoppingStream: "",
   }),
 }));
 

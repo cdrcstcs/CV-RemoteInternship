@@ -24,9 +24,6 @@ return new class extends Migration
             $table->boolean('isChatFollowersOnly')->default(false);
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Foreign key to users table
             $table->timestamps(); // Created_at and updated_at columns
-
-            // Unique constraint for the user_id if needed (if user can only have one stream)
-            $table->unique('user_id');
         });
     }
 

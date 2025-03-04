@@ -2,13 +2,15 @@ import { LiveKitRoom } from "@livekit/components-react";
 import { useViewerTokenStore } from "../../stores/useViewerTokenStore";
 import InfoCard from "./InfoCard";
 import { AboutCard } from "./AboutCard";
-import { Chat, ChatSkeleton } from "./Chat";
 import { Video, VideoSkeleton } from "./Video";
 import { Header, HeaderSkeleton } from "./Header";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import useLiveStreamStore from "../../stores/useLiveStreamStore";
-const StreamPlayer = ({ user, stream, isFollowing }) => {
+import KeyCard from "./KeyCard";
+import UrlCard from "./UrlCard";
+const StreamPlayer = ({ user, stream, isFollowing, onCloseCreateStream}) => {
+  onCloseCreateStream();
   const [loading, setLoading] = useState(true); // Add loading state to handle asynchronous token fetching
   const { token, name, identity, fetchViewerToken } = useViewerTokenStore((state) => ({
     token: state.token,
@@ -17,10 +19,9 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
     fetchViewerToken: state.fetchViewerToken, // Extract the fetch function
   }));
 
-  const { isProcessingStream, stopStream, streamData } = useLiveStreamStore((state) => ({
-    isProcessingStream: state.isProcessingStream,
+  const { isStoppingStream, stopStream } = useLiveStreamStore((state) => ({
+    isStoppingStream: state.isStoppingStream,
     stopStream: state.stopStream,
-    streamData: state.streamData,
   }));
 
   console.log(stream, loading, token, name, identity, user);
@@ -50,10 +51,8 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
 
   // Stop Stream button click handler
   const handleStopStream = () => {
-    if (streamData && !isProcessingStream) {
-      stopStream(); // Trigger stopStream from the store
-      toast.success("Stream is being stopped...");
-    }
+    toast.success("Stream is being stopped...");
+    stopStream(stream.id); // Trigger stopStream from the store
   };
 
   return (
@@ -61,10 +60,19 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
       <LiveKitRoom
         token={token}
         serverUrl={import.meta.env.VITE_PUBLIC_LIVEKIT_WS_URL}
-        className="grid grid-cols-1 lg:gap-y-0 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 h-full"
+        className="grid grid-cols-1 h-full"
       >
         <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">
           <Video hostName={fullName} hostIdentity={user.id} />
+          <KeyCard value={stream.streamKey}/>
+          <UrlCard value={stream.serverUrl}/>
+          <button
+            onClick={handleStopStream}
+            disabled={isStoppingStream}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4"
+          >
+            {isStoppingStream ? "Stopping..." : "Stop Stream"}
+          </button>
           <Header
             hostName={fullName} // Use full name here
             hostIdentity={user.id}
@@ -87,24 +95,6 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
             about={user.about}
             followedByCount={user._count?.followedBy || 0}
           />
-          <button
-            onClick={handleStopStream}
-            disabled={isProcessingStream}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4"
-          >
-            {isProcessingStream ? "Stopping..." : "Stop Stream"}
-          </button>
-        </div>
-        <div className="col-span-1">
-          <Chat
-            viewerName={name || "Guest"}
-            hostName={fullName} // Use full name here
-            hostIdentity={user.id}
-            isFollowing={isFollowing}
-            isChatEnabled={stream.isChatEnabled || false}
-            isChatDelayed={stream.isChatDelayed || false}
-            isChatFollowersOnly={stream.isChatFollowersOnly || false}
-          />
         </div>
       </LiveKitRoom>
     </>
@@ -118,9 +108,6 @@ const StreamPlayerSkeleton = () => {
       <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">
         <VideoSkeleton />
         <HeaderSkeleton />
-      </div>
-      <div className="col-span-1 bg-background">
-        <ChatSkeleton />
       </div>
     </div>
   );
