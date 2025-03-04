@@ -11,6 +11,12 @@ use App\Models\Follow;
 use Agence104\LiveKit\RoomServiceClient;
 use Agence104\LiveKit\IngressServiceClient;
 use App\Integrations\files\CloudinaryImageClient; // Use the custom Cloudinary client
+use Livekit\IngressAudioOptions;
+use Livekit\IngressVideoOptions;
+use Livekit\IngressVideoEncodingPreset;
+use Livekit\TrackSource;
+use Livekit\IngressInput;
+use Livekit\IngressAudioEncodingPreset;
 
 
 class StreamController extends Controller
@@ -78,13 +84,26 @@ class StreamController extends Controller
             }
         }
 
-        // Create a new ingress for the stream
-        $inputType = 1;  // Set to the correct input type (replace 0 with the appropriate value)
+        // Set the correct input type (replace 0 with the appropriate value)
+        $inputType = IngressInput::RTMP_INPUT;  // Assuming 1 is for regular video and audio input
         $name = $self->first_name . ' ' . $self->last_name;
         $roomName = $self->id;  // The room name will be the user ID (this could be customized)
         $participantName = $self->first_name . ' ' . $self->last_name;
         $participantIdentity = $self->id;
-        $bypassTranscoding = true;
+        $bypassTranscoding = false;  // Set to false if you don't want to bypass transcoding
+
+        // Create the audio configuration using the Livekit\IngressAudioOptions class
+        $audioConfig = new IngressAudioOptions([
+            'source' => TrackSource::MICROPHONE, // Audio source (MICROPHONE constant is an integer)
+            'preset' => IngressAudioEncodingPreset::OPUS_STEREO_96KBPS, // OPUS audio encoding preset for stereo audio at 96 kbps
+        ]);
+        // Video and audio configurations
+        $videoConfig = new IngressVideoOptions([
+            'source' => TrackSource::CAMERA,  // Video source (CAMERA constant is an integer)
+            'preset' => IngressVideoEncodingPreset::H264_1080P_30FPS_3_LAYERS, // Video encoding preset (this should also be an integer)
+        ]);
+        
+        
 
         // Create the ingress using the updated IngressServiceClient
         try {
@@ -94,14 +113,15 @@ class StreamController extends Controller
                 $roomName,
                 $participantIdentity,
                 $participantName,
-                null,
-                null,
-                $bypassTranscoding,
+                $audioConfig,  // Pass the audio configuration
+                $videoConfig,  // Pass the video configuration
+                $bypassTranscoding,  // Pass the bypass transcoding flag
             );
         } catch (\Exception $e) {
             Log::error("Failed to create ingress for user {$self->id}: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json(['message' => 'Failed to create stream ingress.'], 500);
         }
+
 
         // Check if ingress was successfully created
         if (!$ingress || !$ingress->getUrl() || !$ingress->getStreamKey()) {
