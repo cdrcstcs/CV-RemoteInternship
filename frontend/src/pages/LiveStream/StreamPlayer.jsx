@@ -6,7 +6,8 @@ import { Chat, ChatSkeleton } from "./Chat";
 import { Video, VideoSkeleton } from "./Video";
 import { Header, HeaderSkeleton } from "./Header";
 import { useEffect, useState } from "react";
-
+import { toast } from "react-hot-toast";
+import useLiveStreamStore from "../../stores/useLiveStreamStore";
 const StreamPlayer = ({ user, stream, isFollowing }) => {
   const [loading, setLoading] = useState(true); // Add loading state to handle asynchronous token fetching
   const { token, name, identity, fetchViewerToken } = useViewerTokenStore((state) => ({
@@ -15,7 +16,15 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
     identity: state.identity,
     fetchViewerToken: state.fetchViewerToken, // Extract the fetch function
   }));
+
+  const { isProcessingStream, stopStream, streamData } = useLiveStreamStore((state) => ({
+    isProcessingStream: state.isProcessingStream,
+    stopStream: state.stopStream,
+    streamData: state.streamData,
+  }));
+
   console.log(stream, loading, token, name, identity, user);
+
   // Fetch viewer token when user.id changes
   useEffect(() => {
     if (user?.id) {
@@ -38,6 +47,14 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
 
   // Concatenate first name and last name for the full name
   const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+
+  // Stop Stream button click handler
+  const handleStopStream = () => {
+    if (streamData && !isProcessingStream) {
+      stopStream(); // Trigger stopStream from the store
+      toast.success("Stream is being stopped...");
+    }
+  };
 
   return (
     <>
@@ -70,6 +87,13 @@ const StreamPlayer = ({ user, stream, isFollowing }) => {
             about={user.about}
             followedByCount={user._count?.followedBy || 0}
           />
+          <button
+            onClick={handleStopStream}
+            disabled={isProcessingStream}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg mt-4"
+          >
+            {isProcessingStream ? "Stopping..." : "Stop Stream"}
+          </button>
         </div>
         <div className="col-span-1">
           <Chat

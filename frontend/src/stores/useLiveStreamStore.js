@@ -33,11 +33,29 @@ export const useLiveStreamStore = create((set, get) => ({
   createStream: async (formData) => {
     const { isProcessingStream } = get();
     if (isProcessingStream) return;
-
+  
     set({ isProcessingStream: true, isErrorStream: false, errorMessageStream: "" });
-
+  
     try {
-      const response = await axiosInstance.post("/create-stream",formData);
+      // Modify formData for boolean fields before sending it to the server
+      const booleanKeys = ['isChatEnabled', 'isChatDelayed', 'isChatFollowersOnly'];
+  
+      for (let [key, value] of formData.entries()) {
+        // Check if the key is one of the boolean keys
+        if (booleanKeys.includes(key)) {
+          // Convert the value to a boolean (true or false) before setting it back in FormData
+          const booleanValue = value === 'true' ? true : (value === 'false' ? false : value);
+          formData.set(key, booleanValue); // Update the form data with the correct boolean value
+        }
+      }
+  
+      // Iterate over FormData and log key-value pairs
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+      // Send the modified formData
+      const response = await axiosInstance.post("/create-stream", formData);
+  
       set({ streamData: response.data, streams: [...get().streams, response.data], isProcessingStream: false });
       toast.success("Stream created successfully!");
     } catch (error) {
@@ -46,7 +64,7 @@ export const useLiveStreamStore = create((set, get) => ({
       toast.error(errorMessage);
     }
   },
-
+  
   // Function to stop the stream
   stopStream: async () => {
     const { isProcessingStream, streamData } = get();

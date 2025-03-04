@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id(); // Auto-increment primary key
             $table->string('title');
             $table->string('thumbnail')->nullable();
+            $table->string('ingressId')->nullable()->unique();
+            $table->string('serverUrl')->nullable();
+            $table->string('streamKey')->nullable();
             $table->boolean('isLive')->default(false);
             $table->boolean('isChatEnabled')->default(true);
             $table->boolean('isChatDelayed')->default(false);
