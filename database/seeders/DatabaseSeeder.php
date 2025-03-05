@@ -37,7 +37,11 @@ use App\Models\{
     Conversation,
     Group,
     Chatbot,
+    StreamGift,
 };
+
+use App\Enums\GiftTypeEnum;
+
 use Carbon\Carbon;
 
 use Faker\Factory as Faker;
@@ -54,6 +58,14 @@ class DatabaseSeeder extends Seeder
         // Create 100 users
         $users = User::factory(100)->create(); 
 
+        // Loop through each value of the GiftTypeEnum and create a StreamGift
+        foreach (GiftTypeEnum::cases() as $giftType) {
+            // Create a new StreamGift for each gift type
+            $streamGift = StreamGift::create([
+                'gift_type' => $giftType->value, // Use the enum value (e.g., 'lion', 'flower', etc.)
+                'price' => $giftType->getPrice(), // Dynamically set the price based on the gift type
+            ]);
+        }
         foreach ($users as $user) {
             // Create 5 chatbots for each user, passing the user_id
             Chatbot::factory(5)->create([

@@ -28,4 +28,16 @@ class Stream extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    // Relationship with StreamMessage model
+    public function streamMessages()
+    {
+        return $this->hasMany(StreamMessage::class, 'stream_id');
+    }
+
+    // Relationship with StreamGift model
+    public function gifts()
+    {
+        return $this->hasMany(StreamGift::class, 'stream_id'); // A Stream can have many gifts
+    }
 }
