@@ -43,6 +43,8 @@ const StreamPlayer = ({ user, stream, isFollowing, onCloseCreateStream}) => {
 
   // Handle case when user or stream or other critical data is null or undefined
   if (loading || !user || !stream || !token || !name || !identity) {
+    console.log("skeleton stream")
+    console.log(loading, user, stream, token, identity, name);
     return <StreamPlayerSkeleton />;
   }
 
@@ -57,6 +59,7 @@ const StreamPlayer = ({ user, stream, isFollowing, onCloseCreateStream}) => {
 
   return (
     <>
+      {console.log("not skeleton")}
       <LiveKitRoom
         token={token}
         serverUrl={import.meta.env.VITE_PUBLIC_LIVEKIT_WS_URL}

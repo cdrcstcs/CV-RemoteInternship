@@ -113,28 +113,21 @@ Route::middleware('custom_cors')->group(function () {
         Route::post('/unblock/{id}', [BlockController::class, 'unblockUser']);
         Route::get('/blocked-users', [BlockController::class, 'getBlockedUsers']);
         Route::get('/is-blocked/{id}', [BlockController::class, 'isBlockedByUser']);
-
         Route::post('/follow/{id}', [FollowController::class, 'followUser']);
         Route::post('/unfollow/{id}', [FollowController::class, 'unfollowUser']);
         Route::get('/is-following/{id}', [FollowController::class, 'isFollowingUser']);
         Route::get('/followed-users', [FollowController::class, 'getFollowedUsers']);
-
         Route::post('/livekit/create-ingress/{ingressType}', [LiveKitController::class, 'createIngress']);
         Route::post('/livekit/reset-ingresses/{hostIdentity}', [LiveKitController::class, 'resetIngresses']);
         Route::get('/livekit/create-token/{roomName}', [LiveKitController::class, 'createAccessToken']);
-
         Route::post('create-stream', [StreamController::class, 'createStream']);  // Create a new stream
         Route::post('stop-stream', [StreamController::class, 'stopStream']); // Stop the stream
-
         Route::post('/stream/update', [StreamController::class, 'updateStream']);
         Route::get('/streams', [StreamController::class, 'getStreams']);
         Route::get('/recommended-users/stream', [StreamController::class, 'getRecommendedUsers']);
         Route::get('/search-streams', [StreamController::class, 'searchStreams']);
         Route::get('/user/stream', [StreamController::class, 'fetchUserStream']);
-
-
         Route::get('/livekit/create-viewer-token/{hostIdentity}', [ViewerController::class, 'createViewerToken']);
-
         Route::put('/user/headline-about', [UserController::class, 'updateHeadlineAndAbout']);
     });
     Route::middleware(['auth:sanctum','role:Administration,ProductSaler'])->group(function () {

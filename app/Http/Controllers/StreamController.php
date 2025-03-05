@@ -188,15 +188,22 @@ class StreamController extends Controller
             }
         }
 
-        // Mark the stream as not live
-        $stream->isLive = false;
-        $stream->save();
+        try {
+            // Mark the stream as not live
+            $stream->isLive = false;
+            $stream->save();
 
-        Log::info("Stream stopped successfully for user {$self->id}, Stream ID: {$stream->id}");
+            // Delete the ingress associated with the stream
+            $this->ingressServiceClient->deleteIngress($stream->ingressId);
 
-        return response()->json(['message' => 'Stream stopped successfully']);
+            Log::info("Stream stopped successfully for user {$self->id}, Stream ID: {$stream->id}");
+
+            return response()->json(['message' => 'Stream stopped successfully']);
+        } catch (\Exception $e) {
+            Log::error("Error stopping stream for user {$self->id}, Stream ID: {$stream->id}. Error: " . $e->getMessage());
+            return response()->json(['message' => 'Failed to stop stream', 'error' => $e->getMessage()], 500);
+        }
     }
-
 
     // Method to search streams based on a term
     public function searchStreams(Request $request)
