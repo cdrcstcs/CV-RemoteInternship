@@ -31,6 +31,7 @@ use App\Http\Controllers\FollowController;
 use App\Http\Controllers\LiveKitController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\ViewerController;
+use App\Http\Controllers\StreamMessageController;
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -129,6 +130,8 @@ Route::middleware('custom_cors')->group(function () {
         Route::get('/user/stream', [StreamController::class, 'fetchUserStream']);
         Route::get('/livekit/create-viewer-token/{hostIdentity}', [ViewerController::class, 'createViewerToken']);
         Route::put('/user/headline-about', [UserController::class, 'updateHeadlineAndAbout']);
+        Route::post('/stream-message', [StreamMessageController::class, 'sendMessage']);
+        Route::get('/stream-messages/creator/{creatorId}', [StreamMessageController::class, 'getMessagesByCreator']);        
     });
     Route::middleware(['auth:sanctum','role:Administration,ProductSaler'])->group(function () {
         Route::post('/feedback-forms', [FeedbackFormController::class, 'storeFeedbackForm']);

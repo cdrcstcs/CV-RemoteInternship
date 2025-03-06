@@ -9,14 +9,18 @@ import { toast } from "react-hot-toast";
 import useLiveStreamStore from "../../stores/useLiveStreamStore";
 import KeyCard from "./KeyCard";
 import UrlCard from "./UrlCard";
-const StreamPlayer = ({ user, stream, isFollowing, onCloseCreateStream}) => {
+import StreamMessages from "./StreamMessages";
+import { useUserStore } from "../../stores/useUserStore";
+
+const StreamPlayer = ({ user, stream, isFollowing, onCloseCreateStream }) => {
   onCloseCreateStream();
-  const [loading, setLoading] = useState(true); // Add loading state to handle asynchronous token fetching
+  const { user: authenticatedUser } = useUserStore();
+  const [loading, setLoading] = useState(true);
   const { token, name, identity, fetchViewerToken } = useViewerTokenStore((state) => ({
     token: state.token,
     name: state.name,
     identity: state.identity,
-    fetchViewerToken: state.fetchViewerToken, // Extract the fetch function
+    fetchViewerToken: state.fetchViewerToken,
   }));
 
   const { isStoppingStream, stopStream } = useLiveStreamStore((state) => ({
@@ -24,51 +28,42 @@ const StreamPlayer = ({ user, stream, isFollowing, onCloseCreateStream}) => {
     stopStream: state.stopStream,
   }));
 
-  console.log(stream, loading, token, name, identity, user);
-
-  // Fetch viewer token when user.id changes
   useEffect(() => {
     if (user?.id) {
-      fetchViewerToken(user.id); // Fetch the token using user.id
-      setLoading(true); // Start loading
+      fetchViewerToken(user.id);
+      setLoading(true);
     }
-  }, [user?.id, fetchViewerToken]); // Trigger useEffect whenever user.id changes
+  }, [user?.id, fetchViewerToken]);
 
-  // Once the token is fetched, set loading to false
   useEffect(() => {
     if (token) {
-      setLoading(false); // Set loading to false once the token is available
+      setLoading(false);
     }
-  }, [token]); // Watch the token for when it's fetched
+  }, [token]);
 
-  // Handle case when user or stream or other critical data is null or undefined
   if (loading || !user || !stream || !token || !name || !identity) {
-    console.log("skeleton stream")
-    console.log(loading, user, stream, token, identity, name);
     return <StreamPlayerSkeleton />;
   }
 
-  // Concatenate first name and last name for the full name
-  const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+  const fullName = `${user.first_name || ""} ${user.last_name || ""}`.trim();
 
-  // Stop Stream button click handler
   const handleStopStream = () => {
     toast.success("Stream is being stopped...");
-    stopStream(stream.id); // Trigger stopStream from the store
+    stopStream(stream.id);
   };
 
   return (
     <>
-      {console.log("not skeleton")}
       <LiveKitRoom
         token={token}
         serverUrl={import.meta.env.VITE_PUBLIC_LIVEKIT_WS_URL}
-        className="grid grid-cols-1 h-full"
+        className="h-full flex flex-col lg:flex-row gap-6 p-4"
       >
-        <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">
+        {/* Left section: Stream and Stream Details */}
+        <div className="flex-1 space-y-4 lg:overflow-y-auto hidden-scrollbar pb-10">
           <Video hostName={fullName} hostIdentity={user.id} />
-          <KeyCard value={stream.streamKey}/>
-          <UrlCard value={stream.serverUrl}/>
+          <KeyCard value={stream.streamKey} />
+          <UrlCard value={stream.serverUrl} />
           <button
             onClick={handleStopStream}
             disabled={isStoppingStream}
@@ -77,7 +72,7 @@ const StreamPlayer = ({ user, stream, isFollowing, onCloseCreateStream}) => {
             {isStoppingStream ? "Stopping..." : "Stop Stream"}
           </button>
           <Header
-            hostName={fullName} // Use full name here
+            hostName={fullName}
             hostIdentity={user.id}
             viewerIdentity={identity}
             imageUrl={user.profile_picture}
@@ -91,12 +86,21 @@ const StreamPlayer = ({ user, stream, isFollowing, onCloseCreateStream}) => {
             thumbnailUrl={stream.thumbnail || ""}
           />
           <AboutCard
-            hostName={fullName} // Use full name here
+            hostName={fullName}
             hostIdentity={user.id}
             viewerIdentity={identity}
             headline={user.headline}
             about={user.about}
             followedByCount={user._count?.followedBy || 0}
+          />
+        </div>
+
+        {/* Right section: StreamMessages */}
+        <div className="w-full lg:w-1/3 rounded-lg shadow-md h-screen">
+          <StreamMessages
+            creatorId={user.id}
+            viewerId={authenticatedUser.id}
+            streamId={stream.id}
           />
         </div>
       </LiveKitRoom>
@@ -105,12 +109,17 @@ const StreamPlayer = ({ user, stream, isFollowing, onCloseCreateStream}) => {
 };
 
 const StreamPlayerSkeleton = () => {
-  console.log("skeleton");
   return (
-    <div className="grid grid-cols-1 lg:gap-y-0 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 h-full">
-      <div className="space-y-4 col-span-1 lg:col-span-2 xl:col-span-2 2xl:col-span-5 lg:overflow-y-auto hidden-scrollbar pb-10">
+    <div className="h-full flex flex-col lg:flex-row gap-6 p-4">
+      {/* Left section: Skeleton for Stream and Stream Details */}
+      <div className="flex-1 space-y-4 lg:overflow-y-auto hidden-scrollbar pb-10">
         <VideoSkeleton />
         <HeaderSkeleton />
+      </div>
+
+      {/* Right section: Skeleton for StreamMessages */}
+      <div className="w-full lg:w-1/3 bg-gray-200 rounded-lg shadow-md h-screen">
+        <div className="h-full w-full bg-gray-300 rounded-md" />
       </div>
     </div>
   );
