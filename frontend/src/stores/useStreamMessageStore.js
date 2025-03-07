@@ -29,7 +29,6 @@ export const useStreamMessageStore = create((set, get) => ({
       }); // Replace with your backend URL
 
       set({
-        messages: [...get().messages, response.data], // Append the new message to the messages store
         isProcessingMessage: false,
         isSuccessMessage: true,
       });
@@ -75,7 +74,18 @@ export const useStreamMessageStore = create((set, get) => ({
       toast.error(errorMessage);
     }
   },
-
+  listenForNewMessage: (streamId) => {
+    // Listen for new messages in the specified stream
+    Echo.channel(`stream-chat.${streamId}`)
+      .listen('StreamChatMessageSent', (event) => {
+        console.log(event.message);
+        // When a new message is received, append it to the messages array
+        set((state) => ({
+          messages: [...state.messages, event],
+        }));
+        toast.success("New message received!");
+      });
+  },
   // Function to reset the store
   reset: () => set({
     messages: [],

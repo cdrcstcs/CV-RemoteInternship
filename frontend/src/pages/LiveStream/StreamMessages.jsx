@@ -10,6 +10,7 @@ const StreamMessages = ({ creatorId, viewerId, streamId }) => {
   
   // Access store state and actions from Zustand
   const {
+    listenForNewMessage,
     messages,
     isProcessingMessage,
     isErrorMessage,
@@ -20,7 +21,11 @@ const StreamMessages = ({ creatorId, viewerId, streamId }) => {
     reset,
   } = useStreamMessageStore();
 
-  // Automatically fetch messages when creatorId changes or component mounts
+
+  useEffect(() => {
+    listenForNewMessage(streamId);
+  }, [streamId]);
+
   useEffect(() => {
     if (creatorId) {
       // Call the getMessagesByCreator function to fetch messages

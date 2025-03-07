@@ -6,6 +6,7 @@ use App\Models\StreamMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log; // Add the Log facade for logging
+use App\Jobs\BroadcastStreamMessage; // Import the job
 
 class StreamMessageController extends Controller
 {
@@ -51,6 +52,8 @@ class StreamMessageController extends Controller
         ]);
 
         $streamMessage = StreamMessage::with(['creator', 'viewer', 'stream'])->find($streamMessage->id);
+
+        dispatch(new BroadcastStreamMessage($streamMessage));
 
         // Log the created message
         Log::info('sendMessage created new message', ['message' => $streamMessage]);
