@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id(); // Automatically creates 'Id' as an auto-incrementing integer
             $table->string('first_name', 100)->nullable()->default(null);
             $table->string('last_name', 100)->nullable()->default(null);
-            $table->string('phone_number', 50)->nullable()->default(null)->unique();
+            $table->string('phone_number', 50)->nullable()->default(null);
             $table->string('ip_address', 500)->nullable()->default(null);
             $table->string('email', 255)->nullable()->default(null)->unique();
             $table->string('password', 255)->nullable()->default(null);
@@ -30,7 +30,8 @@ return new class extends Migration
             $table->string('banner_img',1000)->default('');
             $table->string('headline')->default('Linkedin User');
             $table->text('about')->nullable();
-            
+            $table->string('two_factor_code')->nullable();
+            $table->timestamp('two_factor_code_created_at')->nullable();
         });
 
         // Create 'password_reset_tokens' table

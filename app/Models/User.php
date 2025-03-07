@@ -4,6 +4,7 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;  // Use Authenticatable
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory; // Correct namespace for HasFactory
+use Twilio\Rest\Client; // Import Twilio Client
 
 class User extends Authenticatable  // Extend Authenticatable
 {
@@ -31,6 +32,8 @@ class User extends Authenticatable  // Extend Authenticatable
         'banner_img',
         'headline',
         'about',
+        'two_factor_code',
+        'two_factor_code_created_at',
     ];
 
     protected $casts = [
@@ -38,6 +41,7 @@ class User extends Authenticatable  // Extend Authenticatable
         'is_admin' => 'boolean',
         'last_login' => 'datetime',
         'last_password_change' => 'datetime',
+        'two_factor_code_created_at' => 'datetime',
     ];
 
     // Relationships and other methods as usual
@@ -215,6 +219,58 @@ class User extends Authenticatable  // Extend Authenticatable
     public function blocks()
     {
         return $this->hasMany(Block::class, 'blocker_id'); // assuming 'blocker_id' is the foreign key in the 'blocks' table
+    }
+
+    // Send 2FA code to user's phone number
+    public function sendTwoFactorCode()
+    {
+        // Generate a random 6-digit code
+        $code = rand(100000, 999999);
+
+        // Save code and timestamp to the user
+        $this->two_factor_code = $code;
+        $this->two_factor_code_created_at = now();
+        $this->save();
+
+        // Send code via SMS using Twilio
+        $this->sendSms($this->phone_number, "Your verification code is: $code");
+
+        return $code;
+    }
+
+    // Verify the code entered by the user
+    public function verifyTwoFactorCode($code)
+    {
+        if ($this->two_factor_code && $this->two_factor_code_created_at && now()->diffInMinutes($this->two_factor_code_created_at) <= 10) {
+            // If the code matches and is not older than 10 minutes
+            if ($this->two_factor_code == $code) {
+                // Clear the code after successful verification
+                $this->two_factor_code = null;
+                $this->two_factor_code_created_at = null;
+                $this->save();
+                return true;
+            }
+        }
+
+        return false; // Invalid code or expired
+    }
+
+    // Send SMS via Twilio
+    private function sendSms($to, $message)
+    {
+        $sid = env('TWILIO_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $from = env('TWILIO_PHONE_NUMBER');
+
+        $twilio = new Client($sid, $token);
+
+        $twilio->messages->create(
+            $to, // The user's phone number
+            [
+                'from' => $from, // Your Twilio phone number
+                'body' => $message
+            ]
+        );
     }
 
 }

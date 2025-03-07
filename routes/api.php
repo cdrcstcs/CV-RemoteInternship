@@ -31,6 +31,8 @@ use App\Http\Controllers\LiveKitController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\ViewerController;
 use App\Http\Controllers\StreamMessageController;
+use App\Http\Controllers\TwoFactorController;
+
 
 // Apply CORS middleware globally on all routes in this file
 Route::middleware('custom_cors')->group(function () {
@@ -64,6 +66,10 @@ Route::middleware('custom_cors')->group(function () {
         Route::put('/chats/{id}', [ChatBotController::class, 'updateChat']);
         Route::get('/chatbot/context', [ChatbotController::class, 'gatherChatbotContext']);
         Route::post('/send-email', [MailController::class, 'sendEMail']);
+
+
+        Route::post('send-2fa-code', [TwoFactorController::class, 'sendCode']);
+        Route::post('verify-2fa-code', [TwoFactorController::class, 'verifyCode']);
 
     });
     

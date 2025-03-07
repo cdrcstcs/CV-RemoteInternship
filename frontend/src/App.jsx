@@ -43,9 +43,11 @@ import DashboardLayout from "./pages/ChatBot/DashboardLayout.jsx";
 import DashboardPage from "./pages/ChatBot/DashboardPage.jsx";
 import ChatPage from "./pages/ChatBot/ChatPage.jsx";
 import LiveStreamWrapper from "./pages/LiveStream/LiveStreamWrapper.jsx";
+import { useTwoFactorAuthenticationStore } from "./stores/useTwoFactorAuthenticationStore.js";
+import TwoFactorAuthentication from "./pages/TwoFactorAuthentication.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
-  
+  const { is2FAComplete } = useTwoFactorAuthenticationStore();
   // On initial load, check authentication status
   useEffect(() => {
     checkAuth();
@@ -56,6 +58,9 @@ function App() {
     return <LoadingSpinner />;
   }
   
+  const require2FA = (user && !is2FAComplete);
+
+  console.log(require2FA);
   return (
     <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
       {/* Background gradient */}
@@ -68,9 +73,18 @@ function App() {
       <div className="relative z-50 pt-20">
         <Navbar />
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={!user ? <SignUpPage /> : <Navigate to="/" />} />
-          <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
+          {/* Public Routes */}
+          <Route path="/signup" element={!user ? <SignUpPage /> : <Navigate to="/2fa" />} />
+          <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/2fa" />} />
+
+          <Route path="/2fa" element={<TwoFactorAuthentication />} />
+
+          {/* Home page route - If 2FA is not complete, redirect to /2fa */}
+          <Route
+            path="/"
+            element={<HomePage />}
+          />
+
           <Route path="/product/:id" element={<ProductDetailPage />} /> {/* Product details page */}
           <Route
             path="/secret-dashboard"
