@@ -32,33 +32,33 @@ const PurchaseSuccessPage = () => {
 
   const statuses = ['Route Optimization Created', 'Paid', 'Pending', 'Confirmed', 'Packed', 'Delivery Maintenance Checked', 'On Delivery', 'Delivered', 'Canceled'];
 
-  // const orderData = {
-  //   cart: cart,
-  //   orderId: orderId,
-  //   routeDetails: routeDetails,
-  //   totalAmount: totalAmount,
-  //   discountAmount: discountAmount,
-  //   totalAfterDiscount: totalAfterDiscount,
-  //   orderStatus: orderStatus,
-  //   totalDistance: totalDistance, // Replace with actual value
-  // };
-  // useEffect(() => {
-  //   // Prevent sending mail again if it's already been sent or there's an error
-  //   if (
-  //     orderId != null &&
-  //     cart != null &&
-  //     routeDetails != null &&
-  //     totalAmount != null &&
-  //     discountAmount != null &&
-  //     totalAfterDiscount != null &&
-  //     orderStatus != null &&
-  //     totalDistance != null &&
-  //     !isMailSent && errorMessageMail === "" && !isErrorMail 
-  //   ) {
-  //     sendMail(orderData); // Call the sendMail function only if all values are non-null
-  //     setIsMailSent(true); // Mark the mail as sent
-  //   }
-  // }, [orderData, isMailSent, errorMessageMail, isErrorMail]); // Adding isMailSent and errorMessageMail to dependencies ensures the effect only runs once when these change
+  const orderData = {
+    cart: cart,
+    orderId: orderId,
+    routeDetails: routeDetails,
+    totalAmount: totalAmount,
+    discountAmount: discountAmount,
+    totalAfterDiscount: totalAfterDiscount,
+    orderStatus: orderStatus,
+    totalDistance: totalDistance, // Replace with actual value
+  };
+  useEffect(() => {
+    // Prevent sending mail again if it's already been sent or there's an error
+    if (
+      orderId != null &&
+      cart != null &&
+      routeDetails != null &&
+      totalAmount != null &&
+      discountAmount != null &&
+      totalAfterDiscount != null &&
+      orderStatus != null &&
+      totalDistance != null &&
+      !isMailSent && errorMessageMail === "" && !isErrorMail 
+    ) {
+      sendMail(orderData); // Call the sendMail function only if all values are non-null
+      setIsMailSent(true); // Mark the mail as sent
+    }
+  }, [orderData, isMailSent, errorMessageMail, isErrorMail]); // Adding isMailSent and errorMessageMail to dependencies ensures the effect only runs once when these change
   
   useEffect(() => {
     if (!userLocation) return;
@@ -154,10 +154,6 @@ const PurchaseSuccessPage = () => {
 
   if (isErrorMail) {
     return <div>{`Error: ${errorMessageMail}`}</div>;
-  }
-
-  if (isSuccessMail) {
-    return <div>Order processed and email sent successfully!</div>;
   }
 
 

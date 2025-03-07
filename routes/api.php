@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CouponController;
@@ -144,7 +143,6 @@ Route::middleware('custom_cors')->group(function () {
     Route::post('/products', [ProductController::class, 'createProduct']);
     Route::delete('/products/{id}', [ProductController::class, 'deleteProduct']);
     Route::patch('/products/{id}', [ProductController::class, 'toggleFeaturedProduct']);
-    Route::get('/analytics', [AnalyticsController::class, 'getAnalyticsData']);
 
     Route::middleware(['auth:sanctum','role:Administration,WarehouseManager'])->group(function () {
         Route::post('/expense', [WarehouseController::class, 'filterExpenses']);
