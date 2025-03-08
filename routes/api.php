@@ -35,7 +35,7 @@ use App\Http\Controllers\TwoFactorController;
 
 
 // Apply CORS middleware globally on all routes in this file
-Route::middleware('custom_cors')->group(function () {
+Route::middleware(['custom_cors'])->group(function () {
 
     // Auth Routes
     Route::post('/signup', [AuthController::class, 'signup']);
@@ -70,6 +70,8 @@ Route::middleware('custom_cors')->group(function () {
 
         Route::post('send-2fa-code', [TwoFactorController::class, 'sendCode']);
         Route::post('verify-2fa-code', [TwoFactorController::class, 'verifyCode']);
+
+        Route::post('/user/set-language', [UserController::class, 'setLanguage']);
 
     });
     

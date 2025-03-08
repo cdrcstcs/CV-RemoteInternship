@@ -1,18 +1,38 @@
+import { useState } from "react";
 import { ShoppingCart, UserPlus, LogIn, LogOut, Lock, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
+import Select from "react-select";
+import Flag from "react-world-flags";
 
 const Navbar = () => {
-  const { user, logout } = useUserStore();
+  const { user, logout, setLanguage } = useUserStore();
   const isAdmin = user?.role === "admin";
   const { cart } = useCartStore();
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
+
+  // Language options with flags
+  const languageOptions = [
+    { value: "en", label: "English", flag: "GB" },
+    { value: "es", label: "Spanish", flag: "ES" },
+    { value: "fr", label: "French", flag: "FR" },
+    { value: "de", label: "German", flag: "DE" },
+    { value: "ka", label: "Georgian", flag: "GE" },
+    // Add more languages here as needed
+  ];
+
+  const handleLanguageChange = (selectedOption) => {
+    setSelectedLanguage(selectedOption);
+    setLanguage(selectedOption.value);
+    console.log(`Language changed to: ${selectedOption.label}`);
+    // Here, you can handle language change logic like i18n or custom language change
+  };
 
   return (
     <header className="fixed top-0 left-0 w-full bg-gray-900 border-b border-emerald-800 mb-10">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          {/* Navigation bar with no wrapping and horizontal scrolling */}
           <nav className="flex items-center gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">
             <Link to={"/"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Home
@@ -111,6 +131,35 @@ const Navbar = () => {
                 </Link>
               </>
             )}
+            {/* Language Dropdown */}
+            <div className="ml-4 relative">
+              <Select
+                value={selectedLanguage}
+                onChange={handleLanguageChange}
+                options={languageOptions}
+                getOptionLabel={(e) => (
+                  <div className="flex items-center">
+                    <Flag code={e.flag} className="w-5 h-5 mr-2" />
+                    <span>{e.label}</span>
+                  </div>
+                )}
+                className="w-36"
+                classNamePrefix="react-select"
+                placeholder="Language"
+                styles={{
+                  control: (provided) => ({
+                    ...provided,
+                    minWidth: 150,
+                    zIndex: 9999, // Ensures dropdown is visible above other elements
+                  }),
+                  menu: (provided) => ({
+                    ...provided,
+                    zIndex: 9999, // Ensures dropdown is visible above other elements
+                  }),
+                }}
+                menuPortalTarget={document.body} // Ensures dropdown is rendered correctly even in containers with overflow
+              />
+            </div>
           </nav>
         </div>
       </div>

@@ -198,4 +198,25 @@ export const useUserStore = create((set, get) => ({
       toast.error(error.response?.data?.message || "An error occurred while updating the address");
     }
   },
+
+  // Set language for the user
+  setLanguage: async (language) => {
+    set({ loading: true });
+
+    try {
+      // Make the API call to update the language
+      const res = await axiosInstance.put("/user/set-language", { language });
+
+      // Update the user state with the new language
+      set({
+        user: res.data, // Assuming the API response includes the updated language
+        loading: false,
+      });
+
+      toast.success("Language updated successfully!");
+    } catch (error) {
+      set({ loading: false });
+      toast.error(error.response?.data?.message || "An error occurred while updating the language");
+    }
+  },
 }));

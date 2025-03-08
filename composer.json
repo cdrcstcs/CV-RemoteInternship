@@ -20,6 +20,7 @@
         "predis/predis": "^2.3",
         "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-sluggable": "^3.7",
+        "stichoza/google-translate-php": "^5.2",
         "stripe/stripe-php": "^16.4",
         "taylanunutmaz/agora-token-builder": "^1.1",
         "twilio/sdk": "^8.3",

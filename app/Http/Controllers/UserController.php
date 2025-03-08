@@ -56,4 +56,32 @@ class UserController extends Controller
         // Return a success response
         return response()->json($user);
     }
+
+    public function setLanguage(Request $request)
+    {
+        // Validate the incoming request data
+        $validator = Validator::make($request->all(), [
+            'language' => 'required|string|size:2', // ISO 639-1 codes should be exactly 2 characters long
+        ]);
+
+        // If validation fails, return an error response
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        // Get the currently authenticated user
+        $user = $request->user();
+
+        // Update the user's language attribute
+        $user->update([
+            'language' => $request->input('language', $user->language),
+        ]);
+
+        // Return a success response
+        return response()->json($user);
+    }
+
 }

@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'role' => \App\Http\Middleware\RoleRoute::class,
             'custom_cors' => \App\Http\Middleware\CustomCors::class, // Add this line
-
+            'translation' => \App\Http\Middleware\TranslateResponse::class,
         ]);
 
         //
