@@ -126,4 +126,97 @@ class CouponController extends Controller
             return response()->json(['message' => 'Server error', 'error' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Store a new coupon, check if any product has the same discount,
+     * and assign the coupon to the products and the authenticated user.
+     */
+    public function create(Request $request)
+    {
+        // Validate the incoming request data
+        $validated = $request->validate([
+            'discount' => 'required|numeric',
+            'expiration_date' => 'required|date',
+        ]);
+
+        Log::info('Creating new coupon', ['discount' => $validated['discount'], 'expiration_date' => $validated['expiration_date']]);
+
+        // Check if a product already has a coupon with the same discount
+        $existingProducts = Product::whereHas('coupons', function ($query) use ($validated) {
+            $query->where('discount', $validated['discount']);
+        })->get();
+
+        if ($existingProducts->isNotEmpty()) {
+            Log::info('Found products with the same discount', ['discount' => $validated['discount'], 'products' => $existingProducts->pluck('id')]);
+        }
+
+        // Start a database transaction to ensure atomicity
+        DB::beginTransaction(); // Start transaction for atomic operations
+
+        try {
+            // Create the new coupon
+            $coupon = Coupon::create([
+                'discount' => $validated['discount'],
+                'expiration_date' => $validated['expiration_date'],
+            ]);
+
+            Log::info('Coupon created successfully', ['coupon_id' => $coupon->id]);
+
+            // If any products already have the same discount, assign the new coupon to them
+            foreach ($existingProducts as $product) {
+                $product->coupons()->attach($coupon->id);
+                Log::info('Coupon assigned to product', ['coupon_id' => $coupon->id, 'product_id' => $product->id]);
+            }
+
+            // Assign the coupon to the authenticated user (use request()->user()->id)
+            $userId = $request->user()->id;  // Get the authenticated user's ID
+            $coupon->users()->attach($userId);
+
+            Log::info('Coupon assigned to user', ['coupon_id' => $coupon->id, 'user_id' => $userId]);
+
+            DB::commit(); // Commit the transaction
+
+            return response()->json($coupon, 201);
+        } catch (\Exception $e) {
+            DB::rollBack(); // Rollback transaction on error
+
+            // Log the error
+            Log::error('Error creating coupon', [
+                'error' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'There was an error creating the coupon.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    /**
+     * Get the coupons associated with the authenticated user.
+     */
+    public function getAllCoupons(Request $request)
+    {
+        // Get the authenticated user using the request()->user() helper
+        $user = $request->user();
+
+        // Log the action for tracking purposes
+        Log::info('Fetching coupons for user', ['user_id' => $user->id]);
+
+        // Fetch the user's coupons
+        $coupons = $user->coupons;  // Assuming the relationship 'coupons' is defined in the User model
+
+        if ($coupons->isEmpty()) {
+            Log::info('No coupons found for user', ['user_id' => $user->id]);
+            return response()->json([
+                'message' => 'You have no coupons.',
+                'coupons' => [],
+            ], 200);
+        }
+
+        Log::info('Coupons found for user', ['user_id' => $user->id, 'coupons' => $coupons->pluck('id')]);
+
+        // Return the coupons in a response
+        return response()->json($coupons, 200);
+    }
 }

@@ -67,6 +67,9 @@ const Navbar = () => {
             <Link to={"/live-stream"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Live Stream
             </Link>
+            <Link to={"/wheel"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+              Wheel
+            </Link>
             {user && (
               <Link
                 to={"/cart"}

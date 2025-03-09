@@ -45,6 +45,7 @@ import ChatPage from "./pages/ChatBot/ChatPage.jsx";
 import LiveStreamWrapper from "./pages/LiveStream/LiveStreamWrapper.jsx";
 import { useTwoFactorAuthenticationStore } from "./stores/useTwoFactorAuthenticationStore.js";
 import TwoFactorAuthentication from "./pages/TwoFactorAuthentication.jsx";
+import Wheel from "./pages/Wheel/Wheel.jsx";
 function App() {
   const { user, checkingAuth, checkAuth } = useUserStore();
   const { is2FAComplete } = useTwoFactorAuthenticationStore();
@@ -150,6 +151,8 @@ function App() {
           <Route path="/feedback-forms/create" element={user ? <CreateFeedbackForm /> : <Navigate to="/login" />} />
 
           <Route path="/chat" element={user ? <ChatWrapper/> : <Navigate to="/login" />} />
+
+          <Route path="/wheel" element={user ? <Wheel/> : <Navigate to="/login" />} />
 
           <Route
             path="/live-stream"

@@ -88,8 +88,12 @@ Route::middleware(['custom_cors'])->group(function () {
         Route::post('/cart', [CartController::class, 'addToCart']);
         Route::delete('/cart', [CartController::class, 'removeCartItem']);
         Route::put('/cart/quantity', [CartController::class, 'updateOrderItemQuantity']);
+
         Route::post('/coupon', [CouponController::class, 'getMyCoupon']);
         Route::post('/coupon/apply', [CouponController::class, 'applyCoupon']);
+        Route::post('/create-coupon', [CouponController::class, 'create']);
+        Route::get('/get-my-coupons', [CouponController::class, 'getAllCoupons']);
+
         Route::post('/payment/process', [PaymentController::class, 'processPayment']);
         Route::post('/payment/delivery/prepare', [PaymentController::class, 'prepareDelivery']);
         Route::get('/orders/{orderId}/status', [OrderController::class, 'getOrderStatusById']);
