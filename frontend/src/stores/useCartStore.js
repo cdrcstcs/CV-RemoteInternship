@@ -121,8 +121,8 @@ export const useCartStore = create((set, get) => ({
     }
   },
 
-  createStripePaymentIntent: async (currency) => {
-    const { orderId, totalAfterDiscount } = get();
+  createStripePaymentIntent: async (currency,totalAfterDiscount) => {
+    const { orderId } = get();
     if (!orderId) {
       toast.error("Order not found. Cannot create payment intent.");
       return;

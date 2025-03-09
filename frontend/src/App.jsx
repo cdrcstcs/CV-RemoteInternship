@@ -111,6 +111,7 @@ function App() {
             ) : <Navigate to="/login" />}
           />
           
+        
           <Route path="/social-media" element={user ? <SocialMediaPage /> : <Navigate to="/login" />} />
           <Route path="/notification" element={user ? <NotificationsPage /> : <Navigate to="/login" />} />
           <Route path="/network" element={user ? <NetworkPage /> : <Navigate to="/login" />} />
@@ -152,7 +153,11 @@ function App() {
 
           <Route
             path="/live-stream"
-            element={user ? <LiveStreamWrapper/> : <Navigate to="/login" />}
+            element={
+              user ? 
+              <Elements stripe={stripePromise}> 
+                <LiveStreamWrapper/>        
+              </Elements> : <Navigate to="/login" />}
           />
         </Routes>
       </div>

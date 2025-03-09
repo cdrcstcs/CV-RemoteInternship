@@ -3,6 +3,7 @@ import { FaceSmileIcon, PaperAirplaneIcon, ClockIcon } from "@heroicons/react/24
 import EmojiPicker from "emoji-picker-react"; // Import the emoji picker
 import { Popover } from "@headlessui/react";
 import useStreamMessageStore from "../../stores/useStreamMessageStore";
+import GiftSelector from "./GiftSelector";
 
 // Accept creatorId, viewerId, and streamId as props
 const StreamMessages = ({ creatorId, viewerId, streamId }) => {
@@ -126,6 +127,7 @@ const StreamMessages = ({ creatorId, viewerId, streamId }) => {
 
         </div>
       </form>
+      <GiftSelector/>
     </div>
   );
 };

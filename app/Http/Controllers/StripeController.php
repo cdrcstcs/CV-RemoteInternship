@@ -57,4 +57,46 @@ class StripeController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function createPaymentIntentGift(Request $request)
+    {
+        try {
+            // Log incoming request data
+            Log::info('Creating payment intent', [
+                'amount' => $request->amount,
+                'currency' => $request->currency,
+            ]);
+
+            // You can pass dynamic amount from the front-end
+            $amount = (int) ($request->amount * 100); // Convert to cents (e.g., 275.79 -> 27579)
+            $currency = $request->currency;
+
+            // Create the PaymentIntent
+            $paymentIntent = PaymentIntent::create([
+                'amount' => $amount,
+                'currency' => $currency, // or another currency
+                'metadata' => ['integration_check' => 'accept_a_payment'],
+            ]);
+
+            // Log the successful creation of the payment intent
+            Log::info('Payment intent created successfully', [
+                'paymentIntentId' => $paymentIntent->id,
+                'clientSecret' => $paymentIntent->client_secret,
+            ]);
+
+            // Return the client secret to the front-end
+            return response()->json([
+                'clientSecret' => $paymentIntent->client_secret
+            ]);
+        } catch (\Exception $e) {
+            // Log the exception if there is any error
+            Log::error('Error creating payment intent', [
+                'error_message' => $e->getMessage(),
+                'error_stack' => $e->getTraceAsString(), // Optionally log the stack trace
+            ]);
+
+            // Return error response
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

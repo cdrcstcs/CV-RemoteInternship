@@ -49,7 +49,7 @@ const PaymentPage = () => {
     }
 
     // Get the client secret from your store (ensure it's already created)
-    await createStripePaymentIntent(currency); // This will set the client secret in your store
+    await createStripePaymentIntent(currency, totalAfterDiscount); // This will set the client secret in your store
 
     // Make sure the postal code is provided
     const postalCode = selectedAddress ? selectedAddress.postal_code : '';
@@ -63,7 +63,7 @@ const PaymentPage = () => {
           card: cardElement,
           billing_details: {
             address: {
-              postal_code: '118560', // Include the postal code here
+              postal_code: postalCode, // Include the postal code here
             },
           },
         },
