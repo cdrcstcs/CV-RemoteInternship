@@ -32,6 +32,7 @@ use App\Http\Controllers\StreamController;
 use App\Http\Controllers\ViewerController;
 use App\Http\Controllers\StreamMessageController;
 use App\Http\Controllers\TwoFactorController;
+use App\Http\Controllers\EditorController;
 
 
 // Apply CORS middleware globally on all routes in this file
@@ -145,7 +146,18 @@ Route::middleware(['custom_cors'])->group(function () {
         Route::get('/livekit/create-viewer-token/{hostIdentity}', [ViewerController::class, 'createViewerToken']);
         Route::put('/user/headline-about', [UserController::class, 'updateHeadlineAndAbout']);
         Route::post('/stream-message', [StreamMessageController::class, 'sendMessage']);
-        Route::get('/stream-messages/creator/{creatorId}', [StreamMessageController::class, 'getMessagesByCreator']);        
+        Route::get('/stream-messages/creator/{creatorId}', [StreamMessageController::class, 'getMessagesByCreator']);    
+        
+        Route::post('/remove-background', [EditorController::class, 'removeBackground']);
+        Route::post('/replace-background', [EditorController::class, 'replaceBackground']);
+        Route::post('/extract-image', [EditorController::class, 'extractImage']);
+        Route::post('/gen-fill', [EditorController::class, 'genFill']);
+        Route::post('/gen-remove', [EditorController::class, 'genRemove']);
+        Route::post('/recolor-image', [EditorController::class, 'recolorImage']);
+        Route::post('/crop-video', [EditorController::class, 'cropVideo']);
+        Route::post('/initiate-transcription', [EditorController::class, 'initiateTranscription']);
+        Route::post('/upload-video', [EditorController::class, 'uploadVideo']);
+
     });
     Route::middleware(['auth:sanctum','role:Administration,ProductSaler'])->group(function () {
         Route::post('/feedback-forms', [FeedbackFormController::class, 'storeFeedbackForm']);
