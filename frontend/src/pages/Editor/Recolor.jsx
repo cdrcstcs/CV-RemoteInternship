@@ -1,33 +1,26 @@
-import { useImageStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import { recolorImage } from "@/server/recolor"
-import { useAction } from "next-safe-action/hooks"
-import { Badge } from "@/components/ui/badge"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
-import { useMemo } from "react"
+import { Button } from "../../components/Editor/Button"
+import { Badge } from "../../components/Editor/Badge"
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
+import { Input } from "../../components/Editor/Input"
+import { Label } from "../../components/Editor/Label"
+import { cn } from "../../lib/utils"
 import { Paintbrush } from "lucide-react"
-import { useLayerStore } from "@/lib/layer-store"
+import { useEditorStore } from "../../stores/useEditorStore"
+import { toast } from "sonner"
 
 export default function AIRecolor() {
-  const tags = useImageStore((state) => state.tags)
-  const setActiveTag = useImageStore((state) => state.setActiveTag)
-  const activeTag = useImageStore((state) => state.activeTag)
-  const setActiveColor = useImageStore((state) => state.setActiveColor)
-  const activeColor = useImageStore((state) => state.activeColor)
-  const setGenerating = useImageStore((state) => state.setGenerating)
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const addLayer = useLayerStore((state) => state.addLayer)
-  const layers = useLayerStore((state) => state.layers)
-  const generating = useImageStore((state) => state.generating)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
+  const tags = useEditorStore((state) => state.tags)
+  const setActiveTag = useEditorStore((state) => state.setActiveTag)
+  const activeTag = useEditorStore((state) => state.activeTag)
+  const setActiveColor = useEditorStore((state) => state.setActiveColor)
+  const activeColor = useEditorStore((state) => state.activeColor)
+  const setGenerating = useEditorStore((state) => state.setGenerating)
+  const activeLayer = useEditorStore((state) => state.activeLayer)
+  const addLayer = useEditorStore((state) => state.addLayer)
+  const generating = useEditorStore((state) => state.generating)
+  const recolorImage = useEditorStore((state) => state.recolorImage)
+  const setActiveLayer = useEditorStore((state) => state.setActiveLayer)
+  const recolorImageError = useEditorStore((state) => state.recolorImageError)
 
   return (
     <Popover>
@@ -116,13 +109,9 @@ export default function AIRecolor() {
           className="w-full mt-4"
           onClick={async () => {
             setGenerating(true)
-            const res = await recolorImage({
-              color: `to-color_` + activeColor,
-              activeImage: activeLayer.url,
-              tag: "prompt_" + activeTag,
-            })
+            await recolorImage(activeLayer.url, "prompt_" + activeTag, "to-color_" + activeColor)
 
-            if (res?.data?.success) {
+            if (!recolorImageError) {
               const newLayerId = crypto.randomUUID()
               addLayer({
                 id: newLayerId,
@@ -136,6 +125,9 @@ export default function AIRecolor() {
               })
               setGenerating(false)
               setActiveLayer(newLayerId)
+            } else {
+              toast.error("Recoloring failed")
+              setGenerating(false)
             }
           }}
         >

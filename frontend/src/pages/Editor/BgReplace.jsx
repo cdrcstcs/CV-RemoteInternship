@@ -1,17 +1,13 @@
-import { useImageStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import { replaceBackground } from "@/server/bg-replace"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import useImageStore from "../../stores/useImageStore"
+import { Button } from "../../components/Editor/Button"
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
+import { Input } from "../../components/Editor/Input"
+import { Label } from "../../components/Editor/Label"
 import { ImageOff } from "lucide-react"
-import { useLayerStore } from "@/lib/layer-store"
+import useLayerStore from "../../stores/useLayerStore"
 import { useState } from "react"
-
+import { toast } from "sonner"
+import { useEditorStore } from "../../stores/useEditorStore"
 export default function AIBackgroundReplace() {
   const setGenerating = useImageStore((state) => state.setGenerating)
   const activeLayer = useLayerStore((state) => state.activeLayer)
@@ -20,6 +16,10 @@ export default function AIBackgroundReplace() {
   const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
 
   const [prompt, setPrompt] = useState("")
+
+  // Get replaceBackground and error state from the useEditorStore
+  const replaceBackground = useEditorStore((state) => state.replaceBackground)
+  const replaceBackgroundError = useEditorStore((state) => state.replaceBackgroundError)
 
   return (
     <Popover>
@@ -59,12 +59,16 @@ export default function AIBackgroundReplace() {
           className="w-full mt-4"
           onClick={async () => {
             setGenerating(true)
-            const res = await replaceBackground({
-              prompt: prompt,
-              activeImage: activeLayer.url,
-            })
 
-            if (res?.data?.success) {
+            // Call the replaceBackground function from the store
+            await replaceBackground(activeLayer.url, prompt)
+
+            // Check for error after calling replaceBackground
+            if (replaceBackgroundError) {
+              setGenerating(false)
+              toast.error(replaceBackgroundError)
+            } else {
+              // If no error, process the result (assuming replaceBackground updates the active layer)
               const newLayerId = crypto.randomUUID()
               addLayer({
                 id: newLayerId,
@@ -72,12 +76,13 @@ export default function AIBackgroundReplace() {
                 format: activeLayer.format,
                 height: activeLayer.height,
                 width: activeLayer.width,
-                url: res.data.success,
+                url: activeLayer.url, // Assuming the activeLayer URL is updated by replaceBackground
                 publicId: activeLayer.publicId,
                 resourceType: "image",
               })
               setGenerating(false)
               setActiveLayer(newLayerId)
+              toast.success("Background replaced successfully!")
             }
           }}
         >

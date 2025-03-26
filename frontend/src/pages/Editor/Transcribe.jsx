@@ -1,17 +1,19 @@
-import { Button } from "@/components/ui/button"
-import { useLayerStore } from "@/lib/layer-store"
-import { useImageStore } from "@/lib/store"
+import { Button } from "../../components/Editor/Button"
+import useLayerStore from "../../stores/useLayerStore"
+import { useEditorStore } from "../../stores/useEditorStore"
 import { useState } from "react"
 import { toast } from "sonner"
-import { initiateTranscription } from "@/server/transcribe"
 import { Captions } from "lucide-react"
 
 export default function VideoTranscription() {
   const activeLayer = useLayerStore((state) => state.activeLayer)
   const updateLayer = useLayerStore((state) => state.updateLayer)
-  const [transcribing, setTranscribing] = useState(false)
-  const setGenerating = useImageStore((state) => state.setGenerating)
   const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
+  const { initiateTranscription } = useEditorStore((state) => ({
+    initiateTranscription: state.initiateTranscription,
+  }))
+  const [transcribing, setTranscribing] = useState(false)
+  const setGenerating = useLayerStore((state) => state.setGenerating)
 
   const handleTranscribe = async () => {
     if (!activeLayer.publicId || activeLayer.resourceType !== "video") {
@@ -23,9 +25,8 @@ export default function VideoTranscription() {
     setGenerating(true)
 
     try {
-      const result = await initiateTranscription({
-        publicId: activeLayer.publicId,
-      })
+      // Call the initiateTranscription from the zustand store
+      const result = await initiateTranscription(activeLayer.publicId)
 
       if (result) {
         if (result.data && "success" in result.data) {

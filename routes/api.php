@@ -157,6 +157,7 @@ Route::middleware(['custom_cors'])->group(function () {
         Route::post('/crop-video', [EditorController::class, 'cropVideo']);
         Route::post('/initiate-transcription', [EditorController::class, 'initiateTranscription']);
         Route::post('/upload-video', [EditorController::class, 'uploadVideo']);
+        Route::post('/upload-image', [EditorController::class, 'uploadImage']);
 
     });
     Route::middleware(['auth:sanctum','role:Administration,ProductSaler'])->group(function () {

@@ -1,14 +1,7 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "../ui/button"
+import { Dialog, DialogContent, DialogTrigger } from "../../components/Editor/Dialog"
+import { Button } from "../../components/Editor/Button"
 import { Ellipsis, Trash } from "lucide-react"
-import { useLayerStore } from "@/lib/layer-store"
+import useLayerStore from "../../stores/useLayerStore"
 
 export default function LayerInfo({
   layer,

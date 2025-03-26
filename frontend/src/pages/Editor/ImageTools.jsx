@@ -1,9 +1,9 @@
-import AIRecolor from "@/components/toolbar/recolor"
-import GenerativeFill from "@/components/toolbar/generative-fill"
-import GenRemove from "@/components/toolbar/gen-remove"
-import BgRemove from "./bg-remove"
-import AIBackgroundReplace from "./bg-replace"
-import ExtractPart from "./extract-part"
+import AIRecolor from "./Recolor"
+import GenerativeFill from "./GenerativeFill"
+import GenRemove from "./GenRemove"
+import BgRemove from "./BgRemove"
+import AIBackgroundReplace from "./BgReplace"
+import ExtractPart from "./ExtractPart"
 
 export default function ImageTools() {
   return (

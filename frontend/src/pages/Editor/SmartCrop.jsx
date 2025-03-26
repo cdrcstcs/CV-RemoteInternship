@@ -1,70 +1,55 @@
-import React, { useMemo, useState } from "react"
-import { useImageStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import { genFill } from "@/server/gen-fill"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Crop, RefreshCcw, ScanFace, Square } from "lucide-react"
-import { useLayerStore } from "@/lib/layer-store"
-import { genCrop } from "@/server/smart-crop"
-import { toast } from "sonner"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card"
-import Tiktok from "../icons/tiktok"
-import Image from "next/image"
-import Youtube from "../icons/youtube"
-import { cn } from "@/lib/utils"
+import React, { useState } from "react"
+import { useEditorStore } from "../../stores/useEditorStore"
+import { Button } from "../../components/Editor/Button"
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
+import { Crop, Square } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/Editor/Card"
+import TikTok from "./Tiktok"
+import Youtube from "./Youtube"
+import { cn } from "../../lib/utils"
 
 export default function SmartCrop() {
-  const setGenerating = useImageStore((state) => state.setGenerating)
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const addLayer = useLayerStore((state) => state.addLayer)
-  const layers = useLayerStore((state) => state.layers)
+  const setGenerating = useEditorStore((state) => state.setGenerating)
+  const activeLayer = useEditorStore((state) => state.activeLayer)
+  const addLayer = useEditorStore((state) => state.addLayer)
   const [height, setHeight] = useState(0)
   const [width, setWidth] = useState(0)
-  const generating = useImageStore((state) => state.generating)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
+  const generating = useEditorStore((state) => state.generating)
+  const setActiveLayer = useEditorStore((state) => state.setActiveLayer)
+  const cropVideo = useEditorStore((state) => state.cropVideo)
+  const cropVideoError = useEditorStore((state) => state.cropVideoError)
   const [aspectRatio, setAspectRatio] = useState("16:9")
 
+  // Replaced the genCrop function with cropVideo from useEditorStore
   const handleGenCrop = async () => {
     setGenerating(true)
-    const res = await genCrop({
-      height: activeLayer.height.toString(),
-      aspect: aspectRatio,
-      activeVideo: activeLayer.url,
-    })
+    try {
+      await cropVideo(activeLayer.url, aspectRatio, height)
 
-    if (res?.data?.success) {
-      console.log(res.data.success)
-      setGenerating(false)
-      const newLayerId = crypto.randomUUID()
-      const thumbnailUrl = res.data.success.replace(/\.[^/.]+$/, ".jpg")
-      addLayer({
-        id: newLayerId,
-        name: "cropped " + activeLayer.name,
-        format: activeLayer.format,
-        height: height + activeLayer.height,
-        width: width + activeLayer.width,
-        url: res.data.success,
-        publicId: activeLayer.publicId,
-        resourceType: "video",
-        poster: thumbnailUrl,
-      })
-      toast.success(res.data.success)
-      setActiveLayer(newLayerId)
-    }
-    if (res?.data?.error) {
-      toast.error(res.data.error)
+      if (!cropVideoError) {
+        const newLayerId = crypto.randomUUID()
+        const thumbnailUrl = res.data.success.replace(/\.[^/.]+$/, ".jpg")
+        addLayer({
+          id: newLayerId,
+          name: "cropped " + activeLayer.name,
+          format: activeLayer.format,
+          height: height + activeLayer.height,
+          width: width + activeLayer.width,
+          url: res.data.success,
+          publicId: activeLayer.publicId,
+          resourceType: "video",
+          poster: thumbnailUrl,
+        })
+        toast.success("Video cropped successfully!")
+        setActiveLayer(newLayerId)
+      }
+      else {
+        toast.error("Failed to crop video")
+      }
+    } catch (e) {
+      toast.error("Error cropping video")
+      console.error("Error:", e)
+    } finally {
       setGenerating(false)
     }
   }
@@ -73,7 +58,7 @@ export default function SmartCrop() {
     <Popover>
       <PopoverTrigger disabled={!activeLayer?.url} asChild>
         <Button variant="outline" className="py-8">
-          <span className="flex gap-1 items-center  flex-col text-xs font-medium">
+          <span className="flex gap-1 items-center flex-col text-xs font-medium">
             Smart Crop
             <Crop size={18} />
           </span>
@@ -113,13 +98,13 @@ export default function SmartCrop() {
               onClick={() => setAspectRatio("9:16")}
             >
               <CardHeader className="p-0 text-center">
-                <CardTitle className="text-md ">Tiktok</CardTitle>
+                <CardTitle className="text-md">Tiktok</CardTitle>
                 <CardDescription>
-                  <p className="text-sm font-bold ">9:16</p>
+                  <p className="text-sm font-bold">9:16</p>
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex items-center justify-center p-0 pt-2">
-                <Tiktok />
+                <TikTok />
               </CardContent>
             </Card>
             <Card

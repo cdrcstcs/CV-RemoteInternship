@@ -8,7 +8,7 @@ import {
   Map,
   FormInputIcon,
   ListOrdered,
-  BandageIcon,
+  CameraIcon,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom"; // Use React Router's Link and useLocation
 import React from "react";
@@ -115,7 +115,7 @@ const Sidebar = () => {
 
           <SidebarLink
           href="/warehouse/license-plate"
-          icon={BandageIcon}
+          icon={CameraIcon}
           label="License Plate"
           isCollapsed={isSidebarCollapsed}
         />

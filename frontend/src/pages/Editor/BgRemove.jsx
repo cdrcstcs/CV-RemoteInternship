@@ -1,15 +1,10 @@
-import { useImageStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import { bgRemoval } from "@/server/bg-remove"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import useImageStore from "../../stores/useImageStore"
+import { Button } from "../../components/Editor/Button"
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
 import { Image } from "lucide-react"
-import { useLayerStore } from "@/lib/layer-store"
+import useLayerStore from "../../stores/useLayerStore"
 import { toast } from "sonner"
-
+import { useEditorStore } from "../../stores/useEditorStore"
 export default function BgRemove() {
   const activeTag = useImageStore((state) => state.activeTag)
   const activeColor = useImageStore((state) => state.activeColor)
@@ -18,6 +13,11 @@ export default function BgRemove() {
   const addLayer = useLayerStore((state) => state.addLayer)
   const generating = useImageStore((state) => state.generating)
   const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
+  
+  // Fetch removeBackground and removeBackgroundError from the store
+  const removeBackground = useEditorStore((state) => state.removeBackground) 
+  const removeBackgroundError = useEditorStore((state) => state.removeBackgroundError)
+
   return (
     <Popover>
       <PopoverTrigger disabled={!activeLayer?.url} asChild>
@@ -45,11 +45,17 @@ export default function BgRemove() {
           className="w-full mt-4"
           onClick={async () => {
             setGenerating(true)
-            const res = await bgRemoval({
-              activeImage: activeLayer.url,
-              format: activeLayer.format,
-            })
-            if (res?.data?.success) {
+            await removeBackground(activeLayer.url, activeLayer.format); // Use removeBackground from the store
+            
+            // Handle errors or success
+            if (removeBackgroundError) {
+              toast.error(removeBackgroundError); // Display error message
+              setGenerating(false); // Stop the loading spinner
+              return; // Early exit if there's an error
+            }
+            
+            // Proceed with adding the new layer if the background removal is successful
+            if (!removeBackgroundError) {
               const newLayerId = crypto.randomUUID()
               addLayer({
                 id: newLayerId,
@@ -57,16 +63,12 @@ export default function BgRemove() {
                 format: "png",
                 height: activeLayer.height,
                 width: activeLayer.width,
-                url: res.data.success,
+                url: activeLayer.url, // Ensure this is set to the new image URL after background removal
                 publicId: activeLayer.publicId,
                 resourceType: "image",
               })
-              setGenerating(false)
-              setActiveLayer(newLayerId)
-            }
-            if (res?.serverError) {
-              toast.error(res.serverError)
-              setGenerating(false)
+              setActiveLayer(newLayerId) // Set the newly added layer as the active layer
+              setGenerating(false) // Stop the loading spinner
             }
           }}
         >

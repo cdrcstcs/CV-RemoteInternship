@@ -1,32 +1,28 @@
-import { useImageStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import { recolorImage } from "@/server/recolor"
-import { useAction } from "next-safe-action/hooks"
-import { Badge } from "@/components/ui/badge"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
-import { useMemo } from "react"
-import { genRemove } from "@/server/gen-remove"
+import { Button } from "../../components/Editor/Button"
+import { Badge } from "../../components/Editor/Badge"
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
+import { Input } from "../../components/Editor/Input"
+import { Label } from "../../components/Editor/Label"
+import { cn } from "../../lib/utils"
 import { Eraser } from "lucide-react"
-import { useLayerStore } from "@/lib/layer-store"
+import useImageStore from "../../stores/useImageStore"
+import useLayerStore from "../../stores/useLayerStore"
+import { useEditorStore } from "../../stores/useEditorStore" // Importing the useEditorStore
 
 export default function GenRemove() {
   const tags = useImageStore((state) => state.tags)
   const setActiveTag = useImageStore((state) => state.setActiveTag)
-  const generating = useImageStore((state) => state.generating)
+  const generating = useEditorStore((state) => state.generating)  // Accessing generating state from store
   const activeTag = useImageStore((state) => state.activeTag)
   const activeColor = useImageStore((state) => state.activeColor)
-  const setGenerating = useImageStore((state) => state.setGenerating)
+  const setGenerating = useEditorStore((state) => state.setGenerating)  // Accessing setGenerating from store
   const activeLayer = useLayerStore((state) => state.activeLayer)
   const addLayer = useLayerStore((state) => state.addLayer)
   const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
+
+  const genRemove = useEditorStore((state) => state.genRemove);  // Accessing genRemove from store
+  const genRemoveError = useEditorStore((state) => state.genRemoveError);  // Accessing genRemove from store
+
   return (
     <Popover>
       <PopoverTrigger disabled={!activeLayer?.url} asChild>
@@ -85,17 +81,15 @@ export default function GenRemove() {
           }
           onClick={async () => {
             setGenerating(true)
-            const res = await genRemove({
-              activeImage: activeLayer.url,
-              prompt: activeTag,
-            })
-            if (res?.data?.success) {
+            await genRemove(activeLayer.url, activeTag);  // Using genRemove from store
+
+            if (!genRemoveError) {
               setGenerating(false)
 
               const newLayerId = crypto.randomUUID()
               addLayer({
                 id: newLayerId,
-                url: res.data.success,
+                url: activeLayer,
                 format: activeLayer.format,
                 height: activeLayer.height,
                 width: activeLayer.width,
@@ -104,6 +98,8 @@ export default function GenRemove() {
                 resourceType: "image",
               })
               setActiveLayer(newLayerId)
+            } else {
+              setGenerating(false)
             }
           }}
         >

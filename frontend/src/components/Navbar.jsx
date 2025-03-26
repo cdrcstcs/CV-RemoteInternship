@@ -70,6 +70,9 @@ const Navbar = () => {
             <Link to={"/wheel"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
               Wheel
             </Link>
+            <Link to={"/editor"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
+              Editor
+            </Link>
             {user && (
               <Link
                 to={"/cart"}

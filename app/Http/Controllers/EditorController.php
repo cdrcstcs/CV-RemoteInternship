@@ -187,6 +187,7 @@ class EditorController extends Controller
             ], 500); // HTTP 500 Internal Server Error
         }
     }
+
     /**
      * Extract objects from an image via Cloudinary.
      *
@@ -386,6 +387,7 @@ class EditorController extends Controller
             ], 500); // HTTP 500 Internal Server Error
         }
     }
+    
     /**
      * Remove the background from an image via Cloudinary using a custom prompt.
      *

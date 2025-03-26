@@ -1,16 +1,7 @@
-"use client"
-
-import {
-  Dialog,
-  DialogDescription,
-  DialogHeader,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
-} from "./ui/dialog"
-import { useImageStore } from "@/lib/store"
-import { useLayerStore } from "@/lib/layer-store"
-import loadingAnimation from "@/public/animations/loading.json"
+import { Dialog, DialogDescription, DialogHeader, DialogContent, DialogTitle } from "../../components/Editor/Dialog"
+import useImageStore from "../../stores/useImageStore"
+import useLayerStore from "../../stores/useLayerStore"
+import loadingAnimation from "../../../src/animations/loading.json"
 import Lottie from "lottie-react"
 
 export default function Loading() {

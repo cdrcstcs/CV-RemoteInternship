@@ -1,7 +1,6 @@
-import VideoTranscription from "@/components/toolbar/transcribe"
-import { useLayerStore } from "@/lib/layer-store"
-import SmartCrop from "./smart-crop"
-import ExportImage from "./export-image"
+import VideoTranscription from "./Transcribe"
+import useLayerStore from "../../stores/useLayerStore"
+import SmartCrop from "./SmartCrop"
 
 export default function VideoTools() {
   const activeLayer = useLayerStore((state) => state.activeLayer)

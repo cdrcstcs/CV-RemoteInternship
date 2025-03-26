@@ -1,17 +1,11 @@
 import React, { useMemo, useState } from "react"
-import { useImageStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import { genFill } from "@/server/gen-fill"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import useImageStore from "../../stores/useImageStore"
+import { Button } from "../../components/Editor/Button"
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
+import { Input } from "../../components/Editor/Input"
+import { Label } from "../../components/Editor/Label"
 import { Crop } from "lucide-react"
-import { useLayerStore } from "@/lib/layer-store"
-import { Badge } from "../ui/badge"
+import useLayerStore from "../../stores/useLayerStore"
 import { AnimatePresence, motion } from "framer-motion"
 
 const PREVIEW_SIZE = 250
@@ -21,11 +15,12 @@ export default function GenerativeFill() {
   const setGenerating = useImageStore((state) => state.setGenerating)
   const activeLayer = useLayerStore((state) => state.activeLayer)
   const addLayer = useLayerStore((state) => state.addLayer)
-  const layers = useLayerStore((state) => state.layers)
+  const genFill = useEditorStore((state) => state.genFill)  // <-- Accessing genFill from the store
   const [height, setHeight] = useState(0)
   const [width, setWidth] = useState(0)
   const generating = useImageStore((state) => state.generating)
   const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
+  const genFillError = useLayerStore((state) => state.genFillError)
 
   const previewStyle = useMemo(() => {
     if (!activeLayer.width || !activeLayer.height) return {}
@@ -76,14 +71,13 @@ export default function GenerativeFill() {
 
   const handleGenFill = async () => {
     setGenerating(true)
-    const res = await genFill({
+    await genFill({
       width: (width + activeLayer.width).toString(),
       height: (height + activeLayer.height).toString(),
       aspect: "1:1",
       activeImage: activeLayer.url,
     })
-    if (res?.data?.success) {
-      console.log(res.data.success)
+    if (!genFillError) {
       setGenerating(false)
       const newLayerId = crypto.randomUUID()
       addLayer({
@@ -98,8 +92,7 @@ export default function GenerativeFill() {
       })
       setActiveLayer(newLayerId)
     }
-    if (res?.data?.error) {
-      console.log(res.data.error)
+    if (genFillError) {
       setGenerating(false)
     }
   }

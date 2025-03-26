@@ -1,12 +1,12 @@
-import { uploadImage } from "@/server/upload-image"
-import { useImageStore } from "@/lib/store"
+import useImageStore from "../../stores/useImageStore"
 import { useDropzone } from "react-dropzone"
 import Lottie from "lottie-react"
-import { Card, CardContent } from "../ui/card"
-import { cn } from "@/lib/utils"
-import { useLayerStore } from "@/lib/layer-store"
-import imageAnimation from "@/public/animations/image-upload.json"
+import { Card, CardContent } from "../../components/Editor/Card"
+import { cn } from "../../lib/utils"
+import useLayerStore from "../../stores/useLayerStore"
+import imageAnimation from "../../../src/animations/image-upload.json"
 import { toast } from "sonner"
+import { useEditorStore } from "../../stores/useEditorStore"
 
 export default function UploadImage() {
   const setTags = useImageStore((state) => state.setTags)
@@ -14,6 +14,9 @@ export default function UploadImage() {
   const activeLayer = useLayerStore((state) => state.activeLayer)
   const updateLayer = useLayerStore((state) => state.updateLayer)
   const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
+  const { uploadImage } = useEditorStore((state) => ({
+    uploadImage: state.uploadImage, // Get the uploadImage function from Zustand store
+  }))
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
@@ -27,10 +30,12 @@ export default function UploadImage() {
       if (acceptedFiles.length) {
         const formData = new FormData()
         formData.append("image", acceptedFiles[0])
-        //Generate Object url
+
+        // Generate Object URL
         const objectUrl = URL.createObjectURL(acceptedFiles[0])
         setGenerating(true)
 
+        // Update the layer with temporary uploading state
         updateLayer({
           id: activeLayer.id,
           url: objectUrl,
@@ -42,9 +47,12 @@ export default function UploadImage() {
           resourceType: "image",
         })
         setActiveLayer(activeLayer.id)
+
+        // Upload image using the Zustand store function
         const res = await uploadImage({ image: formData })
 
         if (res?.data?.success) {
+          // Update the layer after successful upload
           updateLayer({
             id: activeLayer.id,
             url: res.data.success.url,
@@ -55,14 +63,17 @@ export default function UploadImage() {
             format: res.data.success.format,
             resourceType: res.data.success.resource_type,
           })
+
+          // Set tags from the upload response
           setTags(res.data.success.tags)
 
+          // Set active layer and stop generating state
           setActiveLayer(activeLayer.id)
-          console.log(activeLayer)
           setGenerating(false)
         }
         if (res?.data?.error) {
           setGenerating(false)
+          toast.error(res.data.error)
         }
       }
 
@@ -78,11 +89,11 @@ export default function UploadImage() {
       <Card
         {...getRootProps()}
         className={cn(
-          " hover:cursor-pointer hover:bg-secondary hover:border-primary transition-all  ease-in-out ",
+          "hover:cursor-pointer hover:bg-secondary hover:border-primary transition-all ease-in-out",
           `${isDragActive ? "animate-pulse border-primary bg-secondary" : ""}`
         )}
       >
-        <CardContent className="flex flex-col h-full items-center justify-center px-2 py-24  text-xs ">
+        <CardContent className="flex flex-col h-full items-center justify-center px-2 py-24 text-xs">
           <input {...getInputProps()} />
           <div className="flex items-center flex-col justify-center gap-4">
             <Lottie className="h-48" animationData={imageAnimation} />

@@ -1,18 +1,14 @@
 import React, { useState } from "react"
-import { useImageStore } from "@/lib/store"
-import { Button } from "@/components/ui/button"
-import { extractImage } from "@/server/extract"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import useImageStore from "../../stores/useImageStore"
+import { Button } from "../../components/Editor/Button"
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
+import { Input } from "../../components/Editor/Input"
+import { Label } from "../../components/Editor/Label"
 import { Scissors } from "lucide-react"
-import { useLayerStore } from "@/lib/layer-store"
-import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import useLayerStore from "../../stores/useLayerStore"
+import { Checkbox } from "../../components/Editor/Checkbox"
+import { RadioGroup, RadioGroupItem } from "../../components/Editor/RadioGroup"
+import { useEditorStore } from "../../stores/useEditorStore" // Import the store
 
 export default function ExtractPart() {
   const setGenerating = useImageStore((state) => state.setGenerating)
@@ -35,6 +31,9 @@ export default function ExtractPart() {
     newPrompts[index] = value
     setPrompts(newPrompts)
   }
+
+  // Get extractImage function from useEditorStore
+  const extractImage = useEditorStore((state) => state.extractImage)
 
   return (
     <Popover>
@@ -112,16 +111,20 @@ export default function ExtractPart() {
           className="w-full mt-4"
           onClick={async () => {
             setGenerating(true)
-            const res = await extractImage({
-              prompts: prompts.filter((p) => p.trim() !== ""),
-              activeImage: activeLayer.url,
-              format: activeLayer.format,
+            // Call the extractImage function from the store
+            await extractImage(
+              activeLayer.url,
+              prompts.filter((p) => p.trim() !== ""),
               multiple,
-              mode: mode,  // Using `mode` directly
+              mode,
               invert,
-            })
+              activeLayer.format
+            )
 
-            if (res?.data?.success) {
+            // Handle response
+            const res = useEditorStore.getState().activeLayer; // Assuming extractImage updates activeLayer directly
+
+            if (res?.url) {
               const newLayerId = crypto.randomUUID()
               addLayer({
                 id: newLayerId,
@@ -129,12 +132,15 @@ export default function ExtractPart() {
                 format: ".png",
                 height: activeLayer.height,
                 width: activeLayer.width,
-                url: res.data.success,
+                url: res.url,
                 publicId: activeLayer.publicId,
                 resourceType: "image",
               })
               setGenerating(false)
               setActiveLayer(newLayerId)
+            } else {
+              setGenerating(false)
+              toast.error("Failed to extract image")
             }
           }}
         >

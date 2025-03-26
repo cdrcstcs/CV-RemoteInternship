@@ -1,34 +1,17 @@
 import React, { useMemo } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { useLayerStore } from "@/lib/layer-store"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "./ui/card"
-import { Button } from "./ui/button"
+import useLayerStore from "../../stores/useLayerStore"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/Editor/Card"
+import { Button } from "../../components/Editor/Button"
 import {
   ArrowRight,
-  CornerLeftDown,
-  Ellipsis,
-  GitCompare,
-  GitCompareArrows,
   Images,
   Layers2,
-  Trash,
 } from "lucide-react"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { useImageStore } from "@/lib/store"
-import LayerImage from "./layers/layer-image"
-import { cn } from "@/lib/utils"
-import Image from "next/image"
-import LayerInfo from "./layers/layer-info"
+import useImageStore from "../../stores/useImageStore"
+import LayerImage from "../../components/Editor/LayerImage"
+import { cn } from "../../lib/utils"
+import LayerInfo from "./LayerInfo"
 
 export default function Layers() {
   const layers = useLayerStore((state) => state.layers)
@@ -77,7 +60,7 @@ export default function Layers() {
           <div>
             <CardTitle className="text-sm pb-2">Comparing...</CardTitle>
             <CardDescription className="flex gap-2 items-center">
-              <Image
+              <img
                 alt="compare"
                 width={32}
                 height={32}
@@ -85,7 +68,7 @@ export default function Layers() {
               />
               {comparedLayers.length > 0 && <ArrowRight />}
               {comparedLayers.length > 1 ? (
-                <Image
+                <img
                   alt="compare"
                   width={32}
                   height={32}

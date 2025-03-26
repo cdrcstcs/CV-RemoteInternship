@@ -1,6 +1,6 @@
 import React from "react"
 import { motion, useMotionValue, useTransform } from "framer-motion"
-import { useImageStore } from "@/lib/store"
+import useImageStore from "../../stores/useImageStore"
 
 export default function Resizable() {
   const x = useMotionValue(0)
