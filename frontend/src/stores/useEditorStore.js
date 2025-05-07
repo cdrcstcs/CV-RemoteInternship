@@ -237,7 +237,7 @@ export const useEditorStore = create((set, get) => ({
       formData.append('image', imageFile);
 
       const response = await axiosInstance.post("/upload-image", formData);
-
+      console.log(response);
       if (response.data.success) {
         toast.success("Image uploaded successfully!");
         set({ activeLayer: response.data.success });

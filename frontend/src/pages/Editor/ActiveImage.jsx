@@ -2,8 +2,9 @@ import React from 'react';
 import { cn } from "../../lib/utils"; // Assuming this is a utility function you can continue using
 import { motion } from "framer-motion";
 import ImageComparison from "../../components/Editor/ImageComparison"; // Assuming this component does not rely on Next.js
-import useLayerStore from "../../stores/useLayerStore";
-
+import { useEditorStore } from "../../stores/useEditorStore"
+import useImageStore from "../../stores/useImageStore"
+import useLayerStore from "../../stores/useLayerStore"
 export default function ActiveImage() {
   const generating = useLayerStore((state) => state.generating);
   const activeLayer = useLayerStore((state) => state.activeLayer);

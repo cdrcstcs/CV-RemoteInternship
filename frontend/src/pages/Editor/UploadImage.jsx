@@ -28,11 +28,9 @@ export default function UploadImage() {
     },
     onDrop: async (acceptedFiles, fileRejections) => {
       if (acceptedFiles.length) {
-        const formData = new FormData()
-        formData.append("image", acceptedFiles[0])
 
         // Generate Object URL
-        const objectUrl = URL.createObjectURL(acceptedFiles[0])
+        const objectUrl = acceptedFiles[0]
         setGenerating(true)
 
         // Update the layer with temporary uploading state
@@ -49,7 +47,7 @@ export default function UploadImage() {
         setActiveLayer(activeLayer.id)
 
         // Upload image using the Zustand store function
-        const res = await uploadImage({ image: formData })
+        const res = await uploadImage(acceptedFiles[0])
 
         if (res?.data?.success) {
           // Update the layer after successful upload

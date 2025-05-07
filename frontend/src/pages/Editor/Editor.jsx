@@ -7,7 +7,7 @@ import VideoTools from "./VideoTools"
 import Loading from "./Loading"
 export default function Editor() {
   const activeLayer = useLayerStore((state) => state.activeLayer)
-
+  console.log(activeLayer);
   return (
     <div className="flex h-full ">
       <div className="py-6 px-4  min-w-48 ">

@@ -5,10 +5,61 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Integrations\files\CloudinaryImageClient; // Use the custom Cloudinary client
 use Exception;
-
 class EditorController extends Controller
 {
+
+    protected $cloudinaryClient;
+
+    public function __construct()
+    {
+        // Initialize custom Cloudinary image client
+        $this->cloudinaryClient = new CloudinaryImageClient();
+    }
+
+    /**
+     * Upload an image to Cloudinary.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function uploadImage(Request $request)
+    {
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'image' => 'required|file|mimes:jpg,jpeg,png,gif,webp',
+        ]);
+
+        if ($request->hasFile('image')) {
+            try {
+                // Retrieve the image file
+                $uploadedFile = $request->file('image');
+                $mimeType = $uploadedFile->getClientMimeType();
+                $base64Contents = base64_encode($uploadedFile->getContent());
+
+                // Upload image using custom Cloudinary client
+                $uploadResult = $this->cloudinaryClient->uploadImage($mimeType, $base64Contents);
+
+                // If the upload is successful, return the response
+                if ($uploadResult->isSuccess) {
+                    return response()->json(['success' => $uploadResult],200);
+
+                } else {
+                    throw new \Exception("Cloudinary image upload failed: " . $uploadResult->msg);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error uploading image to Cloudinary', [
+                    'error_message' => $e->getMessage(),
+                    'image' => $uploadedFile->getClientOriginalName()
+                ]);
+                return response()->json(['error' => 'Image upload failed'], 500);
+            }
+        }
+
+        return response()->json(['error' => 'No image file provided'], 400);
+    }
+
     /**
      * Remove the background from an image via Cloudinary.
      *
@@ -763,57 +814,7 @@ class EditorController extends Controller
             ],
         ]);
     }
-    /**
-     * Upload an image to Cloudinary.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function uploadImage(Request $request)
-    {
-        // Validate the incoming request data
-        $validatedData = $request->validate([
-            'image' => 'required|file|mimes:jpg,jpeg,png,gif,webp', // You can specify your allowed file types here
-        ]);
-
-        $image = $validatedData['image'];
-
-        // Cloudinary configuration from .env file
-        $cloudName = env('CLOUDINARY_CLOUD_NAME');
-        $apiKey = env('CLOUDINARY_API_KEY');
-        $apiSecret = env('CLOUDINARY_API_SECRET');
-
-        try {
-            // Open the image file as a stream
-            $imageStream = fopen($image->getRealPath(), 'r');
-
-            // Upload image to Cloudinary
-            $response = Http::withBasicAuth($apiKey, $apiSecret)
-                ->attach(
-                    'file',
-                    $imageStream,
-                    $image->getClientOriginalName()
-                )
-                ->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload", [
-                    'upload_preset' => 'restyled', // Your upload preset
-                    'use_filename' => true,
-                    'unique_filename' => false,
-                    'filename_override' => $image->getClientOriginalName(),
-                ]);
-
-            // Check if the upload was successful
-            if ($response->successful()) {
-                return response()->json([
-                    'success' => $response->json(),
-                ]);
-            }
-
-            return response()->json(['error' => 'Upload failed'], 500);
-        } catch (Exception $e) {
-            Log::error('Error uploading image to Cloudinary', ['exception' => $e->getMessage()]);
-            return response()->json(['error' => 'Error processing file'], 500);
-        }
-    }
+    
 
     /**
      * Upload a video to Cloudinary.

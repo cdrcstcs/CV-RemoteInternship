@@ -7,19 +7,21 @@ import { cn } from "../../lib/utils"
 import { Paintbrush } from "lucide-react"
 import { useEditorStore } from "../../stores/useEditorStore"
 import { toast } from "sonner"
+import useImageStore from "../../stores/useImageStore"
+import useLayerStore from "../../stores/useLayerStore"
 
 export default function AIRecolor() {
-  const tags = useEditorStore((state) => state.tags)
-  const setActiveTag = useEditorStore((state) => state.setActiveTag)
-  const activeTag = useEditorStore((state) => state.activeTag)
-  const setActiveColor = useEditorStore((state) => state.setActiveColor)
-  const activeColor = useEditorStore((state) => state.activeColor)
-  const setGenerating = useEditorStore((state) => state.setGenerating)
-  const activeLayer = useEditorStore((state) => state.activeLayer)
-  const addLayer = useEditorStore((state) => state.addLayer)
-  const generating = useEditorStore((state) => state.generating)
+  const tags = useImageStore((state) => state.tags)
+  const setActiveTag = useImageStore((state) => state.setActiveTag)
+  const activeTag = useImageStore((state) => state.activeTag)
+  const setActiveColor = useImageStore((state) => state.setActiveColor)
+  const activeColor = useImageStore((state) => state.activeColor)
+  const setGenerating = useImageStore((state) => state.setGenerating)
+  const activeLayer = useLayerStore((state) => state.activeLayer)
+  const addLayer = useLayerStore((state) => state.addLayer)
+  const generating = useImageStore((state) => state.generating)
   const recolorImage = useEditorStore((state) => state.recolorImage)
-  const setActiveLayer = useEditorStore((state) => state.setActiveLayer)
+  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
   const recolorImageError = useEditorStore((state) => state.recolorImageError)
 
   return (

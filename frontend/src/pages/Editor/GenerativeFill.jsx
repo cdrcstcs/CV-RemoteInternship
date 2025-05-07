@@ -7,7 +7,7 @@ import { Label } from "../../components/Editor/Label"
 import { Crop } from "lucide-react"
 import useLayerStore from "../../stores/useLayerStore"
 import { AnimatePresence, motion } from "framer-motion"
-
+import { useEditorStore } from "../../stores/useEditorStore"
 const PREVIEW_SIZE = 250
 const EXPANSION_THRESHOLD = 250 // px
 

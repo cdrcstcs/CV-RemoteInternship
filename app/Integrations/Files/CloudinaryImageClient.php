@@ -6,6 +6,7 @@ use Cloudinary\Api\Upload\UploadApi;
 use Cloudinary\Configuration\Configuration;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str; // Make sure this is at the top of the file if you want to use Str::uuid()
 
 class CloudinaryImageClient
 {
@@ -39,25 +40,70 @@ class CloudinaryImageClient
 
     public function uploadImage(string $mimeType, string $base64FileContents): CloudinaryResults
     {
+        Log::debug("uploadImage called", [
+            'mimeType' => $mimeType,
+            'base64_length' => strlen($base64FileContents),
+            'base64_preview' => substr($base64FileContents, 0, 30) . '...' // Only log part to avoid massive output
+        ]);
+
         // Format the file URI for Cloudinary upload
         $formattedUploadUri = self::createUri($mimeType, $base64FileContents);
+        Log::debug("Formatted upload URI", [
+            'uri_sample' => substr($formattedUploadUri, 0, 50) . '...' // Partial preview
+        ]);
 
         try {
             // Instantiate Cloudinary UploadApi
             $uploadClient = new UploadApi();
+            Log::debug("UploadApi client instantiated.");
+
             // Upload the image
             $results = $uploadClient->upload($formattedUploadUri, ['resource_type' => 'image']);
+            Log::info("Cloudinary upload completed", [
+                'results' => $results
+            ]);
+            $results['original_filename'] = (string) Str::uuid();
 
-            Log::info("Cloudinary upload results: " . json_encode($results));
-            // Return success result with Cloudinary URLs
-            return CloudinaryResults::success($results['secure_url'], $results['url']);
+            // Create success result object
+            $successResult = CloudinaryResults::success(
+                $results['secure_url'],
+                $results['url'],
+                $results['width'],
+                $results['height'],
+                $results['original_filename'],
+                $results['public_id'],
+                $results['format'],
+                $results['resource_type']
+            );
+
+            Log::debug("Returning success result", [
+                'secure_url' => $results['secure_url'],
+                'url' => $results['url'],
+                'dimensions' => $results['width'] . 'x' . $results['height'],
+                'filename' => $results['original_filename'],
+                'public_id' => $results['public_id'],
+                'format' => $results['format'],
+                'resource_type' => $results['resource_type']
+            ]);
+
+            return $successResult;
+
         } catch (\Exception $e) {
-            // Log any errors during upload
-            Log::error("Failed to upload file to Cloudinary: " . $e->getMessage());
-            // Return failure result
-            return CloudinaryResults::failed($e->getMessage());
+            Log::error("Exception during Cloudinary upload", [
+                'error_message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            $failedResult = CloudinaryResults::failed($e->getMessage());
+
+            Log::debug("Returning failure result", [
+                'error_message' => $e->getMessage()
+            ]);
+
+            return $failedResult;
         }
     }
+
 
     /**
      * Utility function to create a data URI from base64 file contents.
