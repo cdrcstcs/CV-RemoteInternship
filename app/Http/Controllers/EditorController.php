@@ -43,6 +43,9 @@ class EditorController extends Controller
 
                 // If the upload is successful, return the response
                 if ($uploadResult->isSuccess) {
+                    Log::info('result', [
+                        'result' => $uploadResult,
+                    ]);
                     return response()->json(['success' => $uploadResult],200);
 
                 } else {

@@ -15,6 +15,8 @@ class CloudinaryResults
     public ?string $publicId = null;
     public ?string $format = null;
     public ?string $resourceType = null;
+    public ?array $tags = null;
+
 
     public static function success(
         string $secureUrl,
@@ -24,7 +26,8 @@ class CloudinaryResults
         string $name,
         string $publicId,
         string $format,
-        string $resourceType
+        string $resourceType,
+        array $tags
     ): CloudinaryResults {
         $results = new CloudinaryResults();
         $results->isSuccess = true;
@@ -36,6 +39,8 @@ class CloudinaryResults
         $results->publicId = $publicId;
         $results->format = $format;
         $results->resourceType = $resourceType;
+        $results->tags = $tags;
+
 
         return $results;
     }

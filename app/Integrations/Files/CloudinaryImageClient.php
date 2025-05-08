@@ -73,7 +73,8 @@ class CloudinaryImageClient
                 $results['original_filename'],
                 $results['public_id'],
                 $results['format'],
-                $results['resource_type']
+                $results['resource_type'],
+                $results['tags']
             );
 
             Log::debug("Returning success result", [
@@ -83,7 +84,8 @@ class CloudinaryImageClient
                 'filename' => $results['original_filename'],
                 'public_id' => $results['public_id'],
                 'format' => $results['format'],
-                'resource_type' => $results['resource_type']
+                'resource_type' => $results['resource_type'],
+                'tags' => $results['tags']
             ]);
 
             return $successResult;

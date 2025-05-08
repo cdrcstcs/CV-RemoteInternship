@@ -5,10 +5,16 @@ import axiosInstance from "../lib/axios"; // Ensure this is the correct axios in
 export const useEditorStore = create((set, get) => ({
   generating: false,
   uploading: false,
-  activeLayer: null,
-  layers: [],
-  activeTag: "",
-  activeColor: "",
+  activeLayer: {
+    url: '',
+    width: 0,
+    height: 0,
+    name: "default",
+    publicId: "",
+    format: "",
+    resourceType: "default",
+    tags: [],
+  },
   
   // Error variables for each action
   removeBackgroundError: null,

@@ -1,13 +1,12 @@
 import UploadForm from "./UploadForm"
 import ActiveImage from "./ActiveImage"
-import useLayerStore from "../../stores/useLayerStore"
 import Layers from "./Layers"
 import ImageTools from "./ImageTools"
 import VideoTools from "./VideoTools"
 import Loading from "./Loading"
+import { useEditorStore } from "../../stores/useEditorStore"
 export default function Editor() {
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  console.log(activeLayer);
+  const activeLayer = useEditorStore((state) => state.activeLayer)
   return (
     <div className="flex h-full ">
       <div className="py-6 px-4  min-w-48 ">
