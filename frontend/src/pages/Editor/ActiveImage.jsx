@@ -3,14 +3,14 @@ import { cn } from "../../lib/utils"; // Assuming this is a utility function you
 import { motion } from "framer-motion";
 import ImageComparison from "../../components/Editor/ImageComparison"; // Assuming this component does not rely on Next.js
 import { useEditorStore } from "../../stores/useEditorStore"
-import useImageStore from "../../stores/useImageStore"
-import useLayerStore from "../../stores/useLayerStore"
 export default function ActiveImage() {
-  const generating = useLayerStore((state) => state.generating);
-  const activeLayer = useLayerStore((state) => state.activeLayer);
-  const layerComparisonMode = useLayerStore((state) => state.layerComparisonMode);
-  const comparedLayers = useLayerStore((state) => state.comparedLayers);
-  const layers = useLayerStore((state) => state.layers);
+  const { generating, activeLayer, layerComparisonMode, comparedLayers, layers } = useEditorStore((state) => ({
+    generating: state.generating,
+    activeLayer: state.activeLayer,
+    layerComparisonMode: state.layerComparisonMode,
+    comparedLayers: state.comparedLayers,
+    layers: state.layers,
+  }));  
 
   // Return null if there is no active layer or compared layers
   if (!activeLayer.url && comparedLayers.length === 0) return null;

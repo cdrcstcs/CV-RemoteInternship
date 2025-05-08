@@ -1,24 +1,30 @@
-import useImageStore from "../../stores/useImageStore"
+import useEditorStore from "../../stores/useEditorStore"
 import { useDropzone } from "react-dropzone"
 import Lottie from "lottie-react"
 import { Card, CardContent } from "../../components/Editor/Card"
 import { cn } from "../../lib/utils"
-import useLayerStore from "../../stores/useLayerStore"
+import useEditorStore from "../../stores/useEditorStore"
 import videoAnimation from "../../../src/animations/video-upload.json"
 import { toast } from "sonner"
 import { useEditorStore } from "../../stores/useEditorStore"
 
 export default function UploadVideo() {
-  const setTags = useImageStore((state) => state.setTags)
-  const setGenerating = useImageStore((state) => state.setGenerating)
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const updateLayer = useLayerStore((state) => state.updateLayer)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
-
-  // Access the uploadVideo function from Zustand store
-  const { uploadVideo } = useEditorStore((state) => ({
-    uploadVideo: state.uploadVideo, // Get the uploadVideo function from Zustand store
-  }))
+  const {
+    setTags,
+    setGenerating,
+    activeLayer,
+    updateLayer,
+    setActiveLayer,
+    uploadVideo,
+  } = useEditorStore((state) => ({
+    setTags: state.setTags,
+    setGenerating: state.setGenerating,
+    activeLayer: state.activeLayer,
+    updateLayer: state.updateLayer,
+    setActiveLayer: state.setActiveLayer,
+    uploadVideo: state.uploadVideo,
+  }));
+  
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,

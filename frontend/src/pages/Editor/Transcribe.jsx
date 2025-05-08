@@ -1,19 +1,26 @@
 import { Button } from "../../components/Editor/Button"
-import useLayerStore from "../../stores/useLayerStore"
 import { useEditorStore } from "../../stores/useEditorStore"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Captions } from "lucide-react"
 
 export default function VideoTranscription() {
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const updateLayer = useLayerStore((state) => state.updateLayer)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
-  const { initiateTranscription } = useEditorStore((state) => ({
+  const {
+    activeLayer,
+    updateLayer,
+    setActiveLayer,
+    initiateTranscription,
+    setGenerating,
+  } = useEditorStore((state) => ({
+    activeLayer: state.activeLayer,
+    updateLayer: state.updateLayer,
+    setActiveLayer: state.setActiveLayer,
     initiateTranscription: state.initiateTranscription,
-  }))
+    setGenerating: state.setGenerating,
+  }));
+  
+
   const [transcribing, setTranscribing] = useState(false)
-  const setGenerating = useLayerStore((state) => state.setGenerating)
 
   const handleTranscribe = async () => {
     if (!activeLayer.publicId || activeLayer.resourceType !== "video") {

@@ -7,22 +7,36 @@ import { cn } from "../../lib/utils"
 import { Paintbrush } from "lucide-react"
 import { useEditorStore } from "../../stores/useEditorStore"
 import { toast } from "sonner"
-import useImageStore from "../../stores/useImageStore"
-import useLayerStore from "../../stores/useLayerStore"
 
 export default function AIRecolor() {
-  const tags = useImageStore((state) => state.tags)
-  const setActiveTag = useImageStore((state) => state.setActiveTag)
-  const activeTag = useImageStore((state) => state.activeTag)
-  const setActiveColor = useImageStore((state) => state.setActiveColor)
-  const activeColor = useImageStore((state) => state.activeColor)
-  const setGenerating = useImageStore((state) => state.setGenerating)
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const addLayer = useLayerStore((state) => state.addLayer)
-  const generating = useImageStore((state) => state.generating)
-  const recolorImage = useEditorStore((state) => state.recolorImage)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
-  const recolorImageError = useEditorStore((state) => state.recolorImageError)
+  const {
+    tags,
+    setActiveTag,
+    activeTag,
+    setActiveColor,
+    activeColor,
+    setGenerating,
+    activeLayer,
+    addLayer,
+    generating,
+    recolorImage,
+    setActiveLayer,
+    recolorImageError,
+  } = useEditorStore((state) => ({
+    tags: state.tags,
+    setActiveTag: state.setActiveTag,
+    activeTag: state.activeTag,
+    setActiveColor: state.setActiveColor,
+    activeColor: state.activeColor,
+    setGenerating: state.setGenerating,
+    activeLayer: state.activeLayer,
+    addLayer: state.addLayer,
+    generating: state.generating,
+    recolorImage: state.recolorImage,
+    setActiveLayer: state.setActiveLayer,
+    recolorImageError: state.recolorImageError,
+  }));
+  
 
   return (
     <Popover>

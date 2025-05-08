@@ -4,22 +4,30 @@ import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor
 import { Input } from "../../components/Editor/Input"
 import { Label } from "../../components/Editor/Label"
 import { ImageOff } from "lucide-react"
-import useLayerStore from "../../stores/useLayerStore"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useEditorStore } from "../../stores/useEditorStore"
 export default function AIBackgroundReplace() {
-  const setGenerating = useImageStore((state) => state.setGenerating)
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const addLayer = useLayerStore((state) => state.addLayer)
-  const generating = useImageStore((state) => state.generating)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
+  const {
+    setGenerating,
+    activeLayer,
+    addLayer,
+    generating,
+    setActiveLayer,
+    replaceBackground,
+    replaceBackgroundError,
+  } = useEditorStore((state) => ({
+    setGenerating: state.setGenerating,
+    activeLayer: state.activeLayer,
+    addLayer: state.addLayer,
+    generating: state.generating,
+    setActiveLayer: state.setActiveLayer,
+    replaceBackground: state.replaceBackground,
+    replaceBackgroundError: state.replaceBackgroundError,
+  }));
+  
 
   const [prompt, setPrompt] = useState("")
-
-  // Get replaceBackground and error state from the useEditorStore
-  const replaceBackground = useEditorStore((state) => state.replaceBackground)
-  const replaceBackgroundError = useEditorStore((state) => state.replaceBackgroundError)
 
   return (
     <Popover>

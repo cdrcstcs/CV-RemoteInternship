@@ -1,9 +1,9 @@
 import VideoTranscription from "./Transcribe"
-import useLayerStore from "../../stores/useLayerStore"
 import SmartCrop from "./SmartCrop"
+import { useEditorStore } from "../../stores/useEditorStore"
 
 export default function VideoTools() {
-  const activeLayer = useLayerStore((state) => state.activeLayer)
+  const activeLayer = useEditorStore((state) => state.activeLayer)
   if (activeLayer.resourceType === "video")
     return (
       <>

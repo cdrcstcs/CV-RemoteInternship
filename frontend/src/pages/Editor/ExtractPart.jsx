@@ -1,21 +1,22 @@
 import React, { useState } from "react"
-import useImageStore from "../../stores/useImageStore"
 import { Button } from "../../components/Editor/Button"
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
 import { Input } from "../../components/Editor/Input"
 import { Label } from "../../components/Editor/Label"
 import { Scissors } from "lucide-react"
-import useLayerStore from "../../stores/useLayerStore"
 import { Checkbox } from "../../components/Editor/Checkbox"
 import { RadioGroup, RadioGroupItem } from "../../components/Editor/RadioGroup"
 import { useEditorStore } from "../../stores/useEditorStore" // Import the store
 
 export default function ExtractPart() {
-  const setGenerating = useImageStore((state) => state.setGenerating)
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const addLayer = useLayerStore((state) => state.addLayer)
-  const generating = useImageStore((state) => state.generating)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
+  const { setGenerating, activeLayer, addLayer, generating, setActiveLayer } = useEditorStore((state) => ({
+    setGenerating: state.setGenerating,
+    activeLayer: state.activeLayer,
+    addLayer: state.addLayer,
+    generating: state.generating,
+    setActiveLayer: state.setActiveLayer,
+  }));
+  
 
   const [prompts, setPrompts] = useState([""])
   const [multiple, setMultiple] = useState(false)

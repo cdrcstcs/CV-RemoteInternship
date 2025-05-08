@@ -1,6 +1,5 @@
 import React, { useMemo } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import useLayerStore from "../../stores/useLayerStore"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/Editor/Card"
 import { Button } from "../../components/Editor/Button"
 import {
@@ -8,28 +7,36 @@ import {
   Images,
   Layers2,
 } from "lucide-react"
-import useImageStore from "../../stores/useImageStore"
 import LayerImage from "../../components/Editor/LayerImage"
 import { cn } from "../../lib/utils"
 import LayerInfo from "./LayerInfo"
+import { useEditorStore } from "../../stores/useEditorStore"
 
 export default function Layers() {
-  const layers = useLayerStore((state) => state.layers)
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
-  const addLayer = useLayerStore((state) => state.addLayer)
-  const generating = useImageStore((state) => state.generating)
-  const layerComparisonMode = useLayerStore(
-    (state) => state.layerComparisonMode
-  )
-  const setLayerComparisonMode = useLayerStore(
-    (state) => state.setLayerComparisonMode
-  )
-  const comparedLayers = useLayerStore((state) => state.comparedLayers)
-  const toggleComparedLayer = useLayerStore(
-    (state) => state.toggleComparedLayer
-  )
-  const setComparedLayers = useLayerStore((state) => state.setComparedLayers)
+  const {
+    layers,
+    activeLayer,
+    setActiveLayer,
+    addLayer,
+    generating,
+    layerComparisonMode,
+    setLayerComparisonMode,
+    comparedLayers,
+    toggleComparedLayer,
+    setComparedLayers,
+  } = useEditorStore((state) => ({
+    layers: state.layers,
+    activeLayer: state.activeLayer,
+    setActiveLayer: state.setActiveLayer,
+    addLayer: state.addLayer,
+    generating: state.generating,
+    layerComparisonMode: state.layerComparisonMode,
+    setLayerComparisonMode: state.setLayerComparisonMode,
+    comparedLayers: state.comparedLayers,
+    toggleComparedLayer: state.toggleComparedLayer,
+    setComparedLayers: state.setComparedLayers,
+  }));
+  
 
   const MCard = useMemo(() => motion(Card), [])
   const MButton = useMemo(() => motion(Button), [])

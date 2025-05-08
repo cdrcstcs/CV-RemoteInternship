@@ -9,16 +9,28 @@ import Youtube from "./Youtube"
 import { cn } from "../../lib/utils"
 
 export default function SmartCrop() {
-  const setGenerating = useEditorStore((state) => state.setGenerating)
-  const activeLayer = useEditorStore((state) => state.activeLayer)
-  const addLayer = useEditorStore((state) => state.addLayer)
+  const {
+    setGenerating,
+    activeLayer,
+    addLayer,
+    generating,
+    setActiveLayer,
+    cropVideo,
+    cropVideoError,
+  } = useEditorStore((state) => ({
+    setGenerating: state.setGenerating,
+    activeLayer: state.activeLayer,
+    addLayer: state.addLayer,
+    generating: state.generating,
+    setActiveLayer: state.setActiveLayer,
+    cropVideo: state.cropVideo,
+    cropVideoError: state.cropVideoError,
+  }));
+  
+
+  const [aspectRatio, setAspectRatio] = useState("16:9")
   const [height, setHeight] = useState(0)
   const [width, setWidth] = useState(0)
-  const generating = useEditorStore((state) => state.generating)
-  const setActiveLayer = useEditorStore((state) => state.setActiveLayer)
-  const cropVideo = useEditorStore((state) => state.cropVideo)
-  const cropVideoError = useEditorStore((state) => state.cropVideoError)
-  const [aspectRatio, setAspectRatio] = useState("16:9")
 
   // Replaced the genCrop function with cropVideo from useEditorStore
   const handleGenCrop = async () => {

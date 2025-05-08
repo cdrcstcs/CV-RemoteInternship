@@ -1,22 +1,29 @@
-import useImageStore from "../../stores/useImageStore"
 import { Button } from "../../components/Editor/Button"
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
 import { Image } from "lucide-react"
-import useLayerStore from "../../stores/useLayerStore"
 import { toast } from "sonner"
 import { useEditorStore } from "../../stores/useEditorStore"
 export default function BgRemove() {
-  const activeTag = useImageStore((state) => state.activeTag)
-  const activeColor = useImageStore((state) => state.activeColor)
-  const setGenerating = useImageStore((state) => state.setGenerating)
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const addLayer = useLayerStore((state) => state.addLayer)
-  const generating = useImageStore((state) => state.generating)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
+  const {
+    activeTag,
+    activeColor,
+    activeLayer,
+    addLayer,
+    generating,
+    setActiveLayer,
+    removeBackground,
+    removeBackgroundError,
+  } = useEditorStore((state) => ({
+    activeTag: state.activeTag,
+    activeColor: state.activeColor,
+    activeLayer: state.activeLayer,
+    addLayer: state.addLayer,
+    generating: state.generating,
+    setActiveLayer: state.setActiveLayer,
+    removeBackground: state.removeBackground,
+    removeBackgroundError: state.removeBackgroundError,
+  }));
   
-  // Fetch removeBackground and removeBackgroundError from the store
-  const removeBackground = useEditorStore((state) => state.removeBackground) 
-  const removeBackgroundError = useEditorStore((state) => state.removeBackgroundError)
 
   return (
     <Popover>

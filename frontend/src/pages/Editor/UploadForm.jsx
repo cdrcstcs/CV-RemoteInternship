@@ -1,19 +1,21 @@
 import { Card, CardContent } from "../../components/Editor/Card"
 import { cn } from "../../lib/utils"
-import useLayerStore from "../../stores/useLayerStore"
 import { RadioGroup, RadioGroupItem } from "../../components/Editor/RadioGroup"
 import { Label } from "../../components/Editor/Label"
 import { ImageIcon, VideoIcon } from "lucide-react"
 import { useState } from "react"
 import UploadImage from "./UploadImage"
 import UploadVideo from "./UploadVideo"
+import { useEditorStore } from "../../stores/useEditorStore"
 
 export default function UploadForm() {
-  const activeLayer = useLayerStore((state) => state.activeLayer)
+  const { activeLayer, layerComparisonMode } = useEditorStore((state) => ({
+    activeLayer: state.activeLayer,
+    layerComparisonMode: state.layerComparisonMode,
+  }));
+  
+
   const [selectedType, setSelectedType] = useState("image")
-  const layerComparisonMode = useLayerStore(
-    (state) => state.layerComparisonMode
-  )
   if (!activeLayer.url && !layerComparisonMode)
     return (
       <div className="w-full p-24 flex flex-col  justify-center  h-full">

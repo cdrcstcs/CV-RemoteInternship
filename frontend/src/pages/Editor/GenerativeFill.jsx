@@ -1,26 +1,36 @@
 import React, { useMemo, useState } from "react"
-import useImageStore from "../../stores/useImageStore"
 import { Button } from "../../components/Editor/Button"
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
 import { Input } from "../../components/Editor/Input"
 import { Label } from "../../components/Editor/Label"
 import { Crop } from "lucide-react"
-import useLayerStore from "../../stores/useLayerStore"
 import { AnimatePresence, motion } from "framer-motion"
 import { useEditorStore } from "../../stores/useEditorStore"
 const PREVIEW_SIZE = 250
 const EXPANSION_THRESHOLD = 250 // px
 
 export default function GenerativeFill() {
-  const setGenerating = useImageStore((state) => state.setGenerating)
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const addLayer = useLayerStore((state) => state.addLayer)
-  const genFill = useEditorStore((state) => state.genFill)  // <-- Accessing genFill from the store
+  const {
+    setGenerating,
+    activeLayer,
+    addLayer,
+    genFill,
+    generating,
+    setActiveLayer,
+    genFillError,
+  } = useEditorStore((state) => ({
+    setGenerating: state.setGenerating,
+    activeLayer: state.activeLayer,
+    addLayer: state.addLayer,
+    genFill: state.genFill,
+    generating: state.generating,
+    setActiveLayer: state.setActiveLayer,
+    genFillError: state.genFillError,
+  }));
+  
+  
   const [height, setHeight] = useState(0)
   const [width, setWidth] = useState(0)
-  const generating = useImageStore((state) => state.generating)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
-  const genFillError = useLayerStore((state) => state.genFillError)
 
   const previewStyle = useMemo(() => {
     if (!activeLayer.width || !activeLayer.height) return {}

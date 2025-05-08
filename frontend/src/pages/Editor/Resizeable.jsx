@@ -1,13 +1,9 @@
 import React from "react"
 import { motion, useMotionValue, useTransform } from "framer-motion"
-import useImageStore from "../../stores/useImageStore"
 
 export default function Resizable() {
   const x = useMotionValue(0)
   const y = useMotionValue(0)
-  const setImageHeight = useImageStore((state) => state.setImageHeight)
-  const setImageWidth = useImageStore((state) => state.setImageWidth)
-
   const handleDragEnd = (e) => {}
 
   return (

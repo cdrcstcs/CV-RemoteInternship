@@ -5,24 +5,35 @@ import { Input } from "../../components/Editor/Input"
 import { Label } from "../../components/Editor/Label"
 import { cn } from "../../lib/utils"
 import { Eraser } from "lucide-react"
-import useImageStore from "../../stores/useImageStore"
-import useLayerStore from "../../stores/useLayerStore"
 import { useEditorStore } from "../../stores/useEditorStore" // Importing the useEditorStore
 
 export default function GenRemove() {
-  const tags = useImageStore((state) => state.tags)
-  const setActiveTag = useImageStore((state) => state.setActiveTag)
-  const generating = useEditorStore((state) => state.generating)  // Accessing generating state from store
-  const activeTag = useImageStore((state) => state.activeTag)
-  const activeColor = useImageStore((state) => state.activeColor)
-  const setGenerating = useEditorStore((state) => state.setGenerating)  // Accessing setGenerating from store
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const addLayer = useLayerStore((state) => state.addLayer)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
-
-  const genRemove = useEditorStore((state) => state.genRemove);  // Accessing genRemove from store
-  const genRemoveError = useEditorStore((state) => state.genRemoveError);  // Accessing genRemove from store
-
+  const {
+    tags,
+    setActiveTag,
+    generating,
+    activeTag,
+    activeColor,
+    setGenerating,
+    activeLayer,
+    addLayer,
+    setActiveLayer,
+    genRemove,
+    genRemoveError,
+  } = useEditorStore((state) => ({
+    tags: state.tags,
+    setActiveTag: state.setActiveTag,
+    generating: state.generating,
+    activeTag: state.activeTag,
+    activeColor: state.activeColor,
+    setGenerating: state.setGenerating,
+    activeLayer: state.activeLayer,
+    addLayer: state.addLayer,
+    setActiveLayer: state.setActiveLayer,
+    genRemove: state.genRemove,
+    genRemoveError: state.genRemoveError,
+  }));
+  
   return (
     <Popover>
       <PopoverTrigger disabled={!activeLayer?.url} asChild>

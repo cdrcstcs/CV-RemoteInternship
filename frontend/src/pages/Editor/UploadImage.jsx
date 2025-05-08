@@ -1,29 +1,30 @@
-import useImageStore from "../../stores/useImageStore"
 import { useDropzone } from "react-dropzone"
 import Lottie from "lottie-react"
 import { Card, CardContent } from "../../components/Editor/Card"
 import { cn } from "../../lib/utils"
-import useLayerStore from "../../stores/useLayerStore"
 import imageAnimation from "../../../src/animations/image-upload.json"
 import { toast } from "sonner"
 import { useEditorStore } from "../../stores/useEditorStore"
 
 export default function UploadImage() {
-  const setTags = useImageStore((state) => state.setTags)
-  const setGenerating = useImageStore((state) => state.setGenerating)
-  const generating = useImageStore((state) => state.generating)
-
-  const activeLayer = useLayerStore((state) => state.activeLayer)
-  const { activeLayer: resLayer } = useEditorStore((state) => ({ activeLayer: state.activeLayer }));
-  const updateLayer = useLayerStore((state) => state.updateLayer)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
-  const { uploadImage } = useEditorStore((state) => ({
-    uploadImage: state.uploadImage, // Get the uploadImage function from Zustand store
-  }))
-  const { uploadImageError } = useEditorStore((state) => ({
-    uploadImage: state.uploadImageError, // Get the uploadImage function from Zustand store
-  }))
-
+  const {
+    setTags,
+    generating,
+    activeLayer,
+    updateLayer,
+    setActiveLayer,
+    uploadImage,
+    uploadImageError,
+  } = useEditorStore((state) => ({
+    setTags: state.setTags,
+    generating: state.generating,
+    activeLayer: state.activeLayer,
+    updateLayer: state.updateLayer,
+    setActiveLayer: state.setActiveLayer,
+    uploadImage: state.uploadImage,
+    uploadImageError: state.uploadImageError,
+  }));
+  
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
@@ -59,17 +60,17 @@ export default function UploadImage() {
           // Update the layer after successful upload
           updateLayer({
             id: activeLayer.id,
-            url: resLayer.url,
-            width: resLayer.width,
-            height: resLayer.height,
-            name: resLayer.original_filename,
-            publicId: resLayer.public_id,
-            format: resLayer.format,
-            resourceType: resLayer.resource_type,
+            url: activeLayer.url,
+            width: activeLayer.width,
+            height: activeLayer.height,
+            name: activeLayer.original_filename,
+            publicId: activeLayer.public_id,
+            format: activeLayer.format,
+            resourceType: activeLayer.resource_type,
           })
-          console.log(resLayer);
+          console.log(activeLayer);
           // Set tags from the upload response
-          setTags(resLayer.tags)
+          setTags(activeLayer.tags)
 
           // Set active layer and stop generating state
           setActiveLayer(activeLayer.id)
@@ -87,7 +88,7 @@ export default function UploadImage() {
     },
   })
 
-  if (!resLayer.url)
+  if (!activeLayer.url)
     return (
       <Card
         {...getRootProps()}

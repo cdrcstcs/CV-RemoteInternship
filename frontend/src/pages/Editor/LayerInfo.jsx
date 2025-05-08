@@ -1,15 +1,18 @@
 import { Dialog, DialogContent, DialogTrigger } from "../../components/Editor/Dialog"
 import { Button } from "../../components/Editor/Button"
 import { Ellipsis, Trash } from "lucide-react"
-import useLayerStore from "../../stores/useLayerStore"
+import { useEditorStore } from "../../stores/useEditorStore"
 
 export default function LayerInfo({
   layer,
   layerIndex,
 }) {
-  const layers = useLayerStore((state) => state.layers)
-  const setActiveLayer = useLayerStore((state) => state.setActiveLayer)
-  const removeLayer = useLayerStore((state) => state.removeLayer)
+  const { layers, setActiveLayer, removeLayer } = useEditorStore((state) => ({
+    layers: state.layers,
+    setActiveLayer: state.setActiveLayer,
+    removeLayer: state.removeLayer,
+  }));
+  
 
   return (
     <Dialog>

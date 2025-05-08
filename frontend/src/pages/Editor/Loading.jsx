@@ -1,13 +1,15 @@
 import { Dialog, DialogDescription, DialogHeader, DialogContent, DialogTitle } from "../../components/Editor/Dialog"
-import useImageStore from "../../stores/useImageStore"
-import useLayerStore from "../../stores/useLayerStore"
 import loadingAnimation from "../../../src/animations/loading.json"
 import Lottie from "lottie-react"
+import { useEditorStore } from "../../stores/useEditorStore"
 
 export default function Loading() {
-  const generating = useImageStore((state) => state.generating)
-  const setGenerating = useImageStore((state) => state.setGenerating)
-  const activeLayer = useLayerStore((state) => state.activeLayer)
+  const { generating, setGenerating, activeLayer } = useEditorStore((state) => ({
+    generating: state.generating,
+    setGenerating: state.setGenerating,
+    activeLayer: state.activeLayer,
+  }));
+  
   return (
     <Dialog open={generating} onOpenChange={setGenerating}>
       <DialogContent className="sm:max-w-[425px] flex flex-col items-center">
