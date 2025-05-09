@@ -15,10 +15,9 @@ export default function AIRecolor() {
     activeTag,
     setActiveColor,
     activeColor,
-    setGenerating,
     activeLayer,
     addLayer,
-    generating,
+    recoloringImageGenerating,
     recolorImage,
     setActiveLayer,
     recolorImageError,
@@ -28,10 +27,9 @@ export default function AIRecolor() {
     activeTag: state.activeTag,
     setActiveColor: state.setActiveColor,
     activeColor: state.activeColor,
-    setGenerating: state.setGenerating,
     activeLayer: state.activeLayer,
     addLayer: state.addLayer,
-    generating: state.generating,
+    recoloringImageGenerating: state.recoloringImageGenerating,
     recolorImage: state.recolorImage,
     setActiveLayer: state.setActiveLayer,
     recolorImageError: state.recolorImageError,
@@ -120,14 +118,13 @@ export default function AIRecolor() {
         </div>
         <Button
           disabled={
-            !activeLayer?.url || !activeTag || !activeColor || generating
+            !activeLayer?.url || !activeTag || !activeColor || recoloringImageGenerating
           }
           className="w-full mt-4"
           onClick={async () => {
-            setGenerating(true)
             await recolorImage(activeLayer.url, "prompt_" + activeTag, "to-color_" + activeColor)
 
-            if (!recolorImageError) {
+            if (!recolorImageError && !recoloringImageGenerating) {
               const newLayerId = crypto.randomUUID()
               addLayer({
                 id: newLayerId,
@@ -139,15 +136,13 @@ export default function AIRecolor() {
                 publicId: activeLayer.publicId,
                 resourceType: "image",
               })
-              setGenerating(false)
               setActiveLayer(newLayerId)
             } else {
-              toast.error("Recoloring failed")
-              setGenerating(false)
+              toast.error(recolorImageError)
             }
           }}
         >
-          {generating ? "Generating..." : "Recolor"}
+          {recoloringImageGenerating ? "recoloringImageGenerating..." : "Recolor"}
         </Button>
       </PopoverContent>
     </Popover>

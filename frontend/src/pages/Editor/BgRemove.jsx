@@ -9,7 +9,7 @@ export default function BgRemove() {
     activeColor,
     activeLayer,
     addLayer,
-    generating,
+    removingBackgroundGenerating,
     setActiveLayer,
     removeBackground,
     removeBackgroundError,
@@ -18,7 +18,7 @@ export default function BgRemove() {
     activeColor: state.activeColor,
     activeLayer: state.activeLayer,
     addLayer: state.addLayer,
-    generating: state.generating,
+    removingBackgroundGenerating: state.removingBackgroundGenerating,
     setActiveLayer: state.setActiveLayer,
     removeBackground: state.removeBackground,
     removeBackgroundError: state.removeBackgroundError,
@@ -47,22 +47,20 @@ export default function BgRemove() {
 
         <Button
           disabled={
-            !activeLayer?.url || !activeTag || !activeColor || generating
+            !activeLayer?.url || !activeTag || !activeColor || removingBackgroundGenerating
           }
           className="w-full mt-4"
           onClick={async () => {
-            setGenerating(true)
             await removeBackground(activeLayer.url, activeLayer.format); // Use removeBackground from the store
             
             // Handle errors or success
             if (removeBackgroundError) {
               toast.error(removeBackgroundError); // Display error message
-              setGenerating(false); // Stop the loading spinner
               return; // Early exit if there's an error
             }
             
             // Proceed with adding the new layer if the background removal is successful
-            if (!removeBackgroundError) {
+            if (!removeBackgroundError && !removingBackgroundGenerating) {
               const newLayerId = crypto.randomUUID()
               addLayer({
                 id: newLayerId,
@@ -75,11 +73,10 @@ export default function BgRemove() {
                 resourceType: "image",
               })
               setActiveLayer(newLayerId) // Set the newly added layer as the active layer
-              setGenerating(false) // Stop the loading spinner
             }
           }}
         >
-          {generating ? "Removing..." : "Remove Background"}
+          {removingBackgroundGenerating ? "Removing..." : "Remove Background"}
         </Button>
       </PopoverContent>
     </Popover>

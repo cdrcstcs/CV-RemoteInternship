@@ -11,10 +11,9 @@ export default function GenRemove() {
   const {
     tags,
     setActiveTag,
-    generating,
+    genRemovingGenerating,
     activeTag,
     activeColor,
-    setGenerating,
     activeLayer,
     addLayer,
     setActiveLayer,
@@ -23,10 +22,9 @@ export default function GenRemove() {
   } = useEditorStore((state) => ({
     tags: state.tags,
     setActiveTag: state.setActiveTag,
-    generating: state.generating,
+    genRemovingGenerating: state.genRemovingGenerating,
     activeTag: state.activeTag,
     activeColor: state.activeColor,
-    setGenerating: state.setGenerating,
     activeLayer: state.activeLayer,
     addLayer: state.addLayer,
     setActiveLayer: state.setActiveLayer,
@@ -88,14 +86,12 @@ export default function GenRemove() {
         <Button
           className="w-full mt-4"
           disabled={
-            !activeTag || !activeColor || !activeLayer.url || generating
+            !activeTag || !activeColor || !activeLayer.url || genRemovingGenerating
           }
           onClick={async () => {
-            setGenerating(true)
             await genRemove(activeLayer.url, activeTag);  // Using genRemove from store
 
-            if (!genRemoveError) {
-              setGenerating(false)
+            if (!genRemoveError && !genRemovingGenerating) {
 
               const newLayerId = crypto.randomUUID()
               addLayer({
@@ -109,9 +105,7 @@ export default function GenRemove() {
                 resourceType: "image",
               })
               setActiveLayer(newLayerId)
-            } else {
-              setGenerating(false)
-            }
+            } 
           }}
         >
           Magic Remove 🎨

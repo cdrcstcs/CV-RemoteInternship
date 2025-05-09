@@ -10,6 +10,7 @@ export const useEditorStore = create((set, get) => ({
   activeTag: '',
   activeColor: '',
   activeLayer: {
+    id: '',
     url: '',
     width: 0,
     height: 0,
@@ -41,6 +42,29 @@ export const useEditorStore = create((set, get) => ({
   uploadImageError: null,
   uploadVideoError: null,
 
+  // General state setters
+  setTags: (tags) => set({ tags }),
+  setActiveTag: (tag) => set({ activeTag: tag }),
+  setActiveColor: (color) => set({ activeColor: color }),
+
+  // Layer management
+  addLayer: (layer) => set((state) => ({ layers: [...state.layers, { ...layer }] })),
+  removeLayer: (id) => set((state) => ({ layers: state.layers.filter((l) => l.id !== id) })),
+  setActiveLayer: (id) => set((state) => ({ activeLayer: state.layers.find((l) => l.id === id) || state.layers[0] })),
+  updateLayer: (layer) => set((state) => ({ layers: state.layers.map((l) => (l.id === layer.id ? layer : l)) })),
+  setPoster: (id, posterUrl) => set((state) => ({ layers: state.layers.map((l) => (l.id === id ? { ...l, poster: posterUrl } : l)) })),
+  setTranscription: (id, transcriptionURL) => set((state) => ({ layers: state.layers.map((l) => (l.id === id ? { ...l, transcriptionURL } : l)) })),
+
+  // Layer comparison
+  setLayerComparisonMode: (mode) => set(() => ({ layerComparisonMode: mode, comparedLayers: mode ? [] : [] })),
+  setComparedLayers: (layers) => set(() => ({ comparedLayers: layers, layerComparisonMode: layers.length > 0 })),
+  toggleComparedLayer: (id) => set((state) => {
+    const newComparedLayers = state.comparedLayers.includes(id)
+      ? state.comparedLayers.filter((layerId) => layerId !== id)
+      : [...state.comparedLayers, id].slice(-2);
+    return { comparedLayers: newComparedLayers, layerComparisonMode: newComparedLayers.length > 0 };
+  }),
+  
   // Remove background
   removeBackground: async (imageUrl, format) => {
     set({ removingBackgroundGenerating: true, removeBackgroundError: null });
@@ -195,7 +219,7 @@ export const useEditorStore = create((set, get) => ({
       const response = await axiosInstance.post("/initiate-transcription", { publicId });
       if (response.data.success) {
         toast.success("Transcription initiated successfully!");
-        set({ activeLayer: response.data.subtitledVideoUrl });
+        set({ activeLayer: response.data.success });
       } else {
         set({ initiateTranscriptionError: "Failed to initiate transcription" });
         toast.error("Failed to initiate transcription");
@@ -254,27 +278,4 @@ export const useEditorStore = create((set, get) => ({
       set({ uploadingVideoGenerating: false });
     }
   },
-
-  // General state setters
-  setTags: (tags) => set({ tags }),
-  setActiveTag: (tag) => set({ activeTag: tag }),
-  setActiveColor: (color) => set({ activeColor: color }),
-
-  // Layer management
-  addLayer: (layer) => set((state) => ({ layers: [...state.layers, { ...layer }] })),
-  removeLayer: (id) => set((state) => ({ layers: state.layers.filter((l) => l.id !== id) })),
-  setActiveLayer: (id) => set((state) => ({ activeLayer: state.layers.find((l) => l.id === id) || state.layers[0] })),
-  updateLayer: (layer) => set((state) => ({ layers: state.layers.map((l) => (l.id === layer.id ? layer : l)) })),
-  setPoster: (id, posterUrl) => set((state) => ({ layers: state.layers.map((l) => (l.id === id ? { ...l, poster: posterUrl } : l)) })),
-  setTranscription: (id, transcriptionURL) => set((state) => ({ layers: state.layers.map((l) => (l.id === id ? { ...l, transcriptionURL } : l)) })),
-
-  // Layer comparison
-  setLayerComparisonMode: (mode) => set(() => ({ layerComparisonMode: mode, comparedLayers: mode ? [] : [] })),
-  setComparedLayers: (layers) => set(() => ({ comparedLayers: layers, layerComparisonMode: layers.length > 0 })),
-  toggleComparedLayer: (id) => set((state) => {
-    const newComparedLayers = state.comparedLayers.includes(id)
-      ? state.comparedLayers.filter((layerId) => layerId !== id)
-      : [...state.comparedLayers, id].slice(-2);
-    return { comparedLayers: newComparedLayers, layerComparisonMode: newComparedLayers.length > 0 };
-  }),
 }));

@@ -1,16 +1,12 @@
-import React, { useMemo } from "react"
-import { AnimatePresence, motion } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/Editor/Card"
-import { Button } from "../../components/Editor/Button"
-import {
-  ArrowRight,
-  Images,
-  Layers2,
-} from "lucide-react"
-import LayerImage from "../../components/Editor/LayerImage"
-import { cn } from "../../lib/utils"
-import LayerInfo from "./LayerInfo"
-import { useEditorStore } from "../../stores/useEditorStore"
+import React, { useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/Editor/Card";
+import { Button } from "../../components/Editor/Button";
+import { ArrowRight, Images, Layers2 } from "lucide-react";
+import LayerImage from "../../components/Editor/LayerImage";
+import { cn } from "../../lib/utils";
+import LayerInfo from "./LayerInfo";
+import { useEditorStore } from "../../stores/useEditorStore";
 
 export default function Layers() {
   const {
@@ -18,7 +14,16 @@ export default function Layers() {
     activeLayer,
     setActiveLayer,
     addLayer,
-    generating,
+    removingBackgroundGenerating,
+    replacingBackgroundGenerating,
+    extractingImageGenerating,
+    genFillingGenerating,
+    genRemovingGenerating,
+    recoloringImageGenerating,
+    croppingVideoGenerating,
+    transcribingGenerating,
+    uploadingImageGenerating,
+    uploadingVideoGenerating,
     layerComparisonMode,
     setLayerComparisonMode,
     comparedLayers,
@@ -29,25 +34,45 @@ export default function Layers() {
     activeLayer: state.activeLayer,
     setActiveLayer: state.setActiveLayer,
     addLayer: state.addLayer,
-    generating: state.generating,
+    removingBackgroundGenerating: state.removingBackgroundGenerating,
+    replacingBackgroundGenerating: state.replacingBackgroundGenerating,
+    extractingImageGenerating: state.extractingImageGenerating,
+    genFillingGenerating: state.genFillingGenerating,
+    genRemovingGenerating: state.genRemovingGenerating,
+    recoloringImageGenerating: state.recoloringImageGenerating,
+    croppingVideoGenerating: state.croppingVideoGenerating,
+    transcribingGenerating: state.transcribingGenerating,
+    uploadingImageGenerating: state.uploadingImageGenerating,
+    uploadingVideoGenerating: state.uploadingVideoGenerating,
     layerComparisonMode: state.layerComparisonMode,
     setLayerComparisonMode: state.setLayerComparisonMode,
     comparedLayers: state.comparedLayers,
     toggleComparedLayer: state.toggleComparedLayer,
     setComparedLayers: state.setComparedLayers,
   }));
-  
 
-  const MCard = useMemo(() => motion(Card), [])
-  const MButton = useMemo(() => motion(Button), [])
+  const generating =
+    removingBackgroundGenerating ||
+    replacingBackgroundGenerating ||
+    extractingImageGenerating ||
+    genFillingGenerating ||
+    genRemovingGenerating ||
+    recoloringImageGenerating ||
+    croppingVideoGenerating ||
+    transcribingGenerating ||
+    uploadingImageGenerating ||
+    uploadingVideoGenerating;
+
+  const MCard = useMemo(() => motion(Card), []);
+  const MButton = useMemo(() => motion(Button), []);
 
   const getLayerName = useMemo(
     () => (id) => {
-      const layer = layers.find((l) => l.id === id)
-      return layer ? layer.url : "Nothing here"
+      const layer = layers.find((l) => l.id === id);
+      return layer ? layer.url : "Nothing here";
     },
     [layers]
-  )
+  );
 
   const visibleLayers = useMemo(
     () =>
@@ -55,7 +80,7 @@ export default function Layers() {
         ? layers.filter((layer) => layer.url && layer.resourceType === "image")
         : layers,
     [layerComparisonMode, layers]
-  )
+  );
 
   return (
     <MCard
@@ -101,48 +126,46 @@ export default function Layers() {
       </CardHeader>
       <motion.div className="flex-1 flex flex-col ">
         <AnimatePresence>
-          {visibleLayers.map((layer, index) => {
-            return (
-              <motion.div
-                animate={{ scale: 1, opacity: 1 }}
-                initial={{ scale: 0, opacity: 0 }}
-                exit={{ scale: 0, opacity: 0 }}
-                layout
-                className={cn(
-                  "cursor-pointer ease-in-out hover:bg-secondary border border-transparent",
-                  {
-                    "border-primary": layerComparisonMode
-                      ? comparedLayers.includes(layer.id)
-                      : activeLayer.id === layer.id,
-                    "animate-pulse": generating,
-                  }
-                )}
-                key={layer.id}
-                onClick={() => {
-                  if (generating) return
-                  if (layerComparisonMode) {
-                    toggleComparedLayer(layer.id)
-                  } else {
-                    setActiveLayer(layer.id)
-                  }
-                }}
-              >
-                <div className="relative p-4 flex items-center">
-                  <div className="flex gap-2 items-center h-8 w-full justify-between">
-                    {!layer.url ? (
-                      <p className="text-xs font-medium justify-self-end ">
-                        New layer
-                      </p>
-                    ) : null}
-                    <LayerImage layer={layer} />
-                    {layers.length !== 1 && (
-                      <LayerInfo layer={layer} layerIndex={index} />
-                    )}
-                  </div>
+          {visibleLayers.map((layer, index) => (
+            <motion.div
+              animate={{ scale: 1, opacity: 1 }}
+              initial={{ scale: 0, opacity: 0 }}
+              exit={{ scale: 0, opacity: 0 }}
+              layout
+              className={cn(
+                "cursor-pointer ease-in-out hover:bg-secondary border border-transparent",
+                {
+                  "border-primary": layerComparisonMode
+                    ? comparedLayers.includes(layer.id)
+                    : activeLayer.id === layer.id,
+                  "animate-pulse": generating,
+                }
+              )}
+              key={layer.id}
+              onClick={() => {
+                if (generating) return;
+                if (layerComparisonMode) {
+                  toggleComparedLayer(layer.id);
+                } else {
+                  setActiveLayer(layer.id);
+                }
+              }}
+            >
+              <div className="relative p-4 flex items-center">
+                <div className="flex gap-2 items-center h-8 w-full justify-between">
+                  {!layer.url ? (
+                    <p className="text-xs font-medium justify-self-end ">
+                      New layer
+                    </p>
+                  ) : null}
+                  <LayerImage layer={layer} />
+                  {layers.length !== 1 && (
+                    <LayerInfo layer={layer} layerIndex={index} />
+                  )}
                 </div>
-              </motion.div>
-            )
-          })}
+              </div>
+            </motion.div>
+          ))}
         </AnimatePresence>
       </motion.div>
       <CardContent className="sticky bottom-0 bg-card flex gap-2  shrink-0">
@@ -157,7 +180,7 @@ export default function Layers() {
               publicId: "",
               name: "",
               format: "",
-            })
+            });
           }}
           variant="outline"
           className="w-full flex gap-2"
@@ -170,9 +193,9 @@ export default function Layers() {
           layout
           onClick={() => {
             if (layerComparisonMode) {
-              setLayerComparisonMode(!layerComparisonMode)
+              setLayerComparisonMode(!layerComparisonMode);
             } else {
-              setComparedLayers([activeLayer.id])
+              setComparedLayers([activeLayer.id]);
             }
           }}
           variant={layerComparisonMode ? "destructive" : "outline"}
@@ -187,5 +210,5 @@ export default function Layers() {
         </MButton>
       </CardContent>
     </MCard>
-  )
+  );
 }

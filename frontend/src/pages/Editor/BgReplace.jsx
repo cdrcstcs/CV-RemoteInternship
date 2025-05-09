@@ -1,4 +1,3 @@
-import useImageStore from "../../stores/useImageStore"
 import { Button } from "../../components/Editor/Button"
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
 import { Input } from "../../components/Editor/Input"
@@ -9,18 +8,16 @@ import { toast } from "sonner"
 import { useEditorStore } from "../../stores/useEditorStore"
 export default function AIBackgroundReplace() {
   const {
-    setGenerating,
     activeLayer,
     addLayer,
-    generating,
+    replacingBackgroundGenerating,
     setActiveLayer,
     replaceBackground,
     replaceBackgroundError,
   } = useEditorStore((state) => ({
-    setGenerating: state.setGenerating,
     activeLayer: state.activeLayer,
     addLayer: state.addLayer,
-    generating: state.generating,
+    replacingBackgroundGenerating: state.replacingBackgroundGenerating,
     setActiveLayer: state.setActiveLayer,
     replaceBackground: state.replaceBackground,
     replaceBackgroundError: state.replaceBackgroundError,
@@ -63,19 +60,17 @@ export default function AIBackgroundReplace() {
           </div>
         </div>
         <Button
-          disabled={!activeLayer?.url || generating}
+          disabled={!activeLayer?.url || replacingBackgroundGenerating}
           className="w-full mt-4"
           onClick={async () => {
-            setGenerating(true)
 
             // Call the replaceBackground function from the store
             await replaceBackground(activeLayer.url, prompt)
 
             // Check for error after calling replaceBackground
             if (replaceBackgroundError) {
-              setGenerating(false)
               toast.error(replaceBackgroundError)
-            } else {
+            } else if (!replacingBackgroundGenerating){
               // If no error, process the result (assuming replaceBackground updates the active layer)
               const newLayerId = crypto.randomUUID()
               addLayer({
@@ -88,13 +83,12 @@ export default function AIBackgroundReplace() {
                 publicId: activeLayer.publicId,
                 resourceType: "image",
               })
-              setGenerating(false)
               setActiveLayer(newLayerId)
               toast.success("Background replaced successfully!")
             }
           }}
         >
-          {generating ? "Generating..." : "Replace Background"}
+          {replacingBackgroundGenerating ? "replacingBackgroundGenerating..." : "Replace Background"}
         </Button>
       </PopoverContent>
     </Popover>

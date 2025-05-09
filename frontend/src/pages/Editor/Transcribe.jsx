@@ -1,8 +1,7 @@
-import { Button } from "../../components/Editor/Button"
-import { useEditorStore } from "../../stores/useEditorStore"
-import { useState } from "react"
-import { toast } from "sonner"
-import { Captions } from "lucide-react"
+import { Button } from "../../components/Editor/Button";
+import { useEditorStore } from "../../stores/useEditorStore";
+import { toast } from "sonner";
+import { Captions } from "lucide-react";
 
 export default function VideoTranscription() {
   const {
@@ -10,55 +9,34 @@ export default function VideoTranscription() {
     updateLayer,
     setActiveLayer,
     initiateTranscription,
-    setGenerating,
+    transcribingGenerating,
+    initiateTranscriptionError,
   } = useEditorStore((state) => ({
     activeLayer: state.activeLayer,
     updateLayer: state.updateLayer,
     setActiveLayer: state.setActiveLayer,
     initiateTranscription: state.initiateTranscription,
-    setGenerating: state.setGenerating,
+    transcribingGenerating: state.transcribingGenerating,
+    initiateTranscriptionError: state.initiateTranscriptionError,
   }));
-  
-
-  const [transcribing, setTranscribing] = useState(false)
 
   const handleTranscribe = async () => {
     if (!activeLayer.publicId || activeLayer.resourceType !== "video") {
-      toast.error("Please select a video layer first")
-      return
+      toast.error("Please select a video layer first");
+      return;
     }
 
-    setTranscribing(true)
-    setGenerating(true)
+    await initiateTranscription(activeLayer.publicId);
 
-    try {
-      // Call the initiateTranscription from the zustand store
-      const result = await initiateTranscription(activeLayer.publicId)
-
-      if (result) {
-        if (result.data && "success" in result.data) {
-          toast.success(result.data.success)
-          if (result.data.subtitledVideoUrl) {
-            updateLayer({
-              ...activeLayer,
-              transcriptionURL: result.data.subtitledVideoUrl,
-            })
-            setActiveLayer(activeLayer.id)
-          }
-        } else if (result.data && "error" in result.data) {
-          toast.error(result.data.error)
-        } else {
-          toast.error("Unexpected response from server")
-        }
-      }
-    } catch (error) {
-      toast.error("An error occurred during transcription")
-      console.error("Transcription error:", error)
-    } finally {
-      setTranscribing(false)
-      setGenerating(false)
+    if (activeLayer.subtitledVideoUrl) {
+      // If the URL is available (set in the store after success), update layer
+      updateLayer({
+        ...activeLayer,
+        transcriptionURL: activeLayer.subtitledVideoUrl,
+      });
+      setActiveLayer(activeLayer.id);
     }
-  }
+  };
 
   return (
     <div className="flex items-center">
@@ -66,18 +44,18 @@ export default function VideoTranscription() {
         <Button
           className="py-8 w-full"
           onClick={handleTranscribe}
-          disabled={transcribing || activeLayer.resourceType !== "video"}
-          variant={"outline"}
+          disabled={transcribingGenerating || activeLayer.resourceType !== "video"}
+          variant="outline"
         >
           <span className="flex gap-1 items-center justify-center flex-col text-xs font-medium">
-            {transcribing ? "Transcribing..." : "Transcribe"}
+            {transcribingGenerating ? "Transcribing..." : "Transcribe"}
             <Captions size={18} />
           </span>
         </Button>
       )}
 
       {activeLayer.transcriptionURL && (
-        <Button className="py-8 w-full" variant={"outline"} asChild>
+        <Button className="py-8 w-full" variant="outline" asChild>
           <a
             href={activeLayer.transcriptionURL}
             target="_blank"
@@ -90,6 +68,10 @@ export default function VideoTranscription() {
           </a>
         </Button>
       )}
+
+      {initiateTranscriptionError && (
+        <p className="text-red-500 text-xs mt-2">{initiateTranscriptionError}</p>
+      )}
     </div>
-  )
+  );
 }

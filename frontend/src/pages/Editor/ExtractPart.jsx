@@ -9,12 +9,12 @@ import { RadioGroup, RadioGroupItem } from "../../components/Editor/RadioGroup"
 import { useEditorStore } from "../../stores/useEditorStore" // Import the store
 
 export default function ExtractPart() {
-  const { setGenerating, activeLayer, addLayer, generating, setActiveLayer } = useEditorStore((state) => ({
-    setGenerating: state.setGenerating,
+  const { activeLayer, addLayer, extractingImageGenerating,  setActiveLayer, extractImageError } = useEditorStore((state) => ({
     activeLayer: state.activeLayer,
     addLayer: state.addLayer,
-    generating: state.generating,
+    extractingImageGenerating: state.extractingImageGenerating,
     setActiveLayer: state.setActiveLayer,
+    extractImageError: state.extractImageError,
   }));
   
 
@@ -106,12 +106,11 @@ export default function ExtractPart() {
         <Button
           disabled={
             !activeLayer?.url ||
-            generating ||
+            extractingImageGenerating ||
             prompts.every((p) => p.trim() === "")
           }
           className="w-full mt-4"
           onClick={async () => {
-            setGenerating(true)
             // Call the extractImage function from the store
             await extractImage(
               activeLayer.url,
@@ -122,30 +121,26 @@ export default function ExtractPart() {
               activeLayer.format
             )
 
-            // Handle response
-            const res = useEditorStore.getState().activeLayer; // Assuming extractImage updates activeLayer directly
-
-            if (res?.url) {
-              const newLayerId = crypto.randomUUID()
+            if (activeLayer?.url && !extractingImageGenerating) {
+              const newLayerId = crypto.randomUUID();
               addLayer({
                 id: newLayerId,
                 name: "extracted-" + activeLayer.name,
                 format: ".png",
                 height: activeLayer.height,
                 width: activeLayer.width,
-                url: res.url,
+                url: activeLayer.url,
                 publicId: activeLayer.publicId,
                 resourceType: "image",
-              })
-              setGenerating(false)
-              setActiveLayer(newLayerId)
+              });
+              setActiveLayer(newLayerId);
+              toast.success("Image extracted successfully!");
             } else {
-              setGenerating(false)
-              toast.error("Failed to extract image")
+              toast.error(extractImageError);
             }
           }}
         >
-          {generating ? "Extracting..." : "Extract"}
+          {extractingImageGenerating ? "Extracting..." : "Extract"}
         </Button>
       </PopoverContent>
     </Popover>

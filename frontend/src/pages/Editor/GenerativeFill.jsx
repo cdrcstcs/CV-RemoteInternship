@@ -11,19 +11,17 @@ const EXPANSION_THRESHOLD = 250 // px
 
 export default function GenerativeFill() {
   const {
-    setGenerating,
     activeLayer,
     addLayer,
     genFill,
-    generating,
+    genFillingGenerating,
     setActiveLayer,
     genFillError,
   } = useEditorStore((state) => ({
-    setGenerating: state.setGenerating,
     activeLayer: state.activeLayer,
     addLayer: state.addLayer,
     genFill: state.genFill,
-    generating: state.generating,
+    genFillingGenerating: state.genFillingGenerating,
     setActiveLayer: state.setActiveLayer,
     genFillError: state.genFillError,
   }));
@@ -80,15 +78,13 @@ export default function GenerativeFill() {
   }, [activeLayer, width, height])
 
   const handleGenFill = async () => {
-    setGenerating(true)
     await genFill({
       width: (width + activeLayer.width).toString(),
       height: (height + activeLayer.height).toString(),
       aspect: "1:1",
       activeImage: activeLayer.url,
     })
-    if (!genFillError) {
-      setGenerating(false)
+    if (!genFillError && !genFillingGenerating) {
       const newLayerId = crypto.randomUUID()
       addLayer({
         id: newLayerId,
@@ -101,9 +97,6 @@ export default function GenerativeFill() {
         resourceType: "image",
       })
       setActiveLayer(newLayerId)
-    }
-    if (genFillError) {
-      setGenerating(false)
     }
   }
 
@@ -230,10 +223,10 @@ export default function GenerativeFill() {
           </div>
           <Button
             className="w-full mt-4"
-            disabled={!activeLayer.url || (!width && !height) || generating}
+            disabled={!activeLayer.url || (!width && !height) || genFillingGenerating}
             onClick={handleGenFill}
           >
-            {generating ? "Generating" : "Generative Fill 🎨"}
+            {genFillingGenerating ? "genFillingGenerating" : "Generative Fill 🎨"}
           </Button>
         </div>
       </PopoverContent>

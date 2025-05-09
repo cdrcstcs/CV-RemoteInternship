@@ -10,18 +10,16 @@ import { cn } from "../../lib/utils"
 
 export default function SmartCrop() {
   const {
-    setGenerating,
     activeLayer,
     addLayer,
-    generating,
+    croppingVideoGenerating,
     setActiveLayer,
     cropVideo,
     cropVideoError,
   } = useEditorStore((state) => ({
-    setGenerating: state.setGenerating,
     activeLayer: state.activeLayer,
     addLayer: state.addLayer,
-    generating: state.generating,
+    croppingVideoGenerating: state.croppingVideoGenerating,
     setActiveLayer: state.setActiveLayer,
     cropVideo: state.cropVideo,
     cropVideoError: state.cropVideoError,
@@ -34,11 +32,10 @@ export default function SmartCrop() {
 
   // Replaced the genCrop function with cropVideo from useEditorStore
   const handleGenCrop = async () => {
-    setGenerating(true)
     try {
       await cropVideo(activeLayer.url, aspectRatio, height)
 
-      if (!cropVideoError) {
+      if (!cropVideoError && !croppingVideoGenerating) {
         const newLayerId = crypto.randomUUID()
         const thumbnailUrl = res.data.success.replace(/\.[^/.]+$/, ".jpg")
         addLayer({
@@ -59,11 +56,9 @@ export default function SmartCrop() {
         toast.error("Failed to crop video")
       }
     } catch (e) {
-      toast.error("Error cropping video")
+      toast.error(cropVideoError)
       console.error("Error:", e)
-    } finally {
-      setGenerating(false)
-    }
+    } 
   }
 
   return (
@@ -142,9 +137,9 @@ export default function SmartCrop() {
             onClick={handleGenCrop}
             className="w-full mt-4"
             variant={"outline"}
-            disabled={!activeLayer.url || generating}
+            disabled={!activeLayer.url || croppingVideoGenerating}
           >
-            {generating ? "Cropping..." : "Smart Crop 🎨"}
+            {croppingVideoGenerating ? "Cropping..." : "Smart Crop 🎨"}
           </Button>
         </div>
       </PopoverContent>

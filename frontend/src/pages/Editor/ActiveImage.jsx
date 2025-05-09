@@ -1,19 +1,55 @@
 import React from 'react';
-import { cn } from "../../lib/utils"; // Assuming this is a utility function you can continue using
+import { cn } from "../../lib/utils";
 import { motion } from "framer-motion";
-import ImageComparison from "../../components/Editor/ImageComparison"; // Assuming this component does not rely on Next.js
-import { useEditorStore } from "../../stores/useEditorStore"
+import ImageComparison from "../../components/Editor/ImageComparison";
+import { useEditorStore } from "../../stores/useEditorStore";
+
 export default function ActiveImage() {
-  const { generating, activeLayer, layerComparisonMode, comparedLayers, layers } = useEditorStore((state) => ({
-    generating: state.generating,
+  const {
+    removingBackgroundGenerating,
+    replacingBackgroundGenerating,
+    extractingImageGenerating,
+    genFillingGenerating,
+    genRemovingGenerating,
+    recoloringImageGenerating,
+    croppingVideoGenerating,
+    transcribingGenerating,
+    uploadingImageGenerating,
+    uploadingVideoGenerating,
+    activeLayer,
+    layerComparisonMode,
+    comparedLayers,
+    layers,
+  } = useEditorStore((state) => ({
+    removingBackgroundGenerating: state.removingBackgroundGenerating,
+    replacingBackgroundGenerating: state.replacingBackgroundGenerating,
+    extractingImageGenerating: state.extractingImageGenerating,
+    genFillingGenerating: state.genFillingGenerating,
+    genRemovingGenerating: state.genRemovingGenerating,
+    recoloringImageGenerating: state.recoloringImageGenerating,
+    croppingVideoGenerating: state.croppingVideoGenerating,
+    transcribingGenerating: state.transcribingGenerating,
+    uploadingImageGenerating: state.uploadingImageGenerating,
+    uploadingVideoGenerating: state.uploadingVideoGenerating,
     activeLayer: state.activeLayer,
     layerComparisonMode: state.layerComparisonMode,
     comparedLayers: state.comparedLayers,
     layers: state.layers,
-  }));  
+  }));
 
-  // Return null if there is no active layer or compared layers
-  if (!activeLayer.url && comparedLayers.length === 0) return null;
+  const anyGenerating =
+    removingBackgroundGenerating ||
+    replacingBackgroundGenerating ||
+    extractingImageGenerating ||
+    genFillingGenerating ||
+    genRemovingGenerating ||
+    recoloringImageGenerating ||
+    croppingVideoGenerating ||
+    transcribingGenerating ||
+    uploadingImageGenerating ||
+    uploadingVideoGenerating;
+
+  if (!activeLayer?.url && comparedLayers.length === 0) return null;
 
   const renderLayer = (layer) => (
     <div className="relative w-full h-full flex items-center justify-center">
@@ -23,9 +59,9 @@ export default function ActiveImage() {
           src={layer.url || ""}
           className={cn(
             "rounded-lg object-contain",
-            generating ? "animate-pulse" : ""
+            anyGenerating && "animate-pulse"
           )}
-          style={{ width: "100%", height: "auto" }} // handle sizing without `fill` from Next.js
+          style={{ width: "100%", height: "auto" }}
         />
       )}
       {layer.resourceType === "video" && (
@@ -40,7 +76,6 @@ export default function ActiveImage() {
     </div>
   );
 
-  // If layer comparison mode is active, render the comparison
   if (layerComparisonMode && comparedLayers.length > 0) {
     const comparisonLayers = comparedLayers
       .map((id) => layers.find((l) => l.id === id))
@@ -58,7 +93,6 @@ export default function ActiveImage() {
     );
   }
 
-  // Default render with active layer
   return (
     <div className="w-full relative h-screen p-24 bg-secondary flex flex-col items-center justify-center">
       {renderLayer(activeLayer)}
