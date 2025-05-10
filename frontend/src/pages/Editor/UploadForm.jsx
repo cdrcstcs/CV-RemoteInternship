@@ -1,81 +1,81 @@
-import { Card, CardContent } from "../../components/Editor/Card"
-import { cn } from "../../lib/utils"
-import { RadioGroup, RadioGroupItem } from "../../components/Editor/RadioGroup"
-import { Label } from "../../components/Editor/Label"
-import { ImageIcon, VideoIcon } from "lucide-react"
-import { useState } from "react"
-import UploadImage from "./UploadImage"
-import UploadVideo from "./UploadVideo"
-import { useEditorStore } from "../../stores/useEditorStore"
+import { Card, CardContent } from "../../components/Editor/Card";
+import { cn } from "../../lib/utils";
+import { RadioGroup, RadioGroupItem } from "../../components/Editor/RadioGroup";
+import { Label } from "../../components/Editor/Label";
+import { ImageIcon, VideoIcon } from "lucide-react";
+import { useState } from "react";
+import UploadImage from "./UploadImage";
+import UploadVideo from "./UploadVideo";
+import { useEditorStore } from "../../stores/useEditorStore";
 
 export default function UploadForm() {
-  const { activeLayer, layerComparisonMode } = useEditorStore((state) => ({
-    activeLayer: state.activeLayer,
-    layerComparisonMode: state.layerComparisonMode,
-  }));
-  
+  const { getState } = useEditorStore; // getState for imperative reads
+  const [selectedType, setSelectedType] = useState("image");
 
-  const [selectedType, setSelectedType] = useState("image")
-  if (!activeLayer.url && !layerComparisonMode)
+  const latestState = getState();
+  const activeLayer = latestState.activeLayer;
+  const layerComparisonMode = latestState.layerComparisonMode;
+
+  console.log(activeLayer);
+
+  if (!activeLayer.url && !layerComparisonMode) {
     return (
-      <div className="w-full p-24 flex flex-col  justify-center  h-full">
+      <div className="w-full p-24 flex flex-col justify-center h-full">
         {selectedType === "image" ? <UploadImage /> : null}
         {selectedType === "video" ? <UploadVideo /> : null}
 
         <RadioGroup
           defaultValue="image"
-          onValueChange={(e) => {
-            setSelectedType(e)
-          }}
+          onValueChange={(e) => setSelectedType(e)}
           className="flex items-center justify-center gap-8 py-8"
         >
           <Card
-            onClick={(e) => setSelectedType("image")}
+            onClick={() => setSelectedType("image")}
             className={cn(
               "flex flex-col items-center justify-center py-4 px-6 gap-4 cursor-pointer",
               selectedType === "image" ? "border-primary" : null
             )}
           >
-            <CardContent className="flex items-center  space-x-2 p-0">
+            <CardContent className="flex items-center space-x-2 p-0">
               <RadioGroupItem value="image" id="image-mode" hidden />
               <Label
-                className={`${
-                  selectedType === "image" ? "text-primary" : null
-                }`}
+                className={selectedType === "image" ? "text-primary" : ""}
                 htmlFor="image-mode"
               >
                 Image Mode
               </Label>
             </CardContent>
             <ImageIcon
-              className={`${selectedType === "image" ? "text-primary" : null}`}
+              className={selectedType === "image" ? "text-primary" : ""}
               size={36}
             />
           </Card>
+
           <Card
-            onClick={(e) => setSelectedType("video")}
+            onClick={() => setSelectedType("video")}
             className={cn(
               "flex flex-col items-center justify-center p-4 gap-4 cursor-pointer",
               selectedType === "video" ? "border-primary" : null
             )}
           >
-            <CardContent className="flex items-center  space-x-2 p-0">
+            <CardContent className="flex items-center space-x-2 p-0">
               <RadioGroupItem value="video" id="video-mode" hidden />
               <Label
-                className={`${
-                  selectedType === "video" ? "text-primary" : null
-                }`}
+                className={selectedType === "video" ? "text-primary" : ""}
                 htmlFor="video-mode"
               >
                 Video Mode
               </Label>
             </CardContent>
             <VideoIcon
-              className={`${selectedType === "video" ? "text-primary" : null}`}
+              className={selectedType === "video" ? "text-primary" : ""}
               size={36}
             />
           </Card>
         </RadioGroup>
       </div>
-    )
+    );
+  }
+
+  return null;
 }

@@ -27,6 +27,7 @@ export default function ExtractPart() {
 
   // pull state values manually on render (non-reactive)
   const state = getState();
+  console.log(state.activeLayer);
   const isDisabled =
     !state.activeLayer?.url ||
     state.extractingImageGenerating ||

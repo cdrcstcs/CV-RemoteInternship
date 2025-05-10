@@ -5,6 +5,9 @@ import ImageComparison from "../../components/Editor/ImageComparison";
 import { useEditorStore } from "../../stores/useEditorStore";
 
 export default function ActiveImage() {
+  const { getState } = useEditorStore; // 🔥 getState for imperative state reads
+  const state = getState();
+
   const {
     removingBackgroundGenerating,
     replacingBackgroundGenerating,
@@ -20,22 +23,9 @@ export default function ActiveImage() {
     layerComparisonMode,
     comparedLayers,
     layers,
-  } = useEditorStore((state) => ({
-    removingBackgroundGenerating: state.removingBackgroundGenerating,
-    replacingBackgroundGenerating: state.replacingBackgroundGenerating,
-    extractingImageGenerating: state.extractingImageGenerating,
-    genFillingGenerating: state.genFillingGenerating,
-    genRemovingGenerating: state.genRemovingGenerating,
-    recoloringImageGenerating: state.recoloringImageGenerating,
-    croppingVideoGenerating: state.croppingVideoGenerating,
-    transcribingGenerating: state.transcribingGenerating,
-    uploadingImageGenerating: state.uploadingImageGenerating,
-    uploadingVideoGenerating: state.uploadingVideoGenerating,
-    activeLayer: state.activeLayer,
-    layerComparisonMode: state.layerComparisonMode,
-    comparedLayers: state.comparedLayers,
-    layers: state.layers,
-  }));
+  } = state;
+
+  console.log(activeLayer);
 
   const anyGenerating =
     removingBackgroundGenerating ||

@@ -8,7 +8,8 @@ import { useEditorStore } from "../../stores/useEditorStore";
 
 export default function UploadVideo() {
   const { getState } = useEditorStore;
-
+  const state = getState();
+  console.log(state.activeLayer);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
     accept: { "video/mp4": [".mp4", ".MP4"] },
@@ -17,8 +18,6 @@ export default function UploadVideo() {
         updateLayer,
         setActiveLayer,
         uploadVideo,
-        uploadVideoError,
-        uploadingVideoGenerating,
         setTags,
       } = getState();
 

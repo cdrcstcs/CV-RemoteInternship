@@ -15,7 +15,8 @@ export default function SmartCrop() {
   const [aspectRatio, setAspectRatio] = useState("16:9")
   const [height, setHeight] = useState(0)
   const [width, setWidth] = useState(0)
-
+  const state = getState;
+  console.log(state.activeLayer);
   const handleGenCrop = async () => {
     const {
       activeLayer,

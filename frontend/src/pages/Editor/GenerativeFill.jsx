@@ -18,7 +18,6 @@ export default function GenerativeFill() {
     genFill,
     genFillingGenerating,
     setActiveLayer,
-    genFillError,
   } = useEditorStore((state) => ({
     addLayer: state.addLayer,
     genFill: state.genFill,
@@ -31,7 +30,7 @@ export default function GenerativeFill() {
   const [width, setWidth] = useState(0);
 
   const activeLayer = getState().activeLayer; // ✅ always access latest activeLayer
-
+  console.log(activeLayer);
   const previewStyle = useMemo(() => {
     if (!activeLayer?.width || !activeLayer?.height) return {};
 

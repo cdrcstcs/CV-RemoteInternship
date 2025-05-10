@@ -10,7 +10,8 @@ import { useEditorStore } from "../../stores/useEditorStore";
 export default function AIBackgroundReplace() {
   const { getState } = useEditorStore; // ✅ only getState for all state reads
   const [prompt, setPrompt] = useState("");
-
+  const state = getState();
+  console.log(state.activeLayer);
   return (
     <Popover>
       <PopoverTrigger

@@ -5,14 +5,14 @@ import { Captions } from "lucide-react";
 
 export default function VideoTranscription() {
   const { getState, setState } = useEditorStore();
-
+  const state = getState;
+  console.log(state.activeLayer);
   const handleTranscribe = async () => {
     const {
       activeLayer,
       initiateTranscription,
       updateLayer,
       setActiveLayer,
-      transcribingGenerating,
       initiateTranscriptionError,
     } = getState();
 

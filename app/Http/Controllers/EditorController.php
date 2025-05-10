@@ -6,16 +6,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Integrations\files\CloudinaryImageClient; // Use the custom Cloudinary client
+use App\Integrations\files\CloudinaryVideoClient; // Use the custom Cloudinary client
 use Exception;
 class EditorController extends Controller
 {
 
     protected $cloudinaryClient;
+    protected $cloudinaryVideoClient;
+
 
     public function __construct()
     {
         // Initialize custom Cloudinary image client
         $this->cloudinaryClient = new CloudinaryImageClient();
+
+        $this->cloudinaryVideoClient = new CloudinaryVideoClient();
+
     }
 
     /**
@@ -62,6 +68,38 @@ class EditorController extends Controller
 
         return response()->json(['error' => 'No image file provided'], 400);
     }
+
+    /**
+     * Upload a video to Cloudinary.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    
+
+    public function uploadVideo(Request $request)
+    {
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'video' => 'required|file|mimes:mp4,mkv,avi,webm|max:2048000', // max 2GB
+        ]);
+    
+        if ($request->hasFile('video')) {
+            $file = $validatedData['video'];
+    
+            $uploadResult = $this->cloudinaryVideoClient->uploadVideo($file);
+    
+            if ($uploadResult->isSuccess) {
+                return response()->json(['success' => $uploadResult], 200);
+            } else {
+                return response()->json(['error' => $uploadResult->msg], 500);
+            }
+        }
+    
+        return response()->json(['error' => 'No video file provided'], 400);
+    }
+     
+
 
     /**
      * Remove the background from an image via Cloudinary.
@@ -816,58 +854,5 @@ class EditorController extends Controller
                 ['flags' => 'layer_apply'],
             ],
         ]);
-    }
-    
-
-    /**
-     * Upload a video to Cloudinary.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function uploadVideo(Request $request)
-    {
-        // Validate the incoming request data
-        $validatedData = $request->validate([
-            'video' => 'required|file|mimes:mp4,mkv,avi,webm', // You can specify your allowed video file types here
-        ]);
-
-        $video = $validatedData['video'];
-
-        // Cloudinary configuration from .env file
-        $cloudName = env('CLOUDINARY_CLOUD_NAME');
-        $apiKey = env('CLOUDINARY_API_KEY');
-        $apiSecret = env('CLOUDINARY_API_SECRET');
-
-        try {
-            // Open the video file as a stream
-            $videoStream = fopen($video->getRealPath(), 'r');
-
-            // Upload video to Cloudinary
-            $response = Http::withBasicAuth($apiKey, $apiSecret)
-                ->attach(
-                    'file',
-                    $videoStream,
-                    $video->getClientOriginalName()
-                )
-                ->post("https://api.cloudinary.com/v1_1/{$cloudName}/video/upload", [
-                    'upload_preset' => 'restyled', // Your upload preset
-                    'use_filename' => true,
-                    'unique_filename' => false,
-                    'filename_override' => $video->getClientOriginalName(),
-                ]);
-
-            // Check if the upload was successful
-            if ($response->successful()) {
-                return response()->json([
-                    'success' => $response->json(),
-                ]);
-            }
-
-            return response()->json(['error' => 'Upload failed'], 500);
-        } catch (Exception $e) {
-            Log::error('Error uploading video to Cloudinary', ['exception' => $e->getMessage()]);
-            return response()->json(['error' => 'Error processing file'], 500);
-        }
     }
 }

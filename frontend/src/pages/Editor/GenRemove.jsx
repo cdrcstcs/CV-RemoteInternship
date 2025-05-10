@@ -9,7 +9,8 @@ import { useEditorStore } from "../../stores/useEditorStore" // Import store
 
 export default function GenRemove() {
   const { getState, setState } = useEditorStore // Access getState and setState
-  
+  const state = getState();
+  console.log(state.activeLayer);
   const handleClickTag = (tag) => {
     setState({ activeTag: tag })
   }
@@ -22,7 +23,6 @@ export default function GenRemove() {
     const {
       activeLayer,
       activeTag,
-      activeColor,
       genRemove,
       genRemoveError,
       genRemovingGenerating,

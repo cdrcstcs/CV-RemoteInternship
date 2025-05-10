@@ -50,7 +50,7 @@ export default function Layers() {
     toggleComparedLayer: state.toggleComparedLayer,
     setComparedLayers: state.setComparedLayers,
   }));
-
+  
   const generating =
     removingBackgroundGenerating ||
     replacingBackgroundGenerating ||

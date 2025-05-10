@@ -6,7 +6,8 @@ import { useEditorStore } from "../../stores/useEditorStore";
 
 export default function BgRemove() {
   const { getState } = useEditorStore; // ✅ get direct state access functions
-
+  const state = getState();
+  console.log(state.activeLayer);
   return (
     <Popover>
       <PopoverTrigger

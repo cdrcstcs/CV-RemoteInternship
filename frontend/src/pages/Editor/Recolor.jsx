@@ -26,7 +26,8 @@ export default function AIRecolor() {
   const handleInputColorChange = (e) => {
     setState({ activeColor: e.target.value })
   }
-
+  const state = getState();
+  console.log(state.activeLayer);
   const handleRecolor = async () => {
     const {
       activeLayer,
