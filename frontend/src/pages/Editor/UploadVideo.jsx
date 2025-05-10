@@ -7,34 +7,27 @@ import { toast } from "sonner";
 import { useEditorStore } from "../../stores/useEditorStore";
 
 export default function UploadVideo() {
-  const {
-    setTags,
-    uploadingVideoGenerating,
-    activeLayer,
-    updateLayer,
-    setActiveLayer,
-    uploadVideo,
-    uploadVideoError,
-  } = useEditorStore((state) => ({
-    setTags: state.setTags,
-    uploadingVideoGenerating: state.uploadingVideoGenerating,
-    activeLayer: state.activeLayer,
-    updateLayer: state.updateLayer,
-    setActiveLayer: state.setActiveLayer,
-    uploadVideo: state.uploadVideo,
-    uploadVideoError: state.uploadVideoError,
-  }));
+  const { getState } = useEditorStore;
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
     accept: { "video/mp4": [".mp4", ".MP4"] },
     onDrop: async (acceptedFiles, fileRejections) => {
+      const {
+        updateLayer,
+        setActiveLayer,
+        uploadVideo,
+        uploadVideoError,
+        uploadingVideoGenerating,
+        setTags,
+      } = getState();
+
+      const activeLayer = getState().activeLayer;
+
       if (acceptedFiles.length) {
-        const formData = new FormData();
-        formData.append("video", acceptedFiles[0]);
         const objectUrl = URL.createObjectURL(acceptedFiles[0]);
 
-        // Temporary layer update for preview
+        // Temporary preview update
         updateLayer({
           id: activeLayer.id,
           url: objectUrl,
@@ -49,28 +42,31 @@ export default function UploadVideo() {
 
         setActiveLayer(activeLayer.id);
 
-        // Upload video using store function
-        await uploadVideo({ video: formData });
+        // Upload video
+        await uploadVideo(acceptedFiles[0], activeLayer.id);
 
-        if (!uploadVideoError && !uploadingVideoGenerating) {
-          const thumbnailUrl = activeLayer.url.replace(/\.[^/.]+$/, ".jpg");
+        const latestState = getState();
+        const latestActiveLayer = latestState.activeLayer;
+
+        if (!latestState.uploadVideoError && !latestState.uploadingVideoGenerating) {
+          const thumbnailUrl = latestActiveLayer.url.replace(/\.[^/.]+$/, ".jpg");
 
           updateLayer({
-            id: activeLayer.id,
-            url: activeLayer.url,
-            width: activeLayer.width,
-            height: activeLayer.height,
-            name: activeLayer.original_filename,
-            publicId: activeLayer.public_id,
-            format: activeLayer.format,
+            id: latestActiveLayer.id,
+            url: latestActiveLayer.url,
+            width: latestActiveLayer.width,
+            height: latestActiveLayer.height,
+            name: latestActiveLayer.original_filename,
+            publicId: latestActiveLayer.public_id,
+            format: latestActiveLayer.format,
             poster: thumbnailUrl,
-            resourceType: activeLayer.resource_type,
+            resourceType: latestActiveLayer.resource_type,
           });
 
-          setTags(activeLayer.tags);
-          setActiveLayer(activeLayer.id);
+          setTags(latestActiveLayer.tags);
+          setActiveLayer(latestActiveLayer.id);
         } else {
-          toast.error(uploadVideoError);
+          toast.error(latestState.uploadVideoError || "Upload failed");
         }
       }
 
@@ -80,7 +76,9 @@ export default function UploadVideo() {
     },
   });
 
-  if (!activeLayer.url)
+  const latestActiveLayer = getState().activeLayer;
+
+  if (!latestActiveLayer.url) {
     return (
       <Card
         {...getRootProps()}
@@ -94,15 +92,14 @@ export default function UploadVideo() {
           <div className="flex items-center flex-col justify-center gap-4">
             <Lottie className="h-48" animationData={videoAnimation} />
             <p className="text-muted-foreground text-2xl">
-              {isDragActive
-                ? "Drop your video here!"
-                : "Start by uploading a video"}
+              {isDragActive ? "Drop your video here!" : "Start by uploading a video"}
             </p>
             <p className="text-muted-foreground">Supported Format: .mp4</p>
           </div>
         </CardContent>
       </Card>
     );
+  }
 
-  return null; // or render something else if video already uploaded
+  return null; // Or render something else if video already uploaded
 }

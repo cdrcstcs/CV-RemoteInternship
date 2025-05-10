@@ -4,39 +4,40 @@ import { toast } from "sonner";
 import { Captions } from "lucide-react";
 
 export default function VideoTranscription() {
-  const {
-    activeLayer,
-    updateLayer,
-    setActiveLayer,
-    initiateTranscription,
-    transcribingGenerating,
-    initiateTranscriptionError,
-  } = useEditorStore((state) => ({
-    activeLayer: state.activeLayer,
-    updateLayer: state.updateLayer,
-    setActiveLayer: state.setActiveLayer,
-    initiateTranscription: state.initiateTranscription,
-    transcribingGenerating: state.transcribingGenerating,
-    initiateTranscriptionError: state.initiateTranscriptionError,
-  }));
+  const { getState, setState } = useEditorStore();
 
   const handleTranscribe = async () => {
+    const {
+      activeLayer,
+      initiateTranscription,
+      updateLayer,
+      setActiveLayer,
+      transcribingGenerating,
+      initiateTranscriptionError,
+    } = getState();
+
     if (!activeLayer.publicId || activeLayer.resourceType !== "video") {
       toast.error("Please select a video layer first");
       return;
     }
 
-    await initiateTranscription(activeLayer.publicId);
+    try {
+      await initiateTranscription(activeLayer.publicId, activeLayer.id);
 
-    if (activeLayer.subtitledVideoUrl) {
-      // If the URL is available (set in the store after success), update layer
-      updateLayer({
-        ...activeLayer,
-        transcriptionURL: activeLayer.subtitledVideoUrl,
-      });
-      setActiveLayer(activeLayer.id);
+      if (activeLayer.subtitledVideoUrl) {
+        // If the URL is available (set in the store after success), update layer
+        updateLayer({
+          ...activeLayer,
+          transcriptionURL: activeLayer.subtitledVideoUrl,
+        });
+        setActiveLayer(activeLayer.id);
+      }
+    } catch (error) {
+      toast.error(initiateTranscriptionError || "An error occurred during transcription.");
     }
   };
+
+  const { activeLayer, transcribingGenerating, initiateTranscriptionError } = getState();
 
   return (
     <div className="flex items-center">

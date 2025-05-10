@@ -7,23 +7,9 @@ import { toast } from "sonner";
 import { useEditorStore } from "../../stores/useEditorStore";
 
 export default function UploadImage() {
-  const {
-    setTags,
-    uploadingImageGenerating,
-    activeLayer,
-    updateLayer,
-    setActiveLayer,
-    uploadImage,
-    uploadImageError,
-  } = useEditorStore((state) => ({
-    setTags: state.setTags,
-    uploadingImageGenerating: state.uploadingImageGenerating,
-    activeLayer: state.activeLayer,
-    updateLayer: state.updateLayer,
-    setActiveLayer: state.setActiveLayer,
-    uploadImage: state.uploadImage,
-    uploadImageError: state.uploadImageError,
-  }));
+  const { getState, setState } = useEditorStore;
+
+  const { uploadingImageGenerating, activeLayer, uploadImage, uploadImageError, setTags, updateLayer, setActiveLayer } = getState();
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxFiles: 1,
@@ -49,40 +35,45 @@ export default function UploadImage() {
           format: "",
           resourceType: "image",
         });
+
+        // Set the active layer directly
         setActiveLayer(activeLayer.id);
 
         // Upload image using the Zustand store function
-        await uploadImage(acceptedFiles[0]);
+        await uploadImage(acceptedFiles[0], activeLayer.id);
+
+        const latestActiveLayer = getState().activeLayer;
 
         if (!uploadImageError && !uploadingImageGenerating) {
           // Update the layer after successful upload
           updateLayer({
-            id: activeLayer.id,
-            url: activeLayer.url,
-            width: activeLayer.width,
-            height: activeLayer.height,
-            name: activeLayer.original_filename,
-            publicId: activeLayer.public_id,
-            format: activeLayer.format,
-            resourceType: activeLayer.resource_type,
+            id: latestActiveLayer.id,
+            url: latestActiveLayer.url,
+            width: latestActiveLayer.width,
+            height: latestActiveLayer.height,
+            name: latestActiveLayer.original_filename,
+            publicId: latestActiveLayer.public_id,
+            format: latestActiveLayer.format,
+            resourceType: latestActiveLayer.resource_type,
           });
-          console.log(activeLayer)
+
           // Set tags from upload response
-          setTags(activeLayer.tags);
-          setActiveLayer(activeLayer.id);
+          setTags(latestActiveLayer.tags);
+          setActiveLayer(latestActiveLayer.id);
         } else {
-          toast.error(uploadImageError);
+          toast.error(uploadImageError || "Failed to upload the image");
         }
       }
 
       if (fileRejections.length) {
-        console.log("rejected");
         toast.error(fileRejections[0].errors[0].message);
       }
     },
   });
 
-  if (!activeLayer.url)
+  const latestActiveLayer = getState().activeLayer;
+
+  if (!latestActiveLayer.url) {
     return (
       <Card
         {...getRootProps()}
@@ -96,9 +87,7 @@ export default function UploadImage() {
           <div className="flex items-center flex-col justify-center gap-4">
             <Lottie className="h-48" animationData={imageAnimation} />
             <p className="text-muted-foreground text-2xl">
-              {isDragActive
-                ? "Drop your image here!"
-                : "Start by uploading an image"}
+              {isDragActive ? "Drop your image here!" : "Start by uploading an image"}
             </p>
             <p className="text-muted-foreground">
               Supported Formats .jpeg .jpg .png .webp
@@ -107,6 +96,7 @@ export default function UploadImage() {
         </CardContent>
       </Card>
     );
+  }
 
   return null; // Optional: handle what to render when activeLayer.url exists
 }

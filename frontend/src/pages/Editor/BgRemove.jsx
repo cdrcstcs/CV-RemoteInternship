@@ -1,33 +1,18 @@
-import { Button } from "../../components/Editor/Button"
-import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
-import { Image } from "lucide-react"
-import { toast } from "sonner"
-import { useEditorStore } from "../../stores/useEditorStore"
+import { Button } from "../../components/Editor/Button";
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover";
+import { Image } from "lucide-react";
+import { toast } from "sonner";
+import { useEditorStore } from "../../stores/useEditorStore";
+
 export default function BgRemove() {
-  const {
-    activeTag,
-    activeColor,
-    activeLayer,
-    addLayer,
-    removingBackgroundGenerating,
-    setActiveLayer,
-    removeBackground,
-    removeBackgroundError,
-  } = useEditorStore((state) => ({
-    activeTag: state.activeTag,
-    activeColor: state.activeColor,
-    activeLayer: state.activeLayer,
-    addLayer: state.addLayer,
-    removingBackgroundGenerating: state.removingBackgroundGenerating,
-    setActiveLayer: state.setActiveLayer,
-    removeBackground: state.removeBackground,
-    removeBackgroundError: state.removeBackgroundError,
-  }));
-  
+  const { getState } = useEditorStore; // ✅ get direct state access functions
 
   return (
     <Popover>
-      <PopoverTrigger disabled={!activeLayer?.url} asChild>
+      <PopoverTrigger
+        disabled={!getState().activeLayer?.url} // ✅ access latest activeLayer
+        asChild
+      >
         <Button variant="outline" className="py-8">
           <span className="flex gap-1 items-center justify-center flex-col text-xs font-medium">
             BG Removal
@@ -35,6 +20,7 @@ export default function BgRemove() {
           </span>
         </Button>
       </PopoverTrigger>
+
       <PopoverContent className="w-full">
         <div className="grid gap-4">
           <div className="space-y-2">
@@ -46,39 +32,54 @@ export default function BgRemove() {
         </div>
 
         <Button
-          disabled={
-            !activeLayer?.url || !activeTag || !activeColor || removingBackgroundGenerating
-          }
+          disabled={() => {
+            const state = getState();
+            return (
+              !state.activeLayer?.url ||
+              !state.activeTag ||
+              !state.activeColor ||
+              state.removingBackgroundGenerating
+            );
+          }}
           className="w-full mt-4"
           onClick={async () => {
-            await removeBackground(activeLayer.url, activeLayer.format); // Use removeBackground from the store
-            
-            // Handle errors or success
+            const stateBefore = getState();
+            const { activeLayer, removeBackground } = stateBefore;
+
+            await removeBackground(
+              activeLayer.url,
+              activeLayer.format,
+              activeLayer.id
+            );
+
+            const stateAfter = getState();
+            const { removeBackgroundError, removingBackgroundGenerating } = stateAfter;
+            const latestActiveLayer = stateAfter.activeLayer;
+
             if (removeBackgroundError) {
-              toast.error(removeBackgroundError); // Display error message
-              return; // Early exit if there's an error
+              toast.error(removeBackgroundError);
+              return;
             }
-            
-            // Proceed with adding the new layer if the background removal is successful
+
             if (!removeBackgroundError && !removingBackgroundGenerating) {
-              const newLayerId = crypto.randomUUID()
-              addLayer({
+              const newLayerId = crypto.randomUUID();
+              stateAfter.addLayer({
                 id: newLayerId,
-                name: "bg-removed" + activeLayer.name,
+                name: "bg-removed-" + latestActiveLayer.name,
                 format: "png",
-                height: activeLayer.height,
-                width: activeLayer.width,
-                url: activeLayer.url, // Ensure this is set to the new image URL after background removal
-                publicId: activeLayer.publicId,
+                height: latestActiveLayer.height,
+                width: latestActiveLayer.width,
+                url: latestActiveLayer.url,
+                publicId: latestActiveLayer.publicId,
                 resourceType: "image",
-              })
-              setActiveLayer(newLayerId) // Set the newly added layer as the active layer
+              });
+              stateAfter.setActiveLayer(newLayerId);
             }
           }}
         >
-          {removingBackgroundGenerating ? "Removing..." : "Remove Background"}
+          {getState().removingBackgroundGenerating ? "Removing..." : "Remove Background"}
         </Button>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

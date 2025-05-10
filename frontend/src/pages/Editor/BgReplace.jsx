@@ -1,34 +1,22 @@
-import { Button } from "../../components/Editor/Button"
-import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
-import { Input } from "../../components/Editor/Input"
-import { Label } from "../../components/Editor/Label"
-import { ImageOff } from "lucide-react"
-import { useState } from "react"
-import { toast } from "sonner"
-import { useEditorStore } from "../../stores/useEditorStore"
-export default function AIBackgroundReplace() {
-  const {
-    activeLayer,
-    addLayer,
-    replacingBackgroundGenerating,
-    setActiveLayer,
-    replaceBackground,
-    replaceBackgroundError,
-  } = useEditorStore((state) => ({
-    activeLayer: state.activeLayer,
-    addLayer: state.addLayer,
-    replacingBackgroundGenerating: state.replacingBackgroundGenerating,
-    setActiveLayer: state.setActiveLayer,
-    replaceBackground: state.replaceBackground,
-    replaceBackgroundError: state.replaceBackgroundError,
-  }));
-  
+import { Button } from "../../components/Editor/Button";
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover";
+import { Input } from "../../components/Editor/Input";
+import { Label } from "../../components/Editor/Label";
+import { ImageOff } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useEditorStore } from "../../stores/useEditorStore";
 
-  const [prompt, setPrompt] = useState("")
+export default function AIBackgroundReplace() {
+  const { getState } = useEditorStore; // ✅ only getState for all state reads
+  const [prompt, setPrompt] = useState("");
 
   return (
     <Popover>
-      <PopoverTrigger disabled={!activeLayer?.url} asChild>
+      <PopoverTrigger
+        disabled={!getState().activeLayer?.url} // ✅ latest activeLayer
+        asChild
+      >
         <Button variant="outline" className="py-8">
           <span className="flex gap-1 items-center justify-center flex-col text-xs font-medium">
             AI BG Replace
@@ -36,12 +24,11 @@ export default function AIBackgroundReplace() {
           </span>
         </Button>
       </PopoverTrigger>
+
       <PopoverContent className="w-full">
         <div className="grid gap-4">
           <div className="space-y-2">
-            <h4 className="font-medium leading-none">
-              Generative Background Replace
-            </h4>
+            <h4 className="font-medium leading-none">Generative Background Replace</h4>
             <p className="text-sm text-muted-foreground">
               Replace the background of your image with AI-generated content.
             </p>
@@ -59,38 +46,57 @@ export default function AIBackgroundReplace() {
             </div>
           </div>
         </div>
+
         <Button
-          disabled={!activeLayer?.url || replacingBackgroundGenerating}
+          disabled={() => {
+            const state = getState();
+            return !state.activeLayer?.url || state.replacingBackgroundGenerating;
+          }}
           className="w-full mt-4"
           onClick={async () => {
+            const stateBefore = getState();
+            const { activeLayer, replaceBackground } = stateBefore;
 
-            // Call the replaceBackground function from the store
-            await replaceBackground(activeLayer.url, prompt)
+            if (!activeLayer?.url) {
+              toast.error("No active layer to replace background!");
+              return;
+            }
 
-            // Check for error after calling replaceBackground
+            await replaceBackground(activeLayer.url, prompt, activeLayer.id);
+
+            const stateAfter = getState();
+            const {
+              activeLayer: latestActiveLayer,
+              replaceBackgroundError,
+              replacingBackgroundGenerating,
+              addLayer,
+              setActiveLayer,
+            } = stateAfter;
+
             if (replaceBackgroundError) {
-              toast.error(replaceBackgroundError)
-            } else if (!replacingBackgroundGenerating){
-              // If no error, process the result (assuming replaceBackground updates the active layer)
-              const newLayerId = crypto.randomUUID()
+              toast.error(replaceBackgroundError);
+            } else if (!replacingBackgroundGenerating) {
+              const newLayerId = crypto.randomUUID();
               addLayer({
                 id: newLayerId,
-                name: "bg-replaced-" + activeLayer.name,
-                format: activeLayer.format,
-                height: activeLayer.height,
-                width: activeLayer.width,
-                url: activeLayer.url, // Assuming the activeLayer URL is updated by replaceBackground
-                publicId: activeLayer.publicId,
+                name: "bg-replaced-" + latestActiveLayer.name,
+                format: latestActiveLayer.format,
+                height: latestActiveLayer.height,
+                width: latestActiveLayer.width,
+                url: latestActiveLayer.url,
+                publicId: latestActiveLayer.publicId,
                 resourceType: "image",
-              })
-              setActiveLayer(newLayerId)
-              toast.success("Background replaced successfully!")
+              });
+              setActiveLayer(newLayerId);
+              toast.success("Background replaced successfully!");
             }
           }}
         >
-          {replacingBackgroundGenerating ? "replacingBackgroundGenerating..." : "Replace Background"}
+          {getState().replacingBackgroundGenerating
+            ? "Replacing..."
+            : "Replace Background"}
         </Button>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

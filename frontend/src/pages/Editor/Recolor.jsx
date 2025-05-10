@@ -9,32 +9,64 @@ import { useEditorStore } from "../../stores/useEditorStore"
 import { toast } from "sonner"
 
 export default function AIRecolor() {
-  const {
-    tags,
-    setActiveTag,
-    activeTag,
-    setActiveColor,
-    activeColor,
-    activeLayer,
-    addLayer,
-    recoloringImageGenerating,
-    recolorImage,
-    setActiveLayer,
-    recolorImageError,
-  } = useEditorStore((state) => ({
-    tags: state.tags,
-    setActiveTag: state.setActiveTag,
-    activeTag: state.activeTag,
-    setActiveColor: state.setActiveColor,
-    activeColor: state.activeColor,
-    activeLayer: state.activeLayer,
-    addLayer: state.addLayer,
-    recoloringImageGenerating: state.recoloringImageGenerating,
-    recolorImage: state.recolorImage,
-    setActiveLayer: state.setActiveLayer,
-    recolorImageError: state.recolorImageError,
-  }));
-  
+  const { getState, setState } = useEditorStore
+
+  const handleClickTag = (tag) => {
+    setState({ activeTag: tag })
+  }
+
+  const handleInputTagChange = (e) => {
+    setState({ activeTag: e.target.value })
+  }
+
+  const handleClickColor = (color) => {
+    setState({ activeColor: color })
+  }
+
+  const handleInputColorChange = (e) => {
+    setState({ activeColor: e.target.value })
+  }
+
+  const handleRecolor = async () => {
+    const {
+      activeLayer,
+      activeTag,
+      activeColor,
+      recolorImage,
+      addLayer,
+      setActiveLayer,
+      recolorImageError,
+      recoloringImageGenerating,
+    } = getState()
+
+    if (!activeLayer?.url || !activeTag || !activeColor) return
+
+    await recolorImage(
+      activeLayer.url,
+      "prompt_" + activeTag,
+      "to-color_" + activeColor,
+      activeLayer.id
+    )
+
+    if (!recolorImageError && !recoloringImageGenerating) {
+      const newLayerId = crypto.randomUUID()
+      addLayer({
+        id: newLayerId,
+        name: "recolored" + activeLayer.name,
+        format: activeLayer.format,
+        height: activeLayer.height,
+        width: activeLayer.width,
+        url: getState().res?.data?.success, // assuming result is stored in state
+        publicId: activeLayer.publicId,
+        resourceType: "image",
+      })
+      setActiveLayer(newLayerId)
+    } else {
+      toast.error(recolorImageError)
+    }
+  }
+
+  const { tags, activeTag, activeColor, activeLayer, recoloringImageGenerating } = getState()
 
   return (
     <Popover>
@@ -57,23 +89,22 @@ export default function AIRecolor() {
           <div className="grid gap-2">
             <h3 className="text-xs">Suggested selections</h3>
             <div className="flex gap-2">
-              {tags.length === 0 && (
-                <p className="text-xs text-muted-foreground">
-                  No tags available
-                </p>
+              {tags.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No tags available</p>
+              ) : (
+                tags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    onClick={() => handleClickTag(tag)}
+                    className={cn(
+                      "px-2 py-1 rounded text-xs",
+                      activeTag === tag && "bg-primary text-white"
+                    )}
+                  >
+                    {tag}
+                  </Badge>
+                ))
               )}
-              {tags.map((tag) => (
-                <Badge
-                  key={tag}
-                  onClick={() => setActiveTag(tag)}
-                  className={cn(
-                    "px-2 py-1 rounded text-xs",
-                    activeTag === tag && "bg-primary text-white"
-                  )}
-                >
-                  {tag}
-                </Badge>
-              ))}
             </div>
             <div className="grid grid-cols-3 items-center gap-4">
               <Label htmlFor="width">Selection</Label>
@@ -81,28 +112,26 @@ export default function AIRecolor() {
                 className="col-span-2 h-8"
                 value={activeTag}
                 name="tag"
-                onChange={(e) => {
-                  setActiveTag(e.target.value)
-                }}
+                onChange={handleInputTagChange}
               />
             </div>
             <h3 className="text-xs">Suggested colors</h3>
             <div className="flex gap-2">
               <div
                 className="w-4 h-4 bg-blue-500 rounded-sm cursor-pointer"
-                onClick={() => setActiveColor("blue")}
+                onClick={() => handleClickColor("blue")}
               ></div>
               <div
                 className="w-4 h-4 bg-red-500 rounded-sm cursor-pointer"
-                onClick={() => setActiveColor("red")}
+                onClick={() => handleClickColor("red")}
               ></div>
               <div
                 className="w-4 h-4 bg-green-500 rounded-sm cursor-pointer"
-                onClick={() => setActiveColor("green")}
+                onClick={() => handleClickColor("green")}
               ></div>
               <div
                 className="w-4 h-4 bg-yellow-500 rounded-sm cursor-pointer"
-                onClick={() => setActiveColor("yellow")}
+                onClick={() => handleClickColor("yellow")}
               ></div>
             </div>
             <div className="grid grid-cols-3 items-center gap-4">
@@ -110,7 +139,7 @@ export default function AIRecolor() {
               <Input
                 name="color"
                 value={activeColor}
-                onChange={(e) => setActiveColor(e.target.value)}
+                onChange={handleInputColorChange}
                 className="col-span-2 h-8"
               />
             </div>
@@ -121,28 +150,9 @@ export default function AIRecolor() {
             !activeLayer?.url || !activeTag || !activeColor || recoloringImageGenerating
           }
           className="w-full mt-4"
-          onClick={async () => {
-            await recolorImage(activeLayer.url, "prompt_" + activeTag, "to-color_" + activeColor)
-
-            if (!recolorImageError && !recoloringImageGenerating) {
-              const newLayerId = crypto.randomUUID()
-              addLayer({
-                id: newLayerId,
-                name: "recolored" + activeLayer.name,
-                format: activeLayer.format,
-                height: activeLayer.height,
-                width: activeLayer.width,
-                url: res.data.success,
-                publicId: activeLayer.publicId,
-                resourceType: "image",
-              })
-              setActiveLayer(newLayerId)
-            } else {
-              toast.error(recolorImageError)
-            }
-          }}
+          onClick={handleRecolor}
         >
-          {recoloringImageGenerating ? "recoloringImageGenerating..." : "Recolor"}
+          {recoloringImageGenerating ? "Recoloring..." : "Recolor"}
         </Button>
       </PopoverContent>
     </Popover>

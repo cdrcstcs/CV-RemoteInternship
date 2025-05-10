@@ -66,13 +66,13 @@ export const useEditorStore = create((set, get) => ({
   }),
   
   // Remove background
-  removeBackground: async (imageUrl, format) => {
+  removeBackground: async (imageUrl, format, id) => {
     set({ removingBackgroundGenerating: true, removeBackgroundError: null });
     try {
       const response = await axiosInstance.post("/remove-background", { activeImage: imageUrl, format });
       if (response.data.success) {
         toast.success("Background removed successfully!");
-        set({ activeLayer: response.data.success });
+        set({ activeLayer: { ...response.data.success, id } });
       } else {
         set({ removeBackgroundError: "Failed to remove background" });
         toast.error("Failed to remove background");
@@ -87,13 +87,13 @@ export const useEditorStore = create((set, get) => ({
   },
 
   // Replace background
-  replaceBackground: async (imageUrl, prompt = '') => {
+  replaceBackground: async (imageUrl, prompt = '', id) => {
     set({ replacingBackgroundGenerating: true, replaceBackgroundError: null });
     try {
       const response = await axiosInstance.post("/replace-background", { activeImage: imageUrl, prompt });
       if (response.data.success) {
         toast.success("Background replaced successfully!");
-        set({ activeLayer: response.data.success });
+        set({ activeLayer: { ...response.data.success, id } });
       } else {
         set({ replaceBackgroundError: "Failed to replace background" });
         toast.error("Failed to replace background");
@@ -108,13 +108,13 @@ export const useEditorStore = create((set, get) => ({
   },
 
   // Extract objects
-  extractImage: async (imageUrl, prompts, multiple = false, mode = 'default', invert = false, format = 'jpg') => {
+  extractImage: async (imageUrl, prompts, multiple = false, mode = 'default', invert = false, format = 'jpg', id) => {
     set({ extractingImageGenerating: true, extractImageError: null });
     try {
       const response = await axiosInstance.post("/extract-image", { activeImage: imageUrl, prompts, multiple, mode, invert, format });
       if (response.data.success) {
         toast.success("Image extraction completed!");
-        set({ activeLayer: response.data.success });
+        set({ activeLayer: { ...response.data.success, id } });
       } else {
         set({ extractImageError: "Failed to extract objects from image" });
         toast.error("Failed to extract objects from image");
@@ -129,13 +129,13 @@ export const useEditorStore = create((set, get) => ({
   },
 
   // Generative fill
-  genFill: async (imageUrl, aspect, width, height) => {
+  genFill: async (imageUrl, aspect, width, height, id) => {
     set({ genFillingGenerating: true, genFillError: null });
     try {
       const response = await axiosInstance.post("/gen-fill", { activeImage: imageUrl, aspect, width, height });
       if (response.data.success) {
         toast.success("Generative fill completed!");
-        set({ activeLayer: response.data.success });
+        set({ activeLayer: { ...response.data.success, id } });
       } else {
         set({ genFillError: "Failed to generate fill" });
         toast.error("Failed to generate fill");
@@ -150,13 +150,13 @@ export const useEditorStore = create((set, get) => ({
   },
 
   // Generative remove
-  genRemove: async (imageUrl, prompt) => {
+  genRemove: async (imageUrl, prompt, id) => {
     set({ genRemovingGenerating: true, genRemoveError: null });
     try {
       const response = await axiosInstance.post("/gen-remove", { activeImage: imageUrl, prompt });
       if (response.data.success) {
         toast.success("Generative remove completed!");
-        set({ activeLayer: response.data.success });
+        set({ activeLayer: { ...response.data.success, id } });
       } else {
         set({ genRemoveError: "Failed to generate remove" });
         toast.error("Failed to generate remove");
@@ -171,13 +171,13 @@ export const useEditorStore = create((set, get) => ({
   },
 
   // Recolor image
-  recolorImage: async (imageUrl, tag, color) => {
+  recolorImage: async (imageUrl, tag, color, id) => {
     set({ recoloringImageGenerating: true, recolorImageError: null });
     try {
       const response = await axiosInstance.post("/recolor-image", { activeImage: imageUrl, tag, color });
       if (response.data.success) {
         toast.success("Image recolored successfully!");
-        set({ activeLayer: response.data.success });
+        set({ activeLayer: { ...response.data.success, id } });
       } else {
         set({ recolorImageError: "Failed to recolor image" });
         toast.error("Failed to recolor image");
@@ -192,13 +192,13 @@ export const useEditorStore = create((set, get) => ({
   },
 
   // Crop video
-  cropVideo: async (videoUrl, aspect, height) => {
+  cropVideo: async (videoUrl, aspect, height, id) => {
     set({ croppingVideoGenerating: true, cropVideoError: null });
     try {
       const response = await axiosInstance.post("/crop-video", { activeVideo: videoUrl, aspect, height });
       if (response.data.success) {
         toast.success("Video cropped successfully!");
-        set({ activeLayer: response.data.success });
+        set({ activeLayer: { ...response.data.success, id } });
       } else {
         set({ cropVideoError: "Failed to crop video" });
         toast.error("Failed to crop video");
@@ -213,13 +213,13 @@ export const useEditorStore = create((set, get) => ({
   },
 
   // Initiate transcription
-  initiateTranscription: async (publicId) => {
+  initiateTranscription: async (publicId, id) => {
     set({ transcribingGenerating: true, initiateTranscriptionError: null });
     try {
       const response = await axiosInstance.post("/initiate-transcription", { publicId });
       if (response.data.success) {
         toast.success("Transcription initiated successfully!");
-        set({ activeLayer: response.data.success });
+        set({ activeLayer: { ...response.data.success, id } });
       } else {
         set({ initiateTranscriptionError: "Failed to initiate transcription" });
         toast.error("Failed to initiate transcription");
@@ -234,7 +234,7 @@ export const useEditorStore = create((set, get) => ({
   },
 
   // Upload image
-  uploadImage: async (imageFile) => {
+  uploadImage: async (imageFile, id) => {
     set({ uploadingImageGenerating: true, uploadImageError: null });
     try {
       const formData = new FormData();
@@ -242,7 +242,7 @@ export const useEditorStore = create((set, get) => ({
       const response = await axiosInstance.post("/upload-image", formData);
       if (response.data.success) {
         toast.success("Image uploaded successfully!");
-        set({ activeLayer: response.data.success });
+        set({ activeLayer: { ...response.data.success, id } });
       } else {
         set({ uploadImageError: "Failed to upload image" });
         toast.error("Failed to upload image");
@@ -252,12 +252,14 @@ export const useEditorStore = create((set, get) => ({
       toast.error("Error uploading image");
       console.error("Error:", e);
     } finally {
+      const currentState = get(); // if using Zustand, replace with correct getter
+      console.log(currentState.activeLayer);      
       set({ uploadingImageGenerating: false });
     }
   },
 
   // Upload video
-  uploadVideo: async (videoFile) => {
+  uploadVideo: async (videoFile, id) => {
     set({ uploadingVideoGenerating: true, uploadVideoError: null });
     try {
       const formData = new FormData();
@@ -265,7 +267,7 @@ export const useEditorStore = create((set, get) => ({
       const response = await axiosInstance.post("/upload-video", formData);
       if (response.data.success) {
         toast.success("Video uploaded successfully!");
-        set({ activeLayer: response.data.success });
+        set({ activeLayer: { ...response.data.success, id } });
       } else {
         set({ uploadVideoError: "Failed to upload video" });
         toast.error("Failed to upload video");

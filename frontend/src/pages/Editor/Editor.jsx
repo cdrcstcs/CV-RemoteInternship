@@ -7,6 +7,7 @@ import Loading from "./Loading"
 import { useEditorStore } from "../../stores/useEditorStore"
 export default function Editor() {
   const activeLayer = useEditorStore((state) => state.activeLayer)
+  console.log(activeLayer);
   return (
     <div className="flex h-full ">
       <div className="py-6 px-4  min-w-48 ">

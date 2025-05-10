@@ -147,6 +147,7 @@ export default function Layers() {
                 if (layerComparisonMode) {
                   toggleComparedLayer(layer.id);
                 } else {
+                  console.log(layer.id);
                   setActiveLayer(layer.id);
                 }
               }}

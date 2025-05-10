@@ -5,33 +5,51 @@ import { Input } from "../../components/Editor/Input"
 import { Label } from "../../components/Editor/Label"
 import { cn } from "../../lib/utils"
 import { Eraser } from "lucide-react"
-import { useEditorStore } from "../../stores/useEditorStore" // Importing the useEditorStore
+import { useEditorStore } from "../../stores/useEditorStore" // Import store
 
 export default function GenRemove() {
-  const {
-    tags,
-    setActiveTag,
-    genRemovingGenerating,
-    activeTag,
-    activeColor,
-    activeLayer,
-    addLayer,
-    setActiveLayer,
-    genRemove,
-    genRemoveError,
-  } = useEditorStore((state) => ({
-    tags: state.tags,
-    setActiveTag: state.setActiveTag,
-    genRemovingGenerating: state.genRemovingGenerating,
-    activeTag: state.activeTag,
-    activeColor: state.activeColor,
-    activeLayer: state.activeLayer,
-    addLayer: state.addLayer,
-    setActiveLayer: state.setActiveLayer,
-    genRemove: state.genRemove,
-    genRemoveError: state.genRemoveError,
-  }));
+  const { getState, setState } = useEditorStore // Access getState and setState
   
+  const handleClickTag = (tag) => {
+    setState({ activeTag: tag })
+  }
+
+  const handleInputChange = (e) => {
+    setState({ activeTag: e.target.value })
+  }
+
+  const handleGenRemove = async () => {
+    const {
+      activeLayer,
+      activeTag,
+      activeColor,
+      genRemove,
+      genRemoveError,
+      genRemovingGenerating,
+      addLayer,
+      setActiveLayer
+    } = getState()
+
+    await genRemove(activeLayer.url, activeTag, activeLayer.id)
+
+    if (!genRemoveError && !genRemovingGenerating) {
+      const newLayerId = crypto.randomUUID()
+      addLayer({
+        id: newLayerId,
+        url: activeLayer,
+        format: activeLayer.format,
+        height: activeLayer.height,
+        width: activeLayer.width,
+        name: activeLayer.name,
+        publicId: activeLayer.publicId,
+        resourceType: "image",
+      })
+      setActiveLayer(newLayerId)
+    }
+  }
+
+  const { tags, activeTag, activeColor, activeLayer, genRemovingGenerating } = getState()
+
   return (
     <Popover>
       <PopoverTrigger disabled={!activeLayer?.url} asChild>
@@ -53,14 +71,12 @@ export default function GenRemove() {
             <h3 className="text-xs">Suggested selections</h3>
             <div className="flex gap-2">
               {tags.length === 0 && (
-                <p className="text-xs text-muted-foreground">
-                  No tags available
-                </p>
+                <p className="text-xs text-muted-foreground">No tags available</p>
               )}
               {tags.map((tag) => (
                 <Badge
                   key={tag}
-                  onClick={() => setActiveTag(tag)}
+                  onClick={() => handleClickTag(tag)}
                   className={cn(
                     "px-2 py-1 rounded text-xs",
                     activeTag === tag && "bg-primary text-white"
@@ -76,9 +92,7 @@ export default function GenRemove() {
                 className="col-span-2 h-8"
                 value={activeTag}
                 name="tag"
-                onChange={(e) => {
-                  setActiveTag(e.target.value)
-                }}
+                onChange={handleInputChange}
               />
             </div>
           </div>
@@ -88,25 +102,7 @@ export default function GenRemove() {
           disabled={
             !activeTag || !activeColor || !activeLayer.url || genRemovingGenerating
           }
-          onClick={async () => {
-            await genRemove(activeLayer.url, activeTag);  // Using genRemove from store
-
-            if (!genRemoveError && !genRemovingGenerating) {
-
-              const newLayerId = crypto.randomUUID()
-              addLayer({
-                id: newLayerId,
-                url: activeLayer,
-                format: activeLayer.format,
-                height: activeLayer.height,
-                width: activeLayer.width,
-                name: activeLayer.name,
-                publicId: activeLayer.publicId,
-                resourceType: "image",
-              })
-              setActiveLayer(newLayerId)
-            } 
-          }}
+          onClick={handleGenRemove}
         >
           Magic Remove 🎨
         </Button>

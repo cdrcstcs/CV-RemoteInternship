@@ -1,44 +1,40 @@
-import React, { useState } from "react"
-import { Button } from "../../components/Editor/Button"
-import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
-import { Input } from "../../components/Editor/Input"
-import { Label } from "../../components/Editor/Label"
-import { Scissors } from "lucide-react"
-import { Checkbox } from "../../components/Editor/Checkbox"
-import { RadioGroup, RadioGroupItem } from "../../components/Editor/RadioGroup"
-import { useEditorStore } from "../../stores/useEditorStore" // Import the store
+import React, { useState } from "react";
+import { Button } from "../../components/Editor/Button";
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover";
+import { Input } from "../../components/Editor/Input";
+import { Label } from "../../components/Editor/Label";
+import { Scissors } from "lucide-react";
+import { Checkbox } from "../../components/Editor/Checkbox";
+import { RadioGroup, RadioGroupItem } from "../../components/Editor/RadioGroup";
+import { useEditorStore } from "../../stores/useEditorStore";
+import { toast } from "sonner"; // Don't forget toast!
 
 export default function ExtractPart() {
-  const { activeLayer, addLayer, extractingImageGenerating,  setActiveLayer, extractImageError } = useEditorStore((state) => ({
-    activeLayer: state.activeLayer,
-    addLayer: state.addLayer,
-    extractingImageGenerating: state.extractingImageGenerating,
-    setActiveLayer: state.setActiveLayer,
-    extractImageError: state.extractImageError,
-  }));
-  
+  const { getState } = useEditorStore; // ✅ use getState
+  const extractImage = useEditorStore((state) => state.extractImage); // keep method access reactive
 
-  const [prompts, setPrompts] = useState([""])
-  const [multiple, setMultiple] = useState(false)
-  const [mode, setMode] = useState("default")
-  const [invert, setInvert] = useState(false)
+  const [prompts, setPrompts] = useState([""]);
+  const [multiple, setMultiple] = useState(false);
+  const [mode, setMode] = useState("default");
+  const [invert, setInvert] = useState(false);
 
-  const addPrompt = () => {
-    setPrompts([...prompts, ""])
-  }
-
+  const addPrompt = () => setPrompts([...prompts, ""]);
   const updatePrompt = (index, value) => {
-    const newPrompts = [...prompts]
-    newPrompts[index] = value
-    setPrompts(newPrompts)
-  }
+    const newPrompts = [...prompts];
+    newPrompts[index] = value;
+    setPrompts(newPrompts);
+  };
 
-  // Get extractImage function from useEditorStore
-  const extractImage = useEditorStore((state) => state.extractImage)
+  // pull state values manually on render (non-reactive)
+  const state = getState();
+  const isDisabled =
+    !state.activeLayer?.url ||
+    state.extractingImageGenerating ||
+    prompts.every((p) => p.trim() === "");
 
   return (
     <Popover>
-      <PopoverTrigger disabled={!activeLayer?.url} asChild>
+      <PopoverTrigger disabled={!state.activeLayer?.url} asChild>
         <Button variant="outline" className="py-8">
           <span className="flex gap-1 items-center justify-center flex-col text-xs font-medium">
             AI Extract
@@ -46,6 +42,7 @@ export default function ExtractPart() {
           </span>
         </Button>
       </PopoverTrigger>
+
       <PopoverContent className="w-full">
         <div className="grid gap-4">
           <div className="space-y-2">
@@ -54,6 +51,7 @@ export default function ExtractPart() {
               Extract specific areas or objects from your image using AI.
             </p>
           </div>
+
           <div className="grid gap-2">
             {prompts.map((prompt, index) => (
               <div key={index} className="grid grid-cols-3 items-center gap-4">
@@ -83,9 +81,7 @@ export default function ExtractPart() {
             <RadioGroup value={mode} onValueChange={setMode}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="default" id="mode-default" />
-                <Label htmlFor="mode-default">
-                  Default (transparent background)
-                </Label>
+                <Label htmlFor="mode-default">Default (transparent background)</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="mask" id="mode-mask" />
@@ -103,46 +99,60 @@ export default function ExtractPart() {
             </div>
           </div>
         </div>
+
         <Button
-          disabled={
-            !activeLayer?.url ||
-            extractingImageGenerating ||
-            prompts.every((p) => p.trim() === "")
-          }
+          disabled={isDisabled}
           className="w-full mt-4"
           onClick={async () => {
-            // Call the extractImage function from the store
+            const stateBefore = getState();
+            const { activeLayer } = stateBefore;
+
+            if (!activeLayer?.url) {
+              toast.error("No active layer to extract from!");
+              return;
+            }
+
             await extractImage(
               activeLayer.url,
               prompts.filter((p) => p.trim() !== ""),
               multiple,
               mode,
               invert,
-              activeLayer.format
-            )
+              activeLayer.format,
+              activeLayer.id
+            );
 
-            if (activeLayer?.url && !extractingImageGenerating) {
+            const stateAfter = getState();
+            const {
+              activeLayer: latestActiveLayer,
+              extractingImageGenerating,
+              extractImageError,
+              addLayer,
+              setActiveLayer,
+            } = stateAfter;
+
+            if (latestActiveLayer?.url && !extractingImageGenerating) {
               const newLayerId = crypto.randomUUID();
               addLayer({
                 id: newLayerId,
-                name: "extracted-" + activeLayer.name,
+                name: "extracted-" + latestActiveLayer.name,
                 format: ".png",
-                height: activeLayer.height,
-                width: activeLayer.width,
-                url: activeLayer.url,
-                publicId: activeLayer.publicId,
+                height: latestActiveLayer.height,
+                width: latestActiveLayer.width,
+                url: latestActiveLayer.url,
+                publicId: latestActiveLayer.publicId,
                 resourceType: "image",
               });
               setActiveLayer(newLayerId);
               toast.success("Image extracted successfully!");
             } else {
-              toast.error(extractImageError);
+              toast.error(extractImageError ?? "Failed to extract image.");
             }
           }}
         >
-          {extractingImageGenerating ? "Extracting..." : "Extract"}
+          {getState().extractingImageGenerating ? "Extracting..." : "Extract"}
         </Button>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

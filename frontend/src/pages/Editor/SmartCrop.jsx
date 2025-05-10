@@ -7,63 +7,60 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../..
 import TikTok from "./Tiktok"
 import Youtube from "./Youtube"
 import { cn } from "../../lib/utils"
+import { toast } from "sonner"
 
 export default function SmartCrop() {
-  const {
-    activeLayer,
-    addLayer,
-    croppingVideoGenerating,
-    setActiveLayer,
-    cropVideo,
-    cropVideoError,
-  } = useEditorStore((state) => ({
-    activeLayer: state.activeLayer,
-    addLayer: state.addLayer,
-    croppingVideoGenerating: state.croppingVideoGenerating,
-    setActiveLayer: state.setActiveLayer,
-    cropVideo: state.cropVideo,
-    cropVideoError: state.cropVideoError,
-  }));
-  
+  const { getState, setState } = useEditorStore()
 
   const [aspectRatio, setAspectRatio] = useState("16:9")
   const [height, setHeight] = useState(0)
   const [width, setWidth] = useState(0)
 
-  // Replaced the genCrop function with cropVideo from useEditorStore
   const handleGenCrop = async () => {
+    const {
+      activeLayer,
+      cropVideo,
+      addLayer,
+      setActiveLayer,
+      cropVideoError,
+      croppingVideoGenerating,
+    } = getState()
+
+    if (!activeLayer?.url || croppingVideoGenerating) return
+
     try {
-      await cropVideo(activeLayer.url, aspectRatio, height)
+      await cropVideo(activeLayer.url, aspectRatio, height, activeLayer.id)
 
       if (!cropVideoError && !croppingVideoGenerating) {
         const newLayerId = crypto.randomUUID()
-        const thumbnailUrl = res.data.success.replace(/\.[^/.]+$/, ".jpg")
+        const thumbnailUrl = activeLayer?.url.replace(/\.[^/.]+$/, ".jpg")
+        
         addLayer({
           id: newLayerId,
           name: "cropped " + activeLayer.name,
           format: activeLayer.format,
           height: height + activeLayer.height,
           width: width + activeLayer.width,
-          url: res.data.success,
+          url: activeLayer?.url,
           publicId: activeLayer.publicId,
           resourceType: "video",
           poster: thumbnailUrl,
         })
+
         toast.success("Video cropped successfully!")
         setActiveLayer(newLayerId)
-      }
-      else {
+      } else {
         toast.error("Failed to crop video")
       }
     } catch (e) {
       toast.error(cropVideoError)
       console.error("Error:", e)
-    } 
+    }
   }
 
   return (
     <Popover>
-      <PopoverTrigger disabled={!activeLayer?.url} asChild>
+      <PopoverTrigger disabled={!getState().activeLayer?.url} asChild>
         <Button variant="outline" className="py-8">
           <span className="flex gap-1 items-center flex-col text-xs font-medium">
             Smart Crop
@@ -137,9 +134,9 @@ export default function SmartCrop() {
             onClick={handleGenCrop}
             className="w-full mt-4"
             variant={"outline"}
-            disabled={!activeLayer.url || croppingVideoGenerating}
+            disabled={!getState().activeLayer?.url || getState().croppingVideoGenerating}
           >
-            {croppingVideoGenerating ? "Cropping..." : "Smart Crop 🎨"}
+            {getState().croppingVideoGenerating ? "Cropping..." : "Smart Crop 🎨"}
           </Button>
         </div>
       </PopoverContent>

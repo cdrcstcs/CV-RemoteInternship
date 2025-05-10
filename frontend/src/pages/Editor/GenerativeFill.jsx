@@ -1,68 +1,68 @@
-import React, { useMemo, useState } from "react"
-import { Button } from "../../components/Editor/Button"
-import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover"
-import { Input } from "../../components/Editor/Input"
-import { Label } from "../../components/Editor/Label"
-import { Crop } from "lucide-react"
-import { AnimatePresence, motion } from "framer-motion"
-import { useEditorStore } from "../../stores/useEditorStore"
-const PREVIEW_SIZE = 250
-const EXPANSION_THRESHOLD = 250 // px
+import React, { useMemo, useState } from "react";
+import { Button } from "../../components/Editor/Button";
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/Editor/Popover";
+import { Input } from "../../components/Editor/Input";
+import { Label } from "../../components/Editor/Label";
+import { Crop } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEditorStore } from "../../stores/useEditorStore";
+
+const PREVIEW_SIZE = 250;
+const EXPANSION_THRESHOLD = 250; // px
 
 export default function GenerativeFill() {
+  const { getState } = useEditorStore; // ✅ getState for dynamic access
+
   const {
-    activeLayer,
     addLayer,
     genFill,
     genFillingGenerating,
     setActiveLayer,
     genFillError,
   } = useEditorStore((state) => ({
-    activeLayer: state.activeLayer,
     addLayer: state.addLayer,
     genFill: state.genFill,
     genFillingGenerating: state.genFillingGenerating,
     setActiveLayer: state.setActiveLayer,
     genFillError: state.genFillError,
   }));
-  
-  
-  const [height, setHeight] = useState(0)
-  const [width, setWidth] = useState(0)
+
+  const [height, setHeight] = useState(0);
+  const [width, setWidth] = useState(0);
+
+  const activeLayer = getState().activeLayer; // ✅ always access latest activeLayer
 
   const previewStyle = useMemo(() => {
-    if (!activeLayer.width || !activeLayer.height) return {}
+    if (!activeLayer?.width || !activeLayer?.height) return {};
 
-    const newWidth = activeLayer.width + width
-    const newHeight = activeLayer.height + height
+    const newWidth = activeLayer.width + width;
+    const newHeight = activeLayer.height + height;
 
-    const scale = Math.min(PREVIEW_SIZE / newWidth, PREVIEW_SIZE / newHeight)
+    const scale = Math.min(PREVIEW_SIZE / newWidth, PREVIEW_SIZE / newHeight);
 
     return {
       width: `${newWidth * scale}px`,
       height: `${newHeight * scale}px`,
       backgroundImage: `url(${activeLayer.url})`,
-      backgroundSize: `${activeLayer.width * scale}px ${
-        activeLayer.height * scale
-      }px`,
+      backgroundSize: `${activeLayer.width * scale}px ${activeLayer.height * scale}px`,
       backgroundPosition: "center",
       backgroundRepeat: "no-repeat",
       position: "relative",
-    }
-  }, [activeLayer, width, height])
+    };
+  }, [activeLayer, width, height]);
 
   const previewOverlayStyle = useMemo(() => {
-    if (!activeLayer.width || !activeLayer.height) return {}
+    if (!activeLayer?.width || !activeLayer?.height) return {};
 
     const scale = Math.min(
       PREVIEW_SIZE / (activeLayer.width + width),
       PREVIEW_SIZE / (activeLayer.height + height)
-    )
+    );
 
-    const leftWidth = width > 0 ? `${(width / 2) * scale}px` : "0"
-    const rightWidth = width > 0 ? `${(width / 2) * scale}px` : "0"
-    const topHeight = height > 0 ? `${(height / 2) * scale}px` : "0"
-    const bottomHeight = height > 0 ? `${(height / 2) * scale}px` : "0"
+    const leftWidth = width > 0 ? `${(width / 2) * scale}px` : "0";
+    const rightWidth = width > 0 ? `${(width / 2) * scale}px` : "0";
+    const topHeight = height > 0 ? `${(height / 2) * scale}px` : "0";
+    const bottomHeight = height > 0 ? `${(height / 2) * scale}px` : "0";
 
     return {
       position: "absolute",
@@ -74,46 +74,47 @@ export default function GenerativeFill() {
                   inset -${rightWidth} ${topHeight} 0 rgba(48, 119, 255, 1), 
                   inset ${leftWidth} -${bottomHeight} 0 rgba(48, 119, 255, 1), 
                   inset -${rightWidth} -${bottomHeight} 0 rgba(48, 119, 255,1)`,
-    }
-  }, [activeLayer, width, height])
+    };
+  }, [activeLayer, width, height]);
 
   const handleGenFill = async () => {
+    const currentActiveLayer = getState().activeLayer; // ✅ dynamic fetch
+    if (!currentActiveLayer) return;
+
     await genFill({
-      width: (width + activeLayer.width).toString(),
-      height: (height + activeLayer.height).toString(),
+      width: (width + currentActiveLayer.width).toString(),
+      height: (height + currentActiveLayer.height).toString(),
       aspect: "1:1",
-      activeImage: activeLayer.url,
-    })
-    if (!genFillError && !genFillingGenerating) {
-      const newLayerId = crypto.randomUUID()
+      activeImage: currentActiveLayer.url,
+      id: currentActiveLayer.id,
+    });
+
+    const latestState = getState(); // ✅ access latest state after async
+    if (!latestState.genFillError && !latestState.genFillingGenerating) {
+      const newLayerId = crypto.randomUUID();
       addLayer({
         id: newLayerId,
         name: "generative-fill",
-        format: activeLayer.format,
-        height: height + activeLayer.height,
-        width: width + activeLayer.width,
-        url: res.data.success,
-        publicId: activeLayer.publicId,
+        format: currentActiveLayer.format,
+        height: height + currentActiveLayer.height,
+        width: width + currentActiveLayer.width,
+        url: latestState.activeLayer.url, // use latest state url
+        publicId: currentActiveLayer.publicId,
         resourceType: "image",
-      })
-      setActiveLayer(newLayerId)
+      });
+      setActiveLayer(newLayerId);
+    } else {
+      // handle error
+      console.error("Gen fill failed: ", latestState.genFillError);
     }
-  }
+  };
 
   const ExpansionIndicator = ({ value, axis }) => {
-    const isVisible = Math.abs(value) >= EXPANSION_THRESHOLD
+    const isVisible = Math.abs(value) >= EXPANSION_THRESHOLD;
     const position =
       axis === "x"
-        ? {
-            top: "50%",
-            [value > 0 ? "right" : "left"]: 0,
-            transform: "translateY(-50%)",
-          }
-        : {
-            left: "50%",
-            [value > 0 ? "bottom" : "top"]: 0,
-            transform: "translateX(-50%)",
-          }
+        ? { top: "50%", [value > 0 ? "right" : "left"]: 0, transform: "translateY(-50%)" }
+        : { left: "50%", [value > 0 ? "bottom" : "top"]: 0, transform: "translateX(-50%)" };
 
     return (
       <AnimatePresence>
@@ -129,8 +130,8 @@ export default function GenerativeFill() {
           </motion.div>
         )}
       </AnimatePresence>
-    )
-  }
+    );
+  };
 
   return (
     <Popover>
@@ -145,29 +146,19 @@ export default function GenerativeFill() {
       <PopoverContent className="w-full">
         <div className="flex flex-col h-full">
           <div className="space-y-2">
-            <h4 className="font-medium text-center py-2 leading-none">
-              Generative Fill
-            </h4>
+            <h4 className="font-medium text-center py-2 leading-none">Generative Fill</h4>
             {activeLayer.width && activeLayer.height ? (
               <div className="flex justify-evenly">
                 <div className="flex flex-col items-center">
                   <span className="text-xs">Current Size:</span>
                   <p className="text-sm text-primary font-bold">
-                    {activeLayer.width}X{activeLayer.height}
+                    {activeLayer.width}x{activeLayer.height}
                   </p>
                 </div>
                 <div className="flex flex-col items-center">
                   <span className="text-xs">New Size:</span>
                   <p className="text-sm text-primary font-bold">
-                    <Popover>
-                      <PopoverTrigger>
-                        {activeLayer.width + width}
-                      </PopoverTrigger>
-                      <PopoverContent>
-                        <Input name="width" type="number" />
-                      </PopoverContent>
-                    </Popover>
-                    X{activeLayer.height + height}
+                    {activeLayer.width + width}x{activeLayer.height + height}
                   </p>
                 </div>
               </div>
@@ -199,7 +190,6 @@ export default function GenerativeFill() {
               />
             </div>
           </div>
-          {/* Preview */}
           <div
             className="preview-container flex-grow"
             style={{
@@ -213,10 +203,7 @@ export default function GenerativeFill() {
             }}
           >
             <div style={previewStyle}>
-              <div
-                className="animate-pulsate"
-                style={previewOverlayStyle}
-              ></div>
+              <div className="animate-pulsate" style={previewOverlayStyle}></div>
               <ExpansionIndicator value={width} axis="x" />
               <ExpansionIndicator value={height} axis="y" />
             </div>
@@ -226,10 +213,10 @@ export default function GenerativeFill() {
             disabled={!activeLayer.url || (!width && !height) || genFillingGenerating}
             onClick={handleGenFill}
           >
-            {genFillingGenerating ? "genFillingGenerating" : "Generative Fill 🎨"}
+            {genFillingGenerating ? "Generating..." : "Generative Fill 🎨"}
           </Button>
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
