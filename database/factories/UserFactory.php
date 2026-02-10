@@ -36,7 +36,7 @@ class UserFactory extends Factory
         return [
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
-            'phone_number' => '+65 9775 0408',
+            'phone_number' => '+65 8916 4359',
             'ip_address' => $this->faker->ipv4(),
             'email' => $this->faker->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
