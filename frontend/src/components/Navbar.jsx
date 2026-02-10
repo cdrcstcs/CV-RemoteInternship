@@ -1,173 +1,228 @@
 import { useState } from "react";
-import { ShoppingCart, UserPlus, LogIn, LogOut, Lock, User } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useUserStore } from "../stores/useUserStore";
-import { useCartStore } from "../stores/useCartStore";
+import {
+  ShoppingCart,
+  UserPlus,
+  LogIn,
+  LogOut,
+  Lock,
+  User,
+} from "lucide-react";
 import Select from "react-select";
 import Flag from "react-world-flags";
 
+import { useUserStore } from "../stores/useUserStore";
+import { useCartStore } from "../stores/useCartStore";
+
+/* =======================
+   NAV CONFIG
+======================= */
+
+const NAV_ITEMS = [
+  { key: "home", label: "Home", path: "/" },
+  { key: "warehouse", label: "Warehouse", path: "/warehouse" },
+  { key: "vehicle", label: "Vehicle", path: "/vehicle" },
+  { key: "map", label: "Map", path: "/map" },
+  { key: "feedback", label: "Create Feedback Form", path: "/feedback-forms/create" },
+  { key: "social", label: "Social Media", path: "/social-media" },
+  { key: "notification", label: "Notifications", path: "/notification" },
+  { key: "network", label: "Network", path: "/network" },
+  { key: "chat", label: "Chat", path: "/chat" },
+  { key: "chatbot", label: "Chat Bot", path: "/chatbot" },
+  { key: "livestream", label: "Live Stream", path: "/live-stream" },
+  { key: "editor", label: "Editor", path: "/editor" },
+  { key: "cart", label: "Cart", path: "/cart" },
+];
+
+const ROLE_NAV_ACCESS = {
+  Administration: NAV_ITEMS.map(i => i.key),
+
+  WarehouseManager: ["home", "warehouse", "map", "notification"],
+
+  VehicleManager: ["home", "vehicle", "map", "notification"],
+
+  DeliveryDriver: ["home", "vehicle", "map", "notification"],
+  DeliveryMan: ["home", "vehicle", "map", "notification"],
+
+  Customer: [
+    "home",
+    "cart",
+    "social",
+    "notification",
+    "network",
+    "chat",
+    "chatbot",
+    "livestream",
+    "editor",
+  ],
+
+  ProductSaler: [
+    "home",
+    "cart",
+    "feedback",
+    "social",
+    "notification",
+    "network",
+    "chat",
+    "chatbot",
+    "livestream",
+    "editor",
+  ],
+
+  CustomerSupportStaff: [
+    "home",
+    "social",
+    "notification",
+    "chat",
+    "chatbot",
+  ],
+
+  FinanceManager: [
+    "home",
+    "cart",
+    "notification",
+    "map",
+  ],
+
+  ShipmentManager: [
+    "home",
+    "vehicle",
+    "map",
+    "notification",
+  ],
+};
+
+/* =======================
+   COMPONENT
+======================= */
+
 const Navbar = () => {
   const { user, logout, setLanguage } = useUserStore();
-  const isAdmin = user?.role === "admin";
   const { cart } = useCartStore();
   const [selectedLanguage, setSelectedLanguage] = useState(null);
 
-  // Language options with flags
+  const role = user?.role;
+  console.log(role);Z
+  const allowedKeys = ROLE_NAV_ACCESS[role] || ["home"];
+  const visibleNavItems = NAV_ITEMS.filter(item =>
+    allowedKeys.includes(item.key)
+  );
+
+  /* ===== Language ===== */
+
   const languageOptions = [
     { value: "en", label: "English", flag: "GB" },
     { value: "es", label: "Spanish", flag: "ES" },
     { value: "fr", label: "French", flag: "FR" },
     { value: "de", label: "German", flag: "DE" },
     { value: "ka", label: "Georgian", flag: "GE" },
-    // Add more languages here as needed
   ];
 
-  const handleLanguageChange = (selectedOption) => {
-    setSelectedLanguage(selectedOption);
-    setLanguage(selectedOption.value);
-    console.log(`Language changed to: ${selectedOption.label}`);
-    // Here, you can handle language change logic like i18n or custom language change
+  const handleLanguageChange = (option) => {
+    setSelectedLanguage(option);
+    setLanguage(option.value);
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-gray-900 border-b border-emerald-800 mb-10">
+    <header className="fixed top-0 left-0 w-full bg-gray-900 border-b border-emerald-800 z-50">
       <div className="container mx-auto px-4 py-3">
-        <div className="flex justify-between items-center">
-          <nav className="flex items-center gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">
-            <Link to={"/"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Home
-            </Link>
-            <Link to={"/warehouse"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Warehouse
-            </Link>
-            <Link to={"/vehicle"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Vehicle
-            </Link>
-            <Link to={"/map"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Map
-            </Link>
-            <Link to={"/feedback-forms/create"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Create Feedback Form
-            </Link>
-            <Link to={"/social-media"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Social Media
-            </Link>
-            <Link to={"/notification"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Notifications
-            </Link>
-            <Link to={"/network"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Network
-            </Link>
-            <Link to={"/chat"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Chat
-            </Link>
-            <Link to={"/chatbot"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Chat Bot
-            </Link>
-            <Link to={"/live-stream"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Live Stream
-            </Link>
-            <Link to={"/wheel"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Wheel
-            </Link>
-            <Link to={"/editor"} className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out">
-              Editor
-            </Link>
-            {user && (
-              <Link
-                to={"/cart"}
-                className="relative group text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out"
-              >
-                <ShoppingCart className="inline-block mr-1 group-hover:text-emerald-400" size={20} />
-                <span className="hidden sm:inline">Cart</span>
-                {cart.length > 0 && (
-                  <span
-                    className="absolute -top-2 -left-2 bg-emerald-500 text-white rounded-full px-2 py-0.5 text-xs group-hover:bg-emerald-400 transition duration-300 ease-in-out"
-                  >
-                    {cart.length}
-                  </span>
-                )}
-              </Link>
-            )}
-            {isAdmin && (
-              <Link
-                className="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1 rounded-md font-medium transition duration-300 ease-in-out flex items-center"
-                to={"/secret-dashboard"}
-              >
-                <Lock className="inline-block mr-1" size={18} />
-                <span className="hidden sm:inline">Dashboard</span>
-              </Link>
-            )}
+        <nav className="flex items-center gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">
 
-            {user ? (
-              <>
-                {/* Profile Link */}
-                <Link
-                  to={"/profile"}
-                  className="text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out flex items-center"
-                >
-                  <User className="inline-block mr-2" size={20} />
-                  <span className="hidden sm:inline">Profile</span>
-                </Link>
+          {/* ===== Dynamic Tabs ===== */}
+          {visibleNavItems.map(item => (
+            <Link
+              key={item.key}
+              to={item.path}
+              className="text-gray-300 hover:text-emerald-400 transition"
+            >
+              {item.label}
+            </Link>
+          ))}
 
-                {/* Log Out Button */}
-                <button
-                  className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out"
-                  onClick={logout}
-                >
-                  <LogOut size={18} />
-                  <span className="hidden sm:inline ml-2">Log Out</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to={"/signup"}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out"
-                >
-                  <UserPlus className="mr-2" size={18} />
-                  Sign Up
-                </Link>
-                <Link
-                  to={"/login"}
-                  className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md flex items-center transition duration-300 ease-in-out"
-                >
-                  <LogIn className="mr-2" size={18} />
-                  Login
-                </Link>
-              </>
+          {/* ===== Cart ===== */}
+          {user && allowedKeys.includes("cart") && (
+            <Link
+              to="/cart"
+              className="relative text-gray-300 hover:text-emerald-400"
+            >
+              <ShoppingCart size={20} />
+              {cart.length > 0 && (
+                <span className="absolute -top-2 -left-2 bg-emerald-500 text-white rounded-full px-2 text-xs">
+                  {cart.length}
+                </span>
+              )}
+            </Link>
+          )}
+
+          {/* ===== Admin Dashboard ===== */}
+          {role === "Administration" && (
+            <Link
+              to="/secret-dashboard"
+              className="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1 rounded-md flex items-center"
+            >
+              <Lock size={18} className="mr-1" />
+              Dashboard
+            </Link>
+          )}
+
+          {/* ===== Auth ===== */}
+          {user ? (
+            <>
+              <Link
+                to="/profile"
+                className="flex items-center text-gray-300 hover:text-emerald-400"
+              >
+                <User size={20} className="mr-1" />
+                Profile
+              </Link>
+
+              <button
+                onClick={logout}
+                className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-md flex items-center"
+              >
+                <LogOut size={18} />
+                <span className="ml-1 hidden sm:inline">Log Out</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/signup"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-md flex items-center"
+              >
+                <UserPlus size={18} className="mr-1" />
+                Sign Up
+              </Link>
+
+              <Link
+                to="/login"
+                className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded-md flex items-center"
+              >
+                <LogIn size={18} className="mr-1" />
+                Login
+              </Link>
+            </>
+          )}
+
+          {/* ===== Language ===== */}
+          <Select
+            value={selectedLanguage}
+            onChange={handleLanguageChange}
+            options={languageOptions}
+            placeholder="Language"
+            getOptionLabel={(e) => (
+              <div className="flex items-center">
+                <Flag code={e.flag} className="w-5 h-5 mr-2" />
+                {e.label}
+              </div>
             )}
-            {/* Language Dropdown */}
-            <div className="ml-4 relative">
-              <Select
-                value={selectedLanguage}
-                onChange={handleLanguageChange}
-                options={languageOptions}
-                getOptionLabel={(e) => (
-                  <div className="flex items-center">
-                    <Flag code={e.flag} className="w-5 h-5 mr-2" />
-                    <span>{e.label}</span>
-                  </div>
-                )}
-                className="w-36"
-                classNamePrefix="react-select"
-                placeholder="Language"
-                styles={{
-                  control: (provided) => ({
-                    ...provided,
-                    minWidth: 150,
-                    zIndex: 9999, // Ensures dropdown is visible above other elements
-                  }),
-                  menu: (provided) => ({
-                    ...provided,
-                    zIndex: 9999, // Ensures dropdown is visible above other elements
-                  }),
-                }}
-                menuPortalTarget={document.body} // Ensures dropdown is rendered correctly even in containers with overflow
-              />
-            </div>
-          </nav>
-        </div>
+            className="w-36"
+            menuPortalTarget={document.body}
+            styles={{
+              menuPortal: base => ({ ...base, zIndex: 9999 }),
+            }}
+          />
+        </nav>
       </div>
     </header>
   );
