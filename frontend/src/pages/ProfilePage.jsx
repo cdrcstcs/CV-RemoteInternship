@@ -32,7 +32,6 @@ const ProfilePage = () => {
   /* =========================
      SEARCH
   ========================== */
-
   const filteredOrders = userOrders?.filter(order => (
     order.id.toString().includes(searchQuery) ||
     order.status?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -42,7 +41,6 @@ const ProfilePage = () => {
   /* =========================
      SORT
   ========================== */
-
   const sortedOrders = [...filteredOrders].sort((a, b) => {
     const aValue = sortField === 'orderDate'
       ? new Date(a.order_date)
@@ -60,7 +58,6 @@ const ProfilePage = () => {
   /* =========================
      PAGINATION
   ========================== */
-
   const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
   const displayedOrders = sortedOrders.slice(
     (currentPage - 1) * itemsPerPage,
@@ -76,7 +73,6 @@ const ProfilePage = () => {
         {/* =========================
            USER INFO
         ========================== */}
-
         <div className="bg-gray-800 p-6 rounded-lg shadow-md">
           <h3 className="text-2xl font-semibold mb-4">User Information</h3>
 
@@ -86,21 +82,20 @@ const ProfilePage = () => {
           <div><span className="font-semibold">Language:</span> {user.language}</div>
 
           {/* =========================
-             ROLES (FIXED)
+             ROLES
           ========================== */}
-
           <div className="mt-6">
             <span className="font-semibold text-lg">Roles:</span>
-
             {userRoles?.length > 0 ? (
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="flex flex-col gap-2 mt-2">
                 {userRoles.map((role, index) => (
-                  <span
+                  <div
                     key={index}
-                    className="bg-emerald-600 text-white px-3 py-1 rounded-full text-sm"
+                    className="bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm flex flex-col"
                   >
-                    {role.role_name}
-                  </span>
+                    <span className="font-semibold">{role.role_name}</span>
+                    <span className="text-gray-200 text-xs">{role.description}</span>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -109,33 +104,37 @@ const ProfilePage = () => {
           </div>
 
           {/* =========================
-             PERMISSIONS
-          ========================== */}
+   PERMISSIONS
+========================== */}
+<div className="mt-6">
+  <span className="font-semibold text-lg">Permissions:</span>
 
-          <div className="mt-6">
-            <span className="font-semibold text-lg">Permissions:</span>
+  {userRoles && userRoles.length > 0 ? (
+    <div className="flex flex-col gap-2 mt-2">
+      {userRoles.map((role, roleIndex) =>
+        role.permissions?.length > 0 ? (
+          role.permissions.map((permission, permIndex) => (
+            <div
+              key={`${roleIndex}-${permIndex}`}
+              className="border border-emerald-500 px-3 py-2 rounded-lg text-sm flex flex-col text-white"
+            >
+              <span className="font-semibold">{permission.permission_name}</span>
+              <span className="text-gray-200 text-xs">{permission.description}</span>
+            </div>
+          ))
+        ) : null
+      )}
+    </div>
+  ) : (
+    <div className="text-gray-500 mt-2">No permissions assigned</div>
+  )}
+</div>
 
-            {userPermissions?.length > 0 ? (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {userPermissions.map((permission, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-700 border border-emerald-500 px-3 py-1 rounded-full text-sm"
-                  >
-                    {permission}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <div className="text-gray-500 mt-2">No permissions assigned</div>
-            )}
-          </div>
         </div>
 
         {/* =========================
-           SEARCH
+           SEARCH ORDERS
         ========================== */}
-
         <div className="bg-gray-800 p-6 rounded-lg shadow-md">
           <h3 className="text-2xl font-semibold mb-4">Search Orders</h3>
           <input 
@@ -150,7 +149,6 @@ const ProfilePage = () => {
         {/* =========================
            ORDERS
         ========================== */}
-
         <div className="space-y-4">
           <h3 className="text-2xl font-semibold mb-4">Orders</h3>
 
@@ -172,7 +170,6 @@ const ProfilePage = () => {
         {/* =========================
            PAGINATION
         ========================== */}
-
         <div className="flex justify-between mt-4">
           <button 
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -196,7 +193,6 @@ const ProfilePage = () => {
         {/* =========================
            INVOICES
         ========================== */}
-
         <div className="mt-8">
           <h3 className="text-2xl font-semibold mb-4">Invoices</h3>
 

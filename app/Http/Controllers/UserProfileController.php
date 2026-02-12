@@ -149,194 +149,196 @@ class UserProfileController extends Controller
     }
 
     public function getCurrentUser(Request $request)
-    {
-        // Log the incoming request to verify who is making the request
-        Log::info('getCurrentUser request started', ['user_id' => $request->user()->id]);
+{
+    // Log the incoming request to verify who is making the request
+    Log::info('getCurrentUser request started', ['user_id' => $request->user()->id]);
 
-        // Get the authenticated user
-        $user = $request->user();
+    // Get the authenticated user
+    $user = $request->user();
 
-        // Log user information before eager loading
-        Log::info('Authenticated user fetched', [
-            'user_id' => $user->id,
-            'user_email' => $user->email,
-            'user_roles' => $user->roles->pluck('role_name'),  // Pluck role names
+    // Log user information before eager loading
+    Log::info('Authenticated user fetched', [
+        'user_id' => $user->id,
+        'user_email' => $user->email,
+        'user_roles' => $user->roles->pluck('role_name', 'description'),  // Pluck role names and descriptions
+    ]);
+
+    // Eager load the related roles and permissions
+    $userWithDetails = $user->load([
+        'roles.permissions',       // Eager load roles and their associated permissions
+    ]);
+
+    // Log after eager loading
+    Log::info('User data with roles and permissions loaded', [
+        'roles_count' => $userWithDetails->roles->count(),
+    ]);
+
+    // Format the roles and permissions for frontend expectations
+    $userWithDetails->roles = $userWithDetails->roles->map(function ($role) {
+        Log::info('Mapping role', ['role_name' => $role->role_name, 'description' => $role->description]);
+        return [
+            'role_name' => $role->role_name,
+            'description' => $role->description, // Include role description
+            'permissions' => $role->permissions->map(function ($permission) {
+                Log::info('Mapping permission', ['permission_name' => $permission->permission_name, 'description' => $permission->description]);
+                return [
+                    'permission_name' => $permission->permission_name,
+                    'description' => $permission->description, // Include permission description
+                ];
+            }),
+        ];
+    });
+
+    // Log the roles and permissions after mapping
+    Log::info('Roles and permissions after mapping', ['roles' => $userWithDetails->roles]);
+
+    // Format the orders and include order_items, products, and payment for frontend expectations
+    $userWithDetails->orders = $userWithDetails->orders->map(function ($order) {
+        Log::info('Mapping order', [
+            'order_id' => $order->id,
+            'order_status' => $order->status,
+            'order_total_amount' => $order->total_amount,
         ]);
 
-        // Eager load the related roles and permissions
-        $userWithDetails = $user->load([
-            'roles.permissions',       // Eager load roles and their associated permissions
-        ]);
+        // Query the order items separately using the order_id
+        $orderItems = OrderItem::where('orders_id', $order->id)->get();
 
-        // Log after eager loading
-        Log::info('User data with roles and permissions loaded', [
-            'roles_count' => $userWithDetails->roles->count(),
-        ]);
+        $formattedOrderItems = $orderItems->map(function ($orderItem) {
+            Log::info('Mapping order item', [
+                'order_item_id' => $orderItem->id,
+                'quantity' => $orderItem->quantity,
+                'total_amount' => $orderItem->total_amount,
+                'product_id' => $orderItem->product_id,
+            ]);
 
-        // Format the roles and permissions for frontend expectations
-        $userWithDetails->roles = $userWithDetails->roles->map(function ($role) {
-            Log::info('Mapping role', ['role_name' => $role->role_name]); // Log each role name
-            return [
-                'role_name' => $role->role_name,
-                'permissions' => $role->permissions->map(function ($permission) {
-                    Log::info('Mapping permission', ['permission_name' => $permission->permission_name]); // Log each permission
+            // Include the product details for this order item
+            $product = $orderItem->product;
+            $productDetails = [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'image' => $product->image,
+                'description'=> $product->description,
+                'price' => $product->price,
+                'isFeatured' => $product->isFeatured,
+                'categories' => $product->categories->map(function ($category) {
                     return [
-                        'permission_name' => $permission->permission_name,
+                        'category_name' => $category->category_name,
+                        'category_description' => $category->description,
                     ];
                 }),
             ];
-        });
-
-        // Log the roles and permissions after mapping
-        Log::info('Roles and permissions after mapping', ['roles' => $userWithDetails->roles]);
-
-        // Format the orders and include order_items, products, and payment for frontend expectations
-        $userWithDetails->orders = $userWithDetails->orders->map(function ($order) use ($user) {
-            Log::info('Mapping order', [
-                'order_id' => $order->id,
-                'order_status' => $order->status,
-                'order_total_amount' => $order->total_amount,
-            ]);
-
-            // Query the order items separately using the order_id
-            $orderItems = OrderItem::where('orders_id', $order->id)->get();
-
-            $formattedOrderItems = $orderItems->map(function ($orderItem) {
-                Log::info('Mapping order item', [
-                    'order_item_id' => $orderItem->id,
-                    'quantity' => $orderItem->quantity,
-                    'total_amount' => $orderItem->total_amount,
-                    'product_id' => $orderItem->product_id,
-                ]);
-                
-                // Include the product details for this order item
-                $product = $orderItem->product;
-                $productDetails = [
-                    'product_id' => $product->id,
-                    'product_name' => $product->name,
-                    'image' => $product->image,
-                    'description'=> $product->description,
-                    'price' => $product->price,
-                    'isFeatured' => $product->isFeatured,
-                    // Add categories for this product
-                    'categories' => $product->categories->map(function ($category) {
-                        return [
-                            'category_name' => $category->category_name,
-                            'category_description' => $category->description,
-                        ];
-                    }),
-                ];
-
-                return [
-                    'order_item_id' => $orderItem->id,
-                    'quantity' => $orderItem->quantity,
-                    'total_amount' => $orderItem->total_amount,
-                    'product' => $productDetails, // Include product details
-                ];
-            });
-
-            // Query the associated payment for the order separately using order_id
-            $paymentData = Payment::where('order_id', $order->id)->first();
-
-            $formattedPaymentData = $paymentData ? [
-                'payment_id' => $paymentData->id,
-                'total_amount' => $paymentData->total_amount,
-                'paid_amount' => $paymentData->paid_amount,
-                'due_amount' => $paymentData->due_amount,
-                'payment_status' => $paymentData->payment_status,
-                'payment_method' => $paymentData->payment_method,
-                'payment_date' => $paymentData->payment_date,
-                'gateway' => $paymentData->gateway,
-                'currency' => $paymentData->currency,
-            ] : null;
-            Log::info('Payment Data', ['payment' => $paymentData]);
 
             return [
-                'id' => $order->id,
-                'status' => $order->status,
-                'order_date' => $order->order_date,
-                'total_amount' => $order->total_amount,
-                'tracking_number' => $order->tracking_number,
-                'order_items' => $formattedOrderItems, // Include order items in the order data
-                'payment' => $formattedPaymentData,    // Include associated payment for the order
+                'order_item_id' => $orderItem->id,
+                'quantity' => $orderItem->quantity,
+                'total_amount' => $orderItem->total_amount,
+                'product' => $productDetails, // Include product details
             ];
         });
 
-        // Log orders after mapping
-        Log::info('Orders after mapping', ['orders' => $userWithDetails->orders]);
+        // Query the associated payment for the order separately using order_id
+        $paymentData = Payment::where('order_id', $order->id)->first();
 
-        // Now we loop through the invoices and find the payment associated with each invoice
-        $invoices = Invoice::all()->map(function ($invoice) {
-            Log::info('Mapping invoice', [
-                'invoice_id' => $invoice->id,
-                'customer_name' => $invoice->customer_name,
-                'total_amount' => $invoice->total_amount,
-                'paid_amount' => $invoice->paid_amount,
-                'payment_status' => $invoice->payment_status,
-            ]);
+        $formattedPaymentData = $paymentData ? [
+            'payment_id' => $paymentData->id,
+            'total_amount' => $paymentData->total_amount,
+            'paid_amount' => $paymentData->paid_amount,
+            'due_amount' => $paymentData->due_amount,
+            'payment_status' => $paymentData->payment_status,
+            'payment_method' => $paymentData->payment_method,
+            'payment_date' => $paymentData->payment_date,
+            'gateway' => $paymentData->gateway,
+            'currency' => $paymentData->currency,
+        ] : null;
+        Log::info('Payment Data', ['payment' => $paymentData]);
 
-            // Query the associated payment using payment_id
-            $paymentData = Payment::where('id', $invoice->payments_id)->first();
+        return [
+            'id' => $order->id,
+            'status' => $order->status,
+            'order_date' => $order->order_date,
+            'total_amount' => $order->total_amount,
+            'tracking_number' => $order->tracking_number,
+            'order_items' => $formattedOrderItems, // Include order items in the order data
+            'payment' => $formattedPaymentData,    // Include associated payment for the order
+        ];
+    });
 
-            $formattedPaymentData = $paymentData ? [
-                'payment_id' => $paymentData->id,
-                'payment_status' => $paymentData->payment_status,
-                'payment_method' => $paymentData->payment_method,
-                'total_amount' => $paymentData->total_amount,
-                'paid_amount' => $paymentData->paid_amount,
-                'due_amount' => $paymentData->due_amount,
-            ] : null;
+    // Log orders after mapping
+    Log::info('Orders after mapping', ['orders' => $userWithDetails->orders]);
 
-            return [
-                'invoice_id' => $invoice->id,
-                'customer_name' => $invoice->customer_name,
-                'total_amount' => $invoice->total_amount,
-                'paid_amount' => $invoice->paid_amount,
-                'due_amount' => $invoice->due_amount,
-                'payment_status' => $invoice->payment_status,
-                'payment_method' => $invoice->payment_method,
-                'created_date' => $invoice->created_date,
-                'discount' => $invoice->discount,
-                'currency' => $invoice->currency,
-                'payment' => $formattedPaymentData, // Include associated payment data
-            ];
-        });
-
-        // Log invoices after mapping
-        Log::info('Invoices after mapping', ['invoices' => $invoices]);
-
-        // Return the formatted user data along with the loaded roles, permissions, orders, payments, and invoices
-        Log::info('Returning response with user details', [
-            'user' => [
-                'id' => $userWithDetails->id,
-                'first_name' => $userWithDetails->first_name,
-                'last_name' => $userWithDetails->last_name,
-                'email' => $userWithDetails->email,
-                'phone_number' => $userWithDetails->phone_number,
-                'language' => $userWithDetails->language,
-            ],
-            'roles' => $userWithDetails->roles,
-            'permissions' => $userWithDetails->roles->pluck('permissions')->flatten(),
-            'orders' => $userWithDetails->orders,
-            'invoices' => $invoices,
-            'payments' => $userWithDetails->payments, // Include payments for the user
+    // Map invoices with associated payments
+    $invoices = Invoice::all()->map(function ($invoice) {
+        Log::info('Mapping invoice', [
+            'invoice_id' => $invoice->id,
+            'customer_name' => $invoice->customer_name,
+            'total_amount' => $invoice->total_amount,
+            'paid_amount' => $invoice->paid_amount,
+            'payment_status' => $invoice->payment_status,
         ]);
 
-        return response()->json([
-            'user' => [
-                'id' => $userWithDetails->id,
-                'first_name' => $userWithDetails->first_name,
-                'last_name' => $userWithDetails->last_name,
-                'email' => $userWithDetails->email,
-                'phone_number' => $userWithDetails->phone_number,
-                'language' => $userWithDetails->language,
-            ],
-            'roles' => $userWithDetails->roles,
-            'permissions' => $userWithDetails->roles->pluck('permissions')->flatten(),
-            'orders' => $userWithDetails->orders,
-            'invoices' => $invoices,
-        ]);
-    }
+        // Query the associated payment using payment_id
+        $paymentData = Payment::where('id', $invoice->payments_id)->first();
+
+        $formattedPaymentData = $paymentData ? [
+            'payment_id' => $paymentData->id,
+            'payment_status' => $paymentData->payment_status,
+            'payment_method' => $paymentData->payment_method,
+            'total_amount' => $paymentData->total_amount,
+            'paid_amount' => $paymentData->paid_amount,
+            'due_amount' => $paymentData->due_amount,
+        ] : null;
+
+        return [
+            'invoice_id' => $invoice->id,
+            'customer_name' => $invoice->customer_name,
+            'total_amount' => $invoice->total_amount,
+            'paid_amount' => $invoice->paid_amount,
+            'due_amount' => $invoice->due_amount,
+            'payment_status' => $invoice->payment_status,
+            'payment_method' => $invoice->payment_method,
+            'created_date' => $invoice->created_date,
+            'discount' => $invoice->discount,
+            'currency' => $invoice->currency,
+            'payment' => $formattedPaymentData, // Include associated payment data
+        ];
+    });
+
+    // Log invoices after mapping
+    Log::info('Invoices after mapping', ['invoices' => $invoices]);
+
+    // Log final response
+    Log::info('Returning response with user details', [
+        'user' => [
+            'id' => $userWithDetails->id,
+            'first_name' => $userWithDetails->first_name,
+            'last_name' => $userWithDetails->last_name,
+            'email' => $userWithDetails->email,
+            'phone_number' => $userWithDetails->phone_number,
+            'language' => $userWithDetails->language,
+        ],
+        'roles' => $userWithDetails->roles,
+        'permissions' => $userWithDetails->roles->pluck('permissions')->flatten(),
+        'orders' => $userWithDetails->orders,
+        'invoices' => $invoices,
+        'payments' => $userWithDetails->payments,
+    ]);
+
+    return response()->json([
+        'user' => [
+            'id' => $userWithDetails->id,
+            'first_name' => $userWithDetails->first_name,
+            'last_name' => $userWithDetails->last_name,
+            'email' => $userWithDetails->email,
+            'phone_number' => $userWithDetails->phone_number,
+            'language' => $userWithDetails->language,
+        ],
+        'roles' => $userWithDetails->roles,
+        'permissions' => $userWithDetails->roles->pluck('permissions')->flatten(),
+        'orders' => $userWithDetails->orders,
+        'invoices' => $invoices,
+    ]);
+}
+
 
 
 

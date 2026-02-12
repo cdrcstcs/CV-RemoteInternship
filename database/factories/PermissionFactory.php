@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Factories;
 
 use App\Models\Permission;
@@ -15,35 +16,92 @@ class PermissionFactory extends Factory
      */
     public function definition(): array
     {
-        // Predefined set of real permissions for an e-commerce platform
-        $permissions = [
-            'view_products' => 'View products on the platform.',
-            'create_product' => 'Add new products to the store.',
-            'update_product' => 'Edit existing product details.',
-            'delete_product' => 'Remove products from the store.',
-            'manage_orders' => 'View and manage customer orders.',
-            'process_refunds' => 'Handle refund requests and payments.',
-            'view_customers' => 'View the list of customers.',
-            'update_customer' => 'Edit customer details like address and contact.',
-            'delete_customer' => 'Remove customer accounts.',
-            'manage_discounts' => 'Create and manage discount codes for customers.',
-            'view_reports' => 'View sales, inventory, and other reports.',
-            'manage_inventory' => 'Update stock levels for products.',
-            'manage_categories' => 'Add, update, or delete product categories.',
-            'manage_shipping' => 'Configure and manage shipping options.',
-            'manage_payments' => 'Set up and configure payment methods.',
-            'manage_reviews' => 'Approve or remove customer product reviews.',
-            'manage_admins' => 'Create and manage administrator accounts.',
-            'view_admin_dashboard' => 'Access the admin dashboard for monitoring activities.',
-        ];
-
-        // Randomly pick a permission and its description from the predefined list
-        $permission = $this->faker->randomElement(array_keys($permissions));
-        $description = $permissions[$permission];
-
         return [
-            'permission_name' => $permission, // Real permission name, e.g., 'view_products'
-            'description' => $description,    // Real description, e.g., 'View products on the platform.'
+            'permission_name' => '',
+            'description' => '',
         ];
+    }
+
+    /**
+     * Return all predefined permissions for the application.
+     *
+     * @return array<int, array{permission_name: string, description: string}>
+     */
+    public static function allPermissions(): array
+    {
+        return [
+            // -----------------------
+            // 1. Administration
+            // -----------------------
+            ['permission_name' => 'Manage Users', 'description' => 'Full access to user management: view and update profiles, change passwords, set language preferences.'],
+            ['permission_name' => 'Manage Products', 'description' => 'Full control over products: create, update, delete, and manage featured status.'],
+            ['permission_name' => 'Manage Inventory', 'description' => 'Full warehouse and inventory management: view, update, create, analyze inventory; manage orders, expenses; process license plates.'],
+            ['permission_name' => 'Manage Vehicles', 'description' => 'Full vehicle and delivery management: manage vehicles, assign routes, monitor shipments.'],
+            ['permission_name' => 'Manage Cart Coupons Payments', 'description' => 'Full cart, coupon, and payment management: process payments, manage coupons, handle delivery preparation.'],
+            ['permission_name' => 'Manage Social Messaging', 'description' => 'Full social and messaging management: connections, notifications, posts, groups, chat, chatbot, emails.'],
+            ['permission_name' => 'Manage Live Streaming', 'description' => 'Full live streaming and LiveKit management: create streams, manage viewers, send messages, manage access tokens.'],
+            ['permission_name' => 'Manage Media Editor Tools', 'description' => 'Full media and editor tools access: image/video editing, background manipulation, transcription, uploads.'],
+            ['permission_name' => 'Manage Two Factor Authentication', 'description' => 'Two-factor authentication management.'],
+
+            // -----------------------
+            // 2. Warehouse Manager
+            // -----------------------
+            ['permission_name' => 'Warehouse Manage Inventory', 'description' => 'Access all warehouse and inventory management functionalities: view, create, update inventories, track orders, manage expenses, process license plates.'],
+            ['permission_name' => 'Warehouse Limited User Management', 'description' => 'Limited access to user profile management.'],
+
+            // -----------------------
+            // 3. Vehicle Manager
+            // -----------------------
+            ['permission_name' => 'Vehicle Manage', 'description' => 'Manage vehicles: view and update vehicles with management details.'],
+
+            // -----------------------
+            // 4. Delivery Man / Driver
+            // -----------------------
+            ['permission_name' => 'Delivery View Shipments', 'description' => 'Access shipments: view shipment details and assigned vehicle.'],
+            ['permission_name' => 'Delivery Manage Routes', 'description' => 'Can manage route assignments for deliveries.'],
+
+            // -----------------------
+            // 5. Customer
+            // -----------------------
+            ['permission_name' => 'Customer Manage Profile', 'description' => 'Manage personal profile and addresses.'],
+            ['permission_name' => 'Customer Manage Cart Payments Coupons', 'description' => 'Manage cart, payments, and coupons.'],
+            ['permission_name' => 'Customer View Products', 'description' => 'Access to view products, ratings, and recommendations.'],
+            ['permission_name' => 'Customer Social Features', 'description' => 'Participate in social features: posts, comments, likes, connections, notifications, block/follow.'],
+            ['permission_name' => 'Customer Messaging Chatbot', 'description' => 'Access messaging and chatbot interactions.'],
+            ['permission_name' => 'Customer Live Stream', 'description' => 'Participate in live streaming: own streams, view streams, receive viewer tokens.'],
+            ['permission_name' => 'Customer Media Tools', 'description' => 'Access basic media and editor tools for personal use.'],
+
+            // -----------------------
+            // 6. ProductSaler
+            // -----------------------
+            ['permission_name' => 'Productsaler Feedback Forms', 'description' => 'Manage feedback forms for orders.'],
+            ['permission_name' => 'Productsaler Manage Coupons Visibility', 'description' => 'Manage coupons and assist in product visibility.'],
+
+            // -----------------------
+            // 7. Customer Support Staff
+            // -----------------------
+            ['permission_name' => 'Support Read Products', 'description' => 'Read access to products.'],
+            ['permission_name' => 'Support Read Ratings', 'description' => 'Read access to ratings.'],
+            ['permission_name' => 'Support Read Posts', 'description' => 'Read access to posts.'],
+            ['permission_name' => 'Support Read Social', 'description' => 'Read access to social connections and notifications.'],
+        ];
+    }
+    /**
+     * Return permissions suitable for a given role
+     */
+    public static function permissionsForRole(string $roleName): array
+    {
+        $all = self::allPermissions();
+
+        return match ($roleName) {
+            'Administration' => $all, // Admin gets all
+            'WarehouseManager' => array_filter($all, fn($p) => str_contains($p['permission_name'], 'Warehouse') || str_contains($p['permission_name'], 'Manage Profile')),
+            'VehicleManager' => array_filter($all, fn($p) => str_contains($p['permission_name'], 'Vehicle')),
+            'DeliveryDriver', 'DeliveryMan' => array_filter($all, fn($p) => str_contains($p['permission_name'], 'Delivery')),
+            'Customer' => array_filter($all, fn($p) => str_starts_with($p['permission_name'], 'Customer')),
+            'ProductSaler' => array_filter($all, fn($p) => str_starts_with($p['permission_name'], 'Customer') || str_contains($p['permission_name'], 'Productsaler')),
+            'CustomerSupportStaff' => array_filter($all, fn($p) => str_starts_with($p['permission_name'], 'Support')),
+            default => [],
+        };
     }
 }

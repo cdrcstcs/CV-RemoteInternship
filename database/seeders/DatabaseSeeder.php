@@ -2,6 +2,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Database\Factories\PermissionFactory;
 use App\Models\{
     User,
     Role,
@@ -159,16 +160,27 @@ class DatabaseSeeder extends Seeder
 
 
 
-        // Seed Users and their roles
-        foreach ($users as $user) {
+       foreach ($users as $user) {
             $role = Role::factory()->create();
+
+            // Assign role to user
             UserRole::create([
                 'users_id' => $user->id,
                 'roles_id' => $role->id,
             ]);
-            RolePermission::factory()->create([
-                'roles_id' => $role->id,
-            ]);
+
+            // Assign permissions suitable for the role
+            $permissions = PermissionFactory::permissionsForRole($role->role_name);
+
+            foreach ($permissions as $perm) {
+                RolePermission::create([
+                    'roles_id' => $role->id,
+                    'permissions_id' => Permission::firstOrCreate(
+                        ['permission_name' => $perm['permission_name']],
+                        ['description' => $perm['description']]
+                    )->id,
+                ]);
+            }
         }
 
         // Seed Categories
