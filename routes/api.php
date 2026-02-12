@@ -27,7 +27,6 @@ use App\Http\Controllers\MailController;
 use App\Http\Controllers\VideoChatController;
 use App\Http\Controllers\BlockController;
 use App\Http\Controllers\FollowController;
-use App\Http\Controllers\LiveKitController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\ViewerController;
 use App\Http\Controllers\StreamMessageController;
@@ -133,9 +132,6 @@ Route::middleware(['custom_cors'])->group(function () {
         Route::post('/unfollow/{id}', [FollowController::class, 'unfollowUser']);
         Route::get('/is-following/{id}', [FollowController::class, 'isFollowingUser']);
         Route::get('/followed-users', [FollowController::class, 'getFollowedUsers']);
-        Route::post('/livekit/create-ingress/{ingressType}', [LiveKitController::class, 'createIngress']);
-        Route::post('/livekit/reset-ingresses/{hostIdentity}', [LiveKitController::class, 'resetIngresses']);
-        Route::get('/livekit/create-token/{roomName}', [LiveKitController::class, 'createAccessToken']);
         Route::post('create-stream', [StreamController::class, 'createStream']);  // Create a new stream
         Route::post('stop-stream', [StreamController::class, 'stopStream']); // Stop the stream
         Route::post('/stream/update', [StreamController::class, 'updateStream']);

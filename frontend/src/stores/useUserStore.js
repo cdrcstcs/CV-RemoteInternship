@@ -7,7 +7,6 @@ export const useUserStore = create((set, get) => ({
   loading: false,
   checkingAuth: true,
   userAddresses: [], // Store user addresses
-  userAddresses: [],
   userRoles: [],  // Add userRoles to the state
   userPermissions: [],  // Add userPermissions to the state
   userOrders: [],  // Add userOrders to the state

@@ -35,15 +35,11 @@ const NAV_ITEMS = [
 ];
 
 const ROLE_NAV_ACCESS = {
-  Administration: NAV_ITEMS.map(i => i.key),
-
+  Administration: NAV_ITEMS.map((i) => i.key),
   WarehouseManager: ["home", "warehouse", "map", "notification"],
-
   VehicleManager: ["home", "vehicle", "map", "notification"],
-
   DeliveryDriver: ["home", "vehicle", "map", "notification"],
   DeliveryMan: ["home", "vehicle", "map", "notification"],
-
   Customer: [
     "home",
     "cart",
@@ -55,7 +51,6 @@ const ROLE_NAV_ACCESS = {
     "livestream",
     "editor",
   ],
-
   ProductSaler: [
     "home",
     "cart",
@@ -68,7 +63,6 @@ const ROLE_NAV_ACCESS = {
     "livestream",
     "editor",
   ],
-
   CustomerSupportStaff: [
     "home",
     "social",
@@ -76,20 +70,8 @@ const ROLE_NAV_ACCESS = {
     "chat",
     "chatbot",
   ],
-
-  FinanceManager: [
-    "home",
-    "cart",
-    "notification",
-    "map",
-  ],
-
-  ShipmentManager: [
-    "home",
-    "vehicle",
-    "map",
-    "notification",
-  ],
+  FinanceManager: ["home", "cart", "notification", "map"],
+  ShipmentManager: ["home", "vehicle", "map", "notification"],
 };
 
 /* =======================
@@ -97,18 +79,18 @@ const ROLE_NAV_ACCESS = {
 ======================= */
 
 const Navbar = () => {
-  const { user, logout, setLanguage } = useUserStore();
+  const { user, userRoles, checkingAuth, logout, setLanguage } = useUserStore();
   const { cart } = useCartStore();
   const [selectedLanguage, setSelectedLanguage] = useState(null);
 
-  const role = user?.role;
-  console.log(role);Z
+  if (checkingAuth) return null;
+  const role = userRoles?.[0]?.role_name || 'Customer';
+  console.log(role);
   const allowedKeys = ROLE_NAV_ACCESS[role] || ["home"];
-  const visibleNavItems = NAV_ITEMS.filter(item =>
+
+  const visibleNavItems = NAV_ITEMS.filter((item) =>
     allowedKeys.includes(item.key)
   );
-
-  /* ===== Language ===== */
 
   const languageOptions = [
     { value: "en", label: "English", flag: "GB" },
@@ -128,8 +110,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-3">
         <nav className="flex items-center gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">
 
-          {/* ===== Dynamic Tabs ===== */}
-          {visibleNavItems.map(item => (
+          {visibleNavItems.map((item) => (
             <Link
               key={item.key}
               to={item.path}
@@ -139,7 +120,6 @@ const Navbar = () => {
             </Link>
           ))}
 
-          {/* ===== Cart ===== */}
           {user && allowedKeys.includes("cart") && (
             <Link
               to="/cart"
@@ -154,7 +134,6 @@ const Navbar = () => {
             </Link>
           )}
 
-          {/* ===== Admin Dashboard ===== */}
           {role === "Administration" && (
             <Link
               to="/secret-dashboard"
@@ -165,7 +144,6 @@ const Navbar = () => {
             </Link>
           )}
 
-          {/* ===== Auth ===== */}
           {user ? (
             <>
               <Link
@@ -204,7 +182,6 @@ const Navbar = () => {
             </>
           )}
 
-          {/* ===== Language ===== */}
           <Select
             value={selectedLanguage}
             onChange={handleLanguageChange}
@@ -219,7 +196,7 @@ const Navbar = () => {
             className="w-36"
             menuPortalTarget={document.body}
             styles={{
-              menuPortal: base => ({ ...base, zIndex: 9999 }),
+              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
             }}
           />
         </nav>
