@@ -22,10 +22,6 @@ export const useLiveStreamStore = create((set, get) => ({
   isErrorStream: false,
   errorMessageStream: "",
 
-  streams: [], // Store many streams
-  isProcessingStream: false,
-  isErrorStream: false,
-  errorMessageStream: "",
 
   isStoppingStream: false,
   isErrorStoppingStream: false,

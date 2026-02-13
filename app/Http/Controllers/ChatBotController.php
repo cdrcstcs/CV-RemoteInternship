@@ -23,19 +23,19 @@ class ChatBotController extends Controller
     public function gatherChatbotContext()
     {
         // Fetch latest comments for each post (if needed)
-        $comments = Comment::with('post', 'user')->get();
+        $comments = Comment::with('post', 'user')->get(10);
 
         // Fetch products data
-        $products = Product::with('supplier', 'categories', 'coupons')->get();
+        $products = Product::with('supplier', 'categories', 'coupons')->get(10);
 
         // Fetch posts and their associated comments and likes
-        $posts = Post::with(['author', 'comments', 'likes'])->get();
+        $posts = Post::with(['author', 'comments', 'likes'])->get(10);
 
         // Fetch coupons (products and users associated with them)
-        $coupons = Coupon::with('users', 'products')->get();
+        $coupons = Coupon::with('users', 'products')->get(10);
 
         // Fetch roles and permissions (assuming this is relevant to your context)
-        $roles = Role::with('permissions')->get();
+        $roles = Role::with('permissions')->get(10);
 
         // Optional: You can combine all the data into a single structure to make it easy to pass
         $contextData = [

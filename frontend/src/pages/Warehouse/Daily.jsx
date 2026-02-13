@@ -1,118 +1,124 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Box } from "@mui/material";
 import { ResponsiveLine } from "@nivo/line";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import useLineChartStore from "../../stores/useLineChartStore";
+
 const Daily = () => {
   const [startDate, setStartDate] = useState(new Date("2024-05-01"));
   const [endDate, setEndDate] = useState(new Date("2025-05-15"));
-  const { data, loading, isError, errorMessage, fetchLineChartData } = useLineChartStore();
+
+  const {
+    data,
+    loading,
+    isError,
+    errorMessage,
+    fetchLineChartData,
+  } = useLineChartStore();
 
   useEffect(() => {
-    // Fetch data when the date range changes
-    fetchLineChartData(startDate, endDate);
+    if (startDate && endDate) {
+      fetchLineChartData(startDate, endDate);
+    }
   }, [startDate, endDate, fetchLineChartData]);
 
-  // Format the data for the chart
-  const formattedData = [
-    {
-      id: "Shipment",
-      color: 'yellow', // Hardcoded color for Shipment
-      data: data.map((item) => ({
-        x: item.date, // Assuming `item.date` is in a format like "2023-05-01"
-        y: item.total_shipment_amount, // Change this if necessary to the correct field
-      })),
-    },
-    {
-      id: "Vehicle Maintenance",
-      color: "green", // Hardcoded color for Vehicle Maintenance
-      data: data.map((item) => ({
-        x: item.date, // Assuming `item.date` is in a format like "2023-05-01"
-        y: item.total_maintenance_cost, // Change this if necessary to the correct field
-      })),
-    },
-    {
-      id: "Product Expenses",
-      color: "red", // Hardcoded color for Product Expenses
-      data: data.map((item) => ({
-        x: item.date, // Assuming `item.date` is in a format like "2023-05-01"
-        y: item.total_product_expenses, // Change this if necessary to the correct field
-      })),
-    },
-  ];
+  /**
+   * Format + Sort Data (Ascending by Date)
+   */
+  const formattedData = useMemo(() => {
+    if (!Array.isArray(data) || data.length === 0) return [];
+
+    // 1️⃣ Keep only valid date records
+    const safeData = data.filter(
+      (item) =>
+        item?.date &&
+        !isNaN(new Date(item.date))
+    );
+
+    // 2️⃣ Sort ascending (oldest → newest)
+    const sortedData = [...safeData].sort(
+      (a, b) => new Date(a.date) - new Date(b.date)
+    );
+
+    // 3️⃣ Map into chart structure
+    return [
+      {
+        id: "Shipment",
+        color: "yellow",
+        data: sortedData
+          .filter((item) => item.total_shipment_amount != null)
+          .map((item) => ({
+            x: new Date(item.date),
+            y: Number(item.total_shipment_amount) || 0,
+          })),
+      },
+      {
+        id: "Vehicle Maintenance",
+        color: "green",
+        data: sortedData
+          .filter((item) => item.total_maintenance_cost != null)
+          .map((item) => ({
+            x: new Date(item.date),
+            y: Number(item.total_maintenance_cost) || 0,
+          })),
+      },
+      {
+        id: "Product Expenses",
+        color: "red",
+        data: sortedData
+          .filter((item) => item.total_product_expenses != null)
+          .map((item) => ({
+            x: new Date(item.date),
+            y: Number(item.total_product_expenses) || 0,
+          })),
+      },
+    ];
+  }, [data]);
 
   return (
     <Box m="1.5rem 2.5rem">
       <Box height="75vh">
-        <Box display="flex" justifyContent="flex-end">
-          <Box>
-            <DatePicker
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              selectsStart
-              startDate={startDate}
-              endDate={endDate}
-              className="bg-emerald-400"
-            />
-          </Box>
-          <p className="w-4 bg-gray-900"></p>
-          <Box>
-            <DatePicker
-              selected={endDate}
-              onChange={(date) => setEndDate(date)}
-              selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              minDate={startDate}
-              className="bg-emerald-400"
-            />
-          </Box>
+
+        {/* Date Pickers */}
+        <Box display="flex" justifyContent="flex-end" gap={2} mb={3}>
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+            selectsStart
+            startDate={startDate}
+            endDate={endDate}
+            className="bg-emerald-400 px-2 py-1 rounded"
+          />
+
+          <DatePicker
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+            selectsEnd
+            startDate={startDate}
+            endDate={endDate}
+            minDate={startDate}
+            className="bg-emerald-400 px-2 py-1 rounded"
+          />
         </Box>
 
         {loading ? (
           <>Loading...</>
         ) : isError ? (
           <Box color="red">{errorMessage}</Box>
-        ) : formattedData.length ? (
+        ) : formattedData.length > 0 &&
+          formattedData.some((serie) => serie.data.length > 0) ? (
           <ResponsiveLine
             data={formattedData}
-            theme={{
-              axis: {
-                domain: {
-                  line: {
-                    stroke: "#9e9e9e", // Hardcoded color for axis line
-                  },
-                },
-                legend: {
-                  text: {
-                    fill: "#9e9e9e", // Hardcoded color for legend text
-                  },
-                },
-                ticks: {
-                  line: {
-                    stroke: "#9e9e9e", // Hardcoded color for ticks
-                    strokeWidth: 1,
-                  },
-                  text: {
-                    fill: "#9e9e9e", // Hardcoded color for ticks text
-                  },
-                },
-              },
-              legends: {
-                text: {
-                  fill: "#9e9e9e", // Hardcoded color for legend text
-                },
-              },
-              tooltip: {
-                container: {
-                  color: "#1976d2", // Hardcoded color for tooltip
-                },
-              },
-            }}
-            colors={{ datum: "color" }}
             margin={{ top: 50, right: 50, bottom: 70, left: 60 }}
-            xScale={{ type: "point" }}
+
+            /* Time Scale (Required for real dates) */
+            xScale={{
+              type: "time",
+              format: "native",
+              precision: "day",
+            }}
+
             yScale={{
               type: "linear",
               min: "auto",
@@ -120,56 +126,72 @@ const Daily = () => {
               stacked: false,
               reverse: false,
             }}
+
+            xFormat="time:%Y-%m-%d"
             yFormat=" >-.2f"
             curve="catmullRom"
-            axisTop={null}
-            axisRight={null}
+
             axisBottom={{
-              orient: "bottom",
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 90,
+              format: "%b %d",
+              tickValues: "every 1 month",
+              tickRotation: 45,
               legend: "Date",
-              legendOffset: 60,
+              legendOffset: 50,
               legendPosition: "middle",
             }}
+
             axisLeft={{
-              orient: "left",
-              tickSize: 5,
-              tickPadding: 5,
-              tickRotation: 0,
               legend: "Total",
               legendOffset: -50,
               legendPosition: "middle",
             }}
+
             enableGridX={false}
-            enableGridY={false}
-            pointSize={10}
+            enableGridY={true}
+
+            pointSize={6}
             pointColor={{ theme: "background" }}
             pointBorderWidth={2}
             pointBorderColor={{ from: "serieColor" }}
-            pointLabelYOffset={-12}
             useMesh={true}
+
+            colors={{ datum: "color" }}
+
+            theme={{
+              axis: {
+                domain: { line: { stroke: "#9e9e9e" } },
+                ticks: {
+                  line: { stroke: "#9e9e9e" },
+                  text: { fill: "#9e9e9e" },
+                },
+                legend: {
+                  text: { fill: "#9e9e9e" },
+                },
+              },
+              legends: {
+                text: { fill: "#9e9e9e" },
+              },
+              tooltip: {
+                container: {
+                  color: "#1976d2",
+                },
+              },
+            }}
+
             legends={[
               {
                 anchor: "top-left",
                 direction: "column",
-                justify: false,
                 translateX: 50,
-                translateY: 0,
-                itemsSpacing: 0,
-                itemDirection: "left-to-right",
-                itemWidth: 80,
+                itemWidth: 120,
                 itemHeight: 20,
-                itemOpacity: 0.75,
                 symbolSize: 12,
                 symbolShape: "circle",
-                symbolBorderColor: "rgba(0, 0, 0, .5)",
                 effects: [
                   {
                     on: "hover",
                     style: {
-                      itemBackground: "rgba(0, 0, 0, .03)",
+                      itemBackground: "rgba(0,0,0,0.03)",
                       itemOpacity: 1,
                     },
                   },
