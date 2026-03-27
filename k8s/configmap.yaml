@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-config
+  namespace: ecommerce
+data:
+  APP_ENV: production
+  APP_DEBUG: "false"
+  FRONTEND_URL: "https://yourdomain.com"
+  BACKEND_URL: "https://yourdomain.com/api"

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: ecommerce
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: yourdockerhub/backend:latest
+        ports:
+        - containerPort: 9000
+        envFrom:
+        - secretRef:
+            name: ecommerce-secrets
+        - configMapRef:
+            name: ecommerce-config

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: livekit
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: livekit
+  template:
+    metadata:
+      labels:
+        app: livekit
+    spec:
+      containers:
+      - name: livekit
+        image: livekit/livekit-server:latest
+        ports:
+        - containerPort: 7880
+        - containerPort: 7881
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: livekit-service
+  namespace: ecommerce
+spec:
+  selector:
+    app: livekit
+  ports:
+    - port: 7880
+      targetPort: 7880
+    - port: 7881
+      targetPort: 7881
+  type: ClusterIP
