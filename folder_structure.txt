@@ -1,0 +1,525 @@
+.
+├── app
+│   ├── DesignPattern
+│   │   └── DesignPattern.php
+│   ├── Enums
+│   │   ├── GiftTypeEnum.php
+│   │   └── QuestionTypeEnum.php
+│   ├── Events
+│   │   ├── GroupDeleted.php
+│   │   ├── OrderStatusUpdated.php
+│   │   ├── SocketMessage.php
+│   │   └── StreamChatMessageSent.php
+│   ├── Http
+│   │   ├── Controllers
+│   │   │   ├── Auth
+│   │   │   │   ├── AuthenticatedSessionController.php
+│   │   │   │   ├── EmailVerificationNotificationController.php
+│   │   │   │   ├── NewPasswordController.php
+│   │   │   │   ├── PasswordResetLinkController.php
+│   │   │   │   ├── RegisteredUserController.php
+│   │   │   │   └── VerifyEmailController.php
+│   │   │   ├── AuthController.php
+│   │   │   ├── BlockController.php
+│   │   │   ├── CartController.php
+│   │   │   ├── ChatBotController.php
+│   │   │   ├── ConnectionRequestController.php
+│   │   │   ├── Controller.php
+│   │   │   ├── CouponController.php
+│   │   │   ├── DeliveryController.php
+│   │   │   ├── EditorController.php
+│   │   │   ├── FeedbackFormController.php
+│   │   │   ├── FileController.php
+│   │   │   ├── FollowController.php
+│   │   │   ├── GroupController.php
+│   │   │   ├── LicensePlateController.php
+│   │   │   ├── MailController.php
+│   │   │   ├── MapController.php
+│   │   │   ├── MessageController.php
+│   │   │   ├── NotificationController.php
+│   │   │   ├── OrderController.php
+│   │   │   ├── PaymentController.php
+│   │   │   ├── PostController.php
+│   │   │   ├── ProductController.php
+│   │   │   ├── ProfileController.php
+│   │   │   ├── RatingController.php
+│   │   │   ├── StreamController.php
+│   │   │   ├── StreamMessageController.php
+│   │   │   ├── StripeController.php
+│   │   │   ├── TwoFactorController.php
+│   │   │   ├── UserController.php
+│   │   │   ├── UserProfileController.php
+│   │   │   ├── VehicleManagerController.php
+│   │   │   ├── ViewerController.php
+│   │   │   └── WarehouseController.php
+│   │   ├── Middleware
+│   │   │   ├── CustomCors.php
+│   │   │   ├── EnsureEmailIsVerified.php
+│   │   │   ├── RoleRoute.php
+│   │   │   └── TranslateResponse.php
+│   │   ├── Requests
+│   │   │   ├── Auth
+│   │   │   │   └── LoginRequest.php
+│   │   │   ├── ProfileUpdateRequest.php
+│   │   │   ├── StoreFeedbackFormAnswerRequest.php
+│   │   │   ├── StoreFeedbackFormRequest.php
+│   │   │   ├── StoreGroupRequest.php
+│   │   │   ├── StoreMessageRequest.php
+│   │   │   ├── UpdateFeedbackFormRequest.php
+│   │   │   └── UpdateGroupRequest.php
+│   │   └── Resources
+│   │       ├── FeedbackFormAnswerResource.php
+│   │       ├── FeedbackFormQuestionResource.php
+│   │       ├── FeedbackFormResource.php
+│   │       ├── GroupResource.php
+│   │       ├── MessageAttachmentResource.php
+│   │       ├── MessageResource.php
+│   │       └── UserResource.php
+│   ├── Integrations
+│   │   └── Files
+│   │       ├── CloudinaryImageClient.php
+│   │       ├── CloudinaryResults.php
+│   │       ├── CloudinaryVideoClient.php
+│   │       └── CloudinaryVideoResults.php
+│   ├── Jobs
+│   │   ├── BroadcastStreamMessage.php
+│   │   └── DeleteGroupJob.php
+│   ├── Mail
+│   │   └── OrderConfirmationMail.php
+│   ├── Models
+│   │   ├── Block.php
+│   │   ├── Category.php
+│   │   ├── Chatbot.php
+│   │   ├── Comment.php
+│   │   ├── ConnectionRequest.php
+│   │   ├── Conversation.php
+│   │   ├── Coupon.php
+│   │   ├── FeedbackForm.php
+│   │   ├── FeedbackFormAnswer.php
+│   │   ├── FeedbackFormQuestion.php
+│   │   ├── FeedbackFormQuestionAnswer.php
+│   │   ├── Follow.php
+│   │   ├── Group.php
+│   │   ├── Inventory.php
+│   │   ├── Invoice.php
+│   │   ├── Like.php
+│   │   ├── LocationHistory.php
+│   │   ├── Message.php
+│   │   ├── MessageAttachment.php
+│   │   ├── Notification.php
+│   │   ├── Order.php
+│   │   ├── OrderItem.php
+│   │   ├── Payment.php
+│   │   ├── Permission.php
+│   │   ├── Post.php
+│   │   ├── Product.php
+│   │   ├── ProductCategory.php
+│   │   ├── ProductCoupon.php
+│   │   ├── Provider.php
+│   │   ├── Rating.php
+│   │   ├── Role.php
+│   │   ├── RolePermission.php
+│   │   ├── RouteCondition.php
+│   │   ├── RouteDetail.php
+│   │   ├── RouteOptimization.php
+│   │   ├── Shipment.php
+│   │   ├── Stream.php
+│   │   ├── StreamGift.php
+│   │   ├── StreamMessage.php
+│   │   ├── User.php
+│   │   ├── UserAddress.php
+│   │   ├── UserConnection.php
+│   │   ├── UserCoupon.php
+│   │   ├── UserRole.php
+│   │   ├── Vehicle.php
+│   │   ├── VehicleManagement.php
+│   │   └── Warehouse.php
+│   ├── Observers
+│   │   └── MessageObserver.php
+│   ├── Providers
+│   │   ├── AppServiceProvider.php
+│   │   └── HorizonServiceProvider.php
+│   └── Services
+│       ├── CloudinaryService.php
+│       └── RecursiveTranslation.php
+├── bootstrap
+│   ├── app.php
+│   ├── cache
+│   │   ├── packages.php
+│   │   └── services.php
+│   └── providers.php
+├── config
+│   ├── app.php
+│   ├── auth.php
+│   ├── broadcasting.php
+│   ├── cache.php
+│   ├── cors.php
+│   ├── database.php
+│   ├── filesystems.php
+│   ├── horizon.php
+│   ├── jwt.php
+│   ├── logging.php
+│   ├── mail.php
+│   ├── queue.php
+│   ├── reverb.php
+│   ├── sanctum.php
+│   ├── services.php
+│   └── session.php
+├── database
+│   ├── factories
+│   │   ├── CategoryFactory.php
+│   │   ├── ChatbotFactory.php
+│   │   ├── CommentFactory.php
+│   │   ├── ConnectionRequestFactory.php
+│   │   ├── CouponFactory.php
+│   │   ├── FeedbackFormAnswerFactory.php
+│   │   ├── FeedbackFormFactory.php
+│   │   ├── FeedbackFormQuestionAnswerFactory.php
+│   │   ├── FeedbackFormQuestionFactory.php
+│   │   ├── GroupFactory.php
+│   │   ├── InventoryFactory.php
+│   │   ├── InvoiceFactory.php
+│   │   ├── LikeFactory.php
+│   │   ├── LocationHistoryFactory.php
+│   │   ├── MessageFactory.php
+│   │   ├── NotificationFactory.php
+│   │   ├── OrderFactory.php
+│   │   ├── OrderItemFactory.php
+│   │   ├── PaymentFactory.php
+│   │   ├── PermissionFactory.php
+│   │   ├── PostFactory.php
+│   │   ├── ProductCategoryFactory.php
+│   │   ├── ProductCouponFactory.php
+│   │   ├── ProductFactory.php
+│   │   ├── ProviderFactory.php
+│   │   ├── RatingFactory.php
+│   │   ├── RoleFactory.php
+│   │   ├── RolePermissionFactory.php
+│   │   ├── ShipmentFactory.php
+│   │   ├── UserAddressFactory.php
+│   │   ├── UserConnectionFactory.php
+│   │   ├── UserCouponFactory.php
+│   │   ├── UserFactory.php
+│   │   ├── UserRoleFactory.php
+│   │   ├── VehicleFactory.php
+│   │   ├── VehicleManagementFactory.php
+│   │   └── WarehouseFactory.php
+│   ├── migrations
+│   │   ├── 0001_01_01_000000_create_users_table.php
+│   │   ├── 0001_01_01_000001_create_cache_table.php
+│   │   ├── 0001_01_01_000002_create_jobs_table.php
+│   │   ├── 2022_11_21_170127_create_applications_table.php
+│   │   ├── 2022_11_21_170521_create_application_questions_table.php
+│   │   ├── 2022_11_21_170534_create_application_answers_table.php
+│   │   ├── 2022_11_21_170552_create_application_question_answers_table.php
+│   │   ├── 2024_01_16_114923_create_route_conditions_table.php
+│   │   ├── 2024_04_13_093225_create_groups_table.php
+│   │   ├── 2024_04_13_093235_create_conversations_table.php
+│   │   ├── 2024_04_13_093308_create_messages_table.php
+│   │   ├── 2024_04_13_093313_create_message_attachments_table.php
+│   │   ├── 2024_10_31_160146_create_posts_table.php
+│   │   ├── 2024_10_31_160320_create_notifications_table.php
+│   │   ├── 2024_10_31_160454_create_connection_requests_table.php
+│   │   ├── 2024_11_02_131647_create_comments_table.php
+│   │   ├── 2024_11_02_133312_create_likes_table.php
+│   │   ├── 2024_11_03_122501_create_user_connections_table.php
+│   │   ├── 2024_12_19_071415_create_personal_access_tokens_table.php
+│   │   ├── 2024_12_21_062833_create_vehicle_management_table.php
+│   │   ├── 2024_12_21_063021_create_products_table.php
+│   │   ├── 2024_12_21_063209_create_warehouses_table.php
+│   │   ├── 2024_12_21_063343_create_inventory_table.php
+│   │   ├── 2024_12_21_063459_create_orders_table.php
+│   │   ├── 2024_12_21_063602_create_providers_table.php
+│   │   ├── 2024_12_21_063734_create_payments_table.php
+│   │   ├── 2024_12_21_063904_create_permissions_table.php
+│   │   ├── 2024_12_21_064015_create_categories_table.php
+│   │   ├── 2024_12_21_064128_create_shipments_table.php
+│   │   ├── 2024_12_21_064254_create_ratings_table.php
+│   │   ├── 2024_12_21_064420_create_roles_table.php
+│   │   ├── 2024_12_21_064524_create_vehicles_table.php
+│   │   ├── 2024_12_21_064745_create_invoices_table.php
+│   │   ├── 2024_12_21_064905_create_products_categories_table.php
+│   │   ├── 2024_12_21_065141_create_users_roles_table.php
+│   │   ├── 2024_12_21_065255_create_roles_permissions_table.php
+│   │   ├── 2024_12_21_065342_create_order_items_table.php
+│   │   ├── 2024_12_21_065621_create_coupons_table.php
+│   │   ├── 2024_12_21_065731_create_users_coupons_table.php
+│   │   ├── 2024_12_21_065839_create_products_coupons_table.php
+│   │   ├── 2025_01_07_085605_create_location_histories_table.php
+│   │   ├── 2025_01_09_114839_create_user_addresses_table.php
+│   │   ├── 2025_01_11_122341_create_route_optimizations_table.php
+│   │   ├── 2025_01_11_122457_create_route_details_table.php
+│   │   ├── 2025_02_21_085625_create_chatbots_table.php
+│   │   ├── 2025_02_28_061922_create_follows_table.php
+│   │   ├── 2025_02_28_062142_create_blocks_table.php
+│   │   ├── 2025_02_28_062340_create_streams_table.php
+│   │   ├── 2025_03_05_150850_create_stream_messages_table.php
+│   │   └── 2025_03_05_151520_create_stream_gifts_table.php
+│   └── seeders
+│       └── DatabaseSeeder.php
+├── frontend
+│   ├── eslint.config.js
+│   ├── postcss.config.js
+│   ├── public
+│   ├── src
+│   │   ├── animations
+│   │   ├── App.jsx
+│   │   ├── components
+│   │   │   ├── AnalyticsTab.jsx
+│   │   │   ├── CartItem.jsx
+│   │   │   ├── CategoryItem.jsx
+│   │   │   ├── CreateProductForm.jsx
+│   │   │   ├── Editor
+│   │   │   │   ├── Badge.jsx
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Card.jsx
+│   │   │   │   ├── Checkbox.jsx
+│   │   │   │   ├── Dialog.jsx
+│   │   │   │   ├── DropdownMenu.jsx
+│   │   │   │   ├── Form.jsx
+│   │   │   │   ├── ImageComparison.jsx
+│   │   │   │   ├── Input.jsx
+│   │   │   │   ├── Label.jsx
+│   │   │   │   ├── LayerImage.jsx
+│   │   │   │   ├── Popover.jsx
+│   │   │   │   ├── RadioGroup.jsx
+│   │   │   │   └── Tooltip.jsx
+│   │   │   ├── FeaturedProducts.jsx
+│   │   │   ├── FeedBackForm
+│   │   │   │   ├── FeedbackFormQuestions.jsx
+│   │   │   │   ├── PublicQuestionView.jsx
+│   │   │   │   └── QuestionEditor.jsx
+│   │   │   ├── GiftCouponCard.jsx
+│   │   │   ├── LiveStream
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   └── Sidebar.jsx
+│   │   │   ├── LoadingSpinner.jsx
+│   │   │   ├── Map
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   └── Sidebar.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── OrderSummary.jsx
+│   │   │   ├── PeopleAlsoBought.jsx
+│   │   │   ├── ProductCard.jsx
+│   │   │   ├── ProductsList.jsx
+│   │   │   ├── Profile
+│   │   │   │   └── ProfileLayout.jsx
+│   │   │   ├── Vehicle
+│   │   │   │   ├── Navbar.jsx
+│   │   │   │   └── Sidebar.jsx
+│   │   │   └── Warehouse
+│   │   │       ├── Navbar.jsx
+│   │   │       └── Sidebar.jsx
+│   │   ├── echo.js
+│   │   ├── EventBus.jsx
+│   │   ├── helpers.js
+│   │   ├── lib
+│   │   │   ├── axios.js
+│   │   │   ├── gemini.js
+│   │   │   └── utils.js
+│   │   ├── main.jsx
+│   │   ├── pages
+│   │   │   ├── AdminPage.jsx
+│   │   │   ├── CartPage.jsx
+│   │   │   ├── CategoryPage.jsx
+│   │   │   ├── ChangePasswordPage.jsx
+│   │   │   ├── Chat
+│   │   │   │   ├── AttachmentPreview.jsx
+│   │   │   │   ├── AttachmentPreviewModal.jsx
+│   │   │   │   ├── AudioRecorder.jsx
+│   │   │   │   ├── ChatMain.jsx
+│   │   │   │   ├── ChatWrapper.jsx
+│   │   │   │   ├── ConversationHeader.jsx
+│   │   │   │   ├── ConversationItem.jsx
+│   │   │   │   ├── CustomAudioPlayer.jsx
+│   │   │   │   ├── GroupAvatar.jsx
+│   │   │   │   ├── GroupDescriptionPopover.jsx
+│   │   │   │   ├── GroupModal.jsx
+│   │   │   │   ├── GroupUsersPopover.jsx
+│   │   │   │   ├── MessageAttachments.jsx
+│   │   │   │   ├── MessageInput.jsx
+│   │   │   │   ├── MessageItem.jsx
+│   │   │   │   ├── MessageOptionsDropdown.jsx
+│   │   │   │   ├── NewMessageInput.jsx
+│   │   │   │   ├── NewMessageNotification.jsx
+│   │   │   │   ├── Toast.jsx
+│   │   │   │   ├── UserAvatar.jsx
+│   │   │   │   └── UserPicker.jsx
+│   │   │   ├── ChatBot
+│   │   │   │   ├── ChatList.jsx
+│   │   │   │   ├── ChatPage.jsx
+│   │   │   │   ├── DashboardLayout.jsx
+│   │   │   │   ├── DashboardPage.jsx
+│   │   │   │   └── NewPrompt.jsx
+│   │   │   ├── Editor
+│   │   │   │   ├── ActiveImage.jsx
+│   │   │   │   ├── BgRemove.jsx
+│   │   │   │   ├── BgReplace.jsx
+│   │   │   │   ├── Editor.jsx
+│   │   │   │   ├── ExtractPart.jsx
+│   │   │   │   ├── GenerativeFill.jsx
+│   │   │   │   ├── GenRemove.jsx
+│   │   │   │   ├── ImageTools.jsx
+│   │   │   │   ├── LayerInfo.jsx
+│   │   │   │   ├── Layers.jsx
+│   │   │   │   ├── Loading.jsx
+│   │   │   │   ├── Recolor.jsx
+│   │   │   │   ├── Resizeable.jsx
+│   │   │   │   ├── SmartCrop.jsx
+│   │   │   │   ├── Tiktok.jsx
+│   │   │   │   ├── Transcribe.jsx
+│   │   │   │   ├── UploadForm.jsx
+│   │   │   │   ├── UploadImage.jsx
+│   │   │   │   ├── UploadVideo.jsx
+│   │   │   │   ├── VideoTools.jsx
+│   │   │   │   └── Youtube.jsx
+│   │   │   ├── EditProfilePage.jsx
+│   │   │   ├── FeedbackForm
+│   │   │   │   ├── CreateFeedbackForm.jsx
+│   │   │   │   └── FeedbackFormPublicView.jsx
+│   │   │   ├── HomePage.jsx
+│   │   │   ├── LiveStream
+│   │   │   │   ├── AboutCard.jsx
+│   │   │   │   ├── Actions.jsx
+│   │   │   │   ├── BioModal.jsx
+│   │   │   │   ├── ChatCommunity.jsx
+│   │   │   │   ├── CommunityItem.jsx
+│   │   │   │   ├── CopyButton.jsx
+│   │   │   │   ├── FullscreenControl.jsx
+│   │   │   │   ├── GiftSelector.jsx
+│   │   │   │   ├── Header.jsx
+│   │   │   │   ├── Hint.jsx
+│   │   │   │   ├── InfoCard.jsx
+│   │   │   │   ├── InfoModal.jsx
+│   │   │   │   ├── KeyCard.jsx
+│   │   │   │   ├── LiveBadge.jsx
+│   │   │   │   ├── LiveStreamWrapper.jsx
+│   │   │   │   ├── LiveVideo.jsx
+│   │   │   │   ├── LoadingVideo.jsx
+│   │   │   │   ├── OfflineVideo.jsx
+│   │   │   │   ├── StreamCreationForm.jsx
+│   │   │   │   ├── StreamMessages.jsx
+│   │   │   │   ├── StreamPlayer.jsx
+│   │   │   │   ├── Thumbnail.jsx
+│   │   │   │   ├── UrlCard.jsx
+│   │   │   │   ├── UserAvatar.jsx
+│   │   │   │   ├── VerifiedMark.jsx
+│   │   │   │   ├── Video.jsx
+│   │   │   │   └── VolumeControl.jsx
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── Map
+│   │   │   │   ├── MapBoxMap.jsx
+│   │   │   │   ├── MapBoxRoute.jsx
+│   │   │   │   ├── Markers.jsx
+│   │   │   │   ├── RouteDetailPage.jsx
+│   │   │   │   └── WrapperMap.jsx
+│   │   │   ├── MapBoxMap.jsx
+│   │   │   ├── MapBoxRoute.jsx
+│   │   │   ├── Markers.jsx
+│   │   │   ├── PaymentPage.jsx
+│   │   │   ├── ProductDetailPage.jsx
+│   │   │   ├── ProfilePage.jsx
+│   │   │   ├── PurchaseCancelPage.jsx
+│   │   │   ├── PurchaseSuccessPage.jsx
+│   │   │   ├── SignUpPage.jsx
+│   │   │   ├── SocialMedia
+│   │   │   │   ├── FriendRequest.jsx
+│   │   │   │   ├── NetworkPage.jsx
+│   │   │   │   ├── NotificationsPage.jsx
+│   │   │   │   ├── Post.jsx
+│   │   │   │   ├── PostAction.jsx
+│   │   │   │   ├── PostCreation.jsx
+│   │   │   │   ├── RecommendedUser.jsx
+│   │   │   │   ├── SocialMediaPage.jsx
+│   │   │   │   └── UserCard.jsx
+│   │   │   ├── State
+│   │   │   │   ├── Redux.jsx
+│   │   │   │   └── State.jsx
+│   │   │   ├── TwoFactorAuthentication.jsx
+│   │   │   ├── UserAddressPage.jsx
+│   │   │   ├── VehicleManagement
+│   │   │   │   ├── VehicleListPage.jsx
+│   │   │   │   └── WrapperVehicle.jsx
+│   │   │   ├── Warehouse
+│   │   │   │   ├── CreateInventory.jsx
+│   │   │   │   ├── Daily.jsx
+│   │   │   │   ├── Expenses.jsx
+│   │   │   │   ├── Geography.jsx
+│   │   │   │   ├── LicensePlateCapturePage.jsx
+│   │   │   │   ├── WarehouseInventories.jsx
+│   │   │   │   ├── WarehouseOrders.jsx
+│   │   │   │   └── Wrapper.jsx
+│   │   │   └── Wheel
+│   │   │       ├── Coupon.jsx
+│   │   │       └── Wheel.jsx
+│   │   ├── stores
+│   │   │   ├── geoData.js
+│   │   │   ├── useCartStore.js
+│   │   │   ├── useChatBotStore.js
+│   │   │   ├── useChatStore.js
+│   │   │   ├── useCouponStore.js
+│   │   │   ├── useDeliveryStore.js
+│   │   │   ├── useEditorStore.js
+│   │   │   ├── useExpensesStore.js
+│   │   │   ├── useFeedbackFormStore.js
+│   │   │   ├── useGeographyStore.js
+│   │   │   ├── useGiftStore.js
+│   │   │   ├── useInventoryStore.js
+│   │   │   ├── useLicensePlateStore.js
+│   │   │   ├── useLineChartStore.js
+│   │   │   ├── useLiveStreamStore.js
+│   │   │   ├── useMailStore.js
+│   │   │   ├── useOrderStore.js
+│   │   │   ├── useProductStore.js
+│   │   │   ├── useRatingStore.js
+│   │   │   ├── useSocialMediaStore.js
+│   │   │   ├── useStreamMessageStore.js
+│   │   │   ├── useTwoFactorAuthenticationStore.js
+│   │   │   ├── useUserStore.js
+│   │   │   ├── useVehicleStore.js
+│   │   │   └── useViewerTokenStore.js
+│   │   └── stripe.js
+│   ├── tailwind.config.js
+│   └── vite.config.js
+├── k8s
+│   ├── backend-deployment.yaml
+│   ├── backend-service.yaml
+│   ├── configmap.yaml
+│   ├── frontend-deployment.yaml
+│   ├── frontend-service.yaml
+│   ├── ingress.yaml
+│   ├── livestream-deployment.yaml
+│   ├── mongodb-deployment.yaml
+│   ├── namespace.yaml
+│   ├── redis-deployment.yaml
+│   └── secrets.yaml
+├── postcss.config.js
+├── public
+│   └── index.php
+├── resources
+│   ├── js
+│   │   └── echo.js
+│   └── views
+│       └── emails
+│           └── order_confirmation.blade.php
+├── routes
+│   ├── api.php
+│   ├── auth.php
+│   ├── channels.php
+│   ├── console.php
+│   └── web.php
+├── tailwind.config.js
+└── tests
+    ├── Feature
+    │   ├── Auth
+    │   │   ├── AuthenticationTest.php
+    │   │   ├── EmailVerificationTest.php
+    │   │   ├── PasswordResetTest.php
+    │   │   └── RegistrationTest.php
+    │   └── ExampleTest.php
+    ├── Pest.php
+    ├── TestCase.php
+    └── Unit
+        └── ExampleTest.php
+
+64 directories, 459 files
