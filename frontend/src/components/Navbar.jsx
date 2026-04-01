@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   ShoppingCart,
   UserPlus,
@@ -32,6 +32,7 @@ const NAV_ITEMS = [
   { key: "livestream", label: "Live Stream", path: "/live-stream" },
   { key: "editor", label: "Editor", path: "/editor" },
   { key: "cart", label: "Cart", path: "/cart" },
+  { key: "wheel", label: "Wheel", path: "/wheel" }, // <-- Added Wheel
 ];
 
 const ROLE_NAV_ACCESS = {
@@ -50,6 +51,7 @@ const ROLE_NAV_ACCESS = {
     "chatbot",
     "livestream",
     "editor",
+    "wheel", // <-- Wheel added for Customer
   ],
   ProductSaler: [
     "home",
@@ -62,6 +64,7 @@ const ROLE_NAV_ACCESS = {
     "chatbot",
     "livestream",
     "editor",
+    "wheel", // <-- Wheel added for ProductSaler
   ],
   CustomerSupportStaff: [
     "home",
@@ -75,7 +78,7 @@ const ROLE_NAV_ACCESS = {
 };
 
 /* =======================
-   COMPONENT
+   NAVBAR COMPONENT
 ======================= */
 
 const Navbar = () => {
@@ -84,10 +87,9 @@ const Navbar = () => {
   const [selectedLanguage, setSelectedLanguage] = useState(null);
 
   if (checkingAuth) return null;
-  const role = userRoles?.[0]?.role_name || 'Customer';
-  console.log(role);
-  const allowedKeys = ROLE_NAV_ACCESS[role] || ["home"];
 
+  const role = userRoles?.[0]?.role_name || "Customer";
+  const allowedKeys = ROLE_NAV_ACCESS[role] || ["home"];
   const visibleNavItems = NAV_ITEMS.filter((item) =>
     allowedKeys.includes(item.key)
   );
@@ -110,6 +112,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-3">
         <nav className="flex items-center gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">
 
+          {/* Main Navigation Links */}
           {visibleNavItems.map((item) => (
             <Link
               key={item.key}
@@ -120,6 +123,7 @@ const Navbar = () => {
             </Link>
           ))}
 
+          {/* Cart */}
           {user && allowedKeys.includes("cart") && (
             <Link
               to="/cart"
@@ -134,6 +138,7 @@ const Navbar = () => {
             </Link>
           )}
 
+          {/* Admin Secret Dashboard */}
           {role === "Administration" && (
             <Link
               to="/secret-dashboard"
@@ -144,6 +149,7 @@ const Navbar = () => {
             </Link>
           )}
 
+          {/* Auth Links */}
           {user ? (
             <>
               <Link
@@ -182,6 +188,7 @@ const Navbar = () => {
             </>
           )}
 
+          {/* Language Selector */}
           <Select
             value={selectedLanguage}
             onChange={handleLanguageChange}
