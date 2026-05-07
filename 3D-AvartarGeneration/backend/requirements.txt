@@ -1,0 +1,10 @@
+numpy
+torch
+requests
+pillow
+websockets
+asyncio
+flask
+flask-cors 
+torchvision
+cloudinary
