@@ -1,66 +1,389 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## Full-Stack Developer (Part-time Remote Internship)
+**Softech Corp — Da Nang, Vietnam**  
+**Nov 2024 – Dec 2025 (1 yr 1 mo)**
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+### Overview
+Built a full-scale e-commerce and social commerce platform from scratch using modern full-stack technologies, AI/ML systems, real-time communication, logistics optimization, livestreaming, and cloud-based media processing.
 
-## About Laravel
+### Technologies
+`PHP` `Python` `Laravel` `React.js` `Three.js` `TailwindCSS` `Axios` `Zustand` `MySQL` `WebSockets` `Stripe` `Twilio` `LiveKit` `Cloudinary` `YOLOv5` `OpenCV` `Tesseract OCR` `Scikit-learn` `Pandas` `Flask`
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Key Features & Contributions
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Full-Stack E-Commerce Platform
+- Built a scalable e-commerce platform supporting:
+  - Real-time shopping
+  - Payments
+  - Logistics
+  - Livestreaming
+  - Social interactions
+- Developed responsive frontend interfaces using React.js, TailwindCSS, Zustand, Axios, and Three.js.
+- Built backend APIs and services using Laravel and Python integrations.
 
-## Learning Laravel
+### Authentication & Security
+- Implemented JWT-based authentication and role-based access control (RBAC).
+- Added OTP-based two-factor authentication using Twilio.
+- Built secure password management, profile systems, and user activity tracking.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Shopping & Commerce System
+- Developed:
+  - Product catalog management
+  - Categories
+  - Ratings & reviews
+  - Inventory management
+  - Shopping cart
+  - Coupons & discounts
+  - Order processing workflows
+- Integrated Stripe payment processing.
+- Implemented MailTrap email workflows for order confirmations.
+- Built real-time order tracking with WebSocket-based status updates.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Recommendation & Sentiment Analysis System
+- Built a recommendation engine using:
+  - Collaborative filtering
+  - Content-based filtering
+- Utilized Pandas and Scikit-learn for recommendation processing.
+- Developed a review sentiment analysis pipeline using:
+  - Web scraping
+  - Logistic Regression
+- Improved recommendation relevance through sentiment-aware scoring.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### URL Shortener Service
+- Designed and implemented a URL shortener with:
+  - Unique short-code generation
+  - Collision handling
+  - Optimized database indexing
+- Improved link retrieval and creation performance.
 
-## Laravel Sponsors
+### Smart Logistics & Delivery Optimization
+- Built a VRPTW-based delivery routing system.
+- Leveraged Mapbox cost graphs including:
+  - Traffic density
+  - Road complexity
+  - Routing costs
+- Developed constraint-aware shortest-path optimization for:
+  - Suppliers → Warehouses → Customers
+  - Direct delivery handling
+- Created warehouse dashboards with:
+  - Inventory monitoring
+  - Simulated location maps
+  - Expense analytics
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Automatic Number Plate Recognition (ANPR)
+- Built an ANPR system using:
+  - YOLOv5
+  - OpenCV
+  - Tesseract OCR
+- Enabled license plate detection and extraction from:
+  - Images
+  - Real-time video streams
 
-### Premium Partners
+### Livestreaming Platform
+- Developed a LiveKit-powered livestreaming system supporting:
+  - Real-time chat
+  - Gifting
+  - User engagement features
+- Added OBS-compatible:
+  - Stream key generation
+  - Server URL generation
+- Implemented scalable messaging using:
+  - Reverb
+  - Queues
+  - Broadcast architecture
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Social Platform Features
+- Built:
+  - User connections
+  - Posts
+  - Product sharing
+  - Notifications
+- Integrated recursive translation using Google Translate API.
 
-## Contributing
+### AI-Powered 3D Avatar Generation
+- Developed a 3D avatar generation pipeline using:
+  - Python
+  - OpenCV preprocessing
+  - Cartoonization techniques
+  - Edge detection
+  - Smoothing & stylization
+- Integrated Tripo3D for:
+  - Text/image-to-3D
+  - Multi-view-to-3D generation
+  - Rigged animation-ready models
+- Built rendering workflows using:
+  - Flask
+  - Three.js
+  - Cloudinary
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Real-Time Messaging System
+- Built a real-time messaging platform supporting:
+  - Multimedia messages
+  - Group chat automation
+  - Spam and malicious URL detection
+- Applied Logistic Regression for message filtering.
+- Used WebSockets and event-driven architecture for:
+  - Real-time updates
+  - Chat lifecycle management
+  - Background cleanup workers
 
-## Code of Conduct
+### AI Media Editing Tools
+- Developed an AI-powered image & video editor using Cloudinary:
+  - Layer handling
+  - Upload management
+  - Transformations
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### AI Chatbot System
+- Engineered a context-aware AI chatbot using the Gemini API.
+- Used scenario-based dataset seeding for:
+  - Contextual accuracy
+  - Adaptive interactions
+  - Improved response relevance
 
-## Security Vulnerabilities
+### Software Engineering Practices
+- Applied Git-based version control workflows.
+- Implemented:
+  - Unit testing
+  - Integration testing
+  - Endpoint testing
+  - Interface mocking
+  - Request validation
+- Utilized design patterns including:
+  - Singleton
+  - Factory
+  - Builder
+  - Strategy
+  - Command
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Database Architecture
+- Designed and developed a 48-entity relational database.
+- Applied normalization principles:
+  - 2NF
+  - 3NF
+- Optimized relational integrity and scalability.
 
-## License
+# Setup & Development Guide
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Clone Repository
+
+```bash
+git clone <your-repository-url>
+cd CV-Logistics
+```
+
+---
+
+## Laravel Backend Setup
+
+### Create Laravel Project
+
+```bash
+composer create-project laravel/laravel CV-Logistics
+```
+
+### Install Breeze Authentication
+
+```bash
+composer require laravel/breeze --dev
+
+php artisan breeze:install
+```
+
+### Install Broadcasting
+
+```bash
+php artisan install:broadcasting
+```
+
+### Install Frontend Dependencies
+
+```bash
+npm install
+
+# or
+
+yarn install
+```
+
+---
+
+## Database Setup
+
+### Run Migrations & Seeders
+
+```bash
+php artisan migrate --seed
+```
+
+### Refresh Database
+
+```bash
+php artisan migrate:refresh --seed
+```
+
+---
+
+## Start Development Servers
+
+### Laravel Server
+
+```bash
+php artisan serve
+```
+
+### Vite Development Server
+
+```bash
+npm run dev
+
+# or
+
+yarn dev
+```
+
+---
+
+## Queue & Real-Time Services
+
+### Start Laravel Reverb
+
+```bash
+php artisan reverb:start --port=8081 --debug
+```
+
+### Start Queue Worker
+
+```bash
+php artisan queue:work
+```
+
+### Start Horizon
+
+```bash
+php artisan horizon
+```
+
+---
+
+## Artisan Utilities
+
+### Open Laravel Tinker
+
+```bash
+php artisan tinker
+```
+
+### Example Queries
+
+```php
+\App\Models\Shipment::count();
+
+\App\Models\Shipment::query()->paginate(5)->all();
+```
+
+### Generate Model with Migration & Factory
+
+```bash
+php artisan make:model Endorsement -fm
+```
+
+### Generate Resource Controller
+
+```bash
+php artisan make:controller TodoController --model=Todo --requests --resource
+```
+
+### List Application Routes
+
+```bash
+php artisan route:list
+```
+
+---
+
+# Python Microservice Setup
+
+## Create Virtual Environment
+
+```bash
+python3 -m venv venv
+```
+
+## Activate Virtual Environment
+
+### Linux / macOS
+
+```bash
+source venv/bin/activate
+```
+
+### Windows
+
+```bash
+venv\Scripts\activate
+```
+
+---
+
+## Install Python Dependencies
+
+```bash
+pip3 install -r requirements.txt
+```
+
+## Run FastAPI/Uvicorn Server
+
+```bash
+python3 -m uvicorn main:app --reload --port 5000
+```
+
+---
+
+# Full Development Commands
+
+```bash
+composer create-project laravel/laravel CV-Logistics
+
+composer require laravel/breeze --dev
+
+php artisan breeze:install
+
+php artisan install:broadcasting
+
+php artisan serve
+
+npm run dev
+
+php artisan tinker
+
+php artisan make:model Endorsement -fm
+
+php artisan migrate --seed
+
+python3 -m venv venv
+
+source venv/bin/activate
+
+pip3 install -r requirements.txt
+
+python3 -m uvicorn main:app --reload --port 5000
+
+php artisan migrate:refresh --seed
+
+php artisan make:controller TodoController --model=Todo --requests --resource
+
+php artisan reverb:start --port=8081 --debug
+
+php artisan queue:work
+
+php artisan horizon
+
+php artisan route:list
+
+yarn install
+
+yarn dev
+
+php artisan serve
+```
