@@ -2570,12 +2570,12 @@ When a user is deleted:
 ![Diagram](docs/Sequence-Diagram/31.png)
 ![Diagram](docs/Sequence-Diagram/32.png)
 ![Diagram](docs/Sequence-Diagram/33.png)
-![Diagram](docs/Sequence-Diagram/34.png)
-![Diagram](docs/Sequence-Diagram/35.png)
 
-# Other Screenshots
+# Database Initialization & Migration & Seeding 
 
 ![Screenshot](docs/Other/1.png)
+
+# APIs
 ![Screenshot](docs/Other/2.png)
 ![Screenshot](docs/Other/3.png)
 ![Screenshot](docs/Other/4.png)
