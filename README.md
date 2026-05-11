@@ -1029,8 +1029,8 @@ Includes all Customer permissions plus:
 
 ![Screenshot 2026-02-13 at 5.09.40 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%205.09.40%E2%80%AFPM.png)
 
-![Screenshot](docs/Project-Showcase/screenshot-1.png)
+![Screenshot](docs/Project-Showcase/1.png)
 
-![Screenshot](docs/Project-Showcase/screenshot-2.png)
+![Screenshot](docs/Project-Showcase/2.png)
 
-![Screenshot](docs/Project-Showcase/screenshot-3.png)
+![Screenshot](docs/Project-Showcase/3.png)
