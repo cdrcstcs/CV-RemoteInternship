@@ -1028,3 +1028,10 @@ Includes all Customer permissions plus:
 ![Screenshot 2026-02-13 at 5.02.31 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%205.02.31%E2%80%AFPM.png)
 
 ![Screenshot 2026-02-13 at 5.09.40 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%205.09.40%E2%80%AFPM.png)
+
+![Screenshot](./docs/Project-Showcase/Screenshot%202026-04-01%20at%2011.14.27%20PM.png)
+
+![Screenshot](./docs/Project-Showcase/Screenshot%202026-04-01%20at%2011.14.51%20PM.png)
+
+![Screenshot](./docs/Project-Showcase/Screenshot%202026-04-01%20at%2011.15.05%20PM.png)
+
