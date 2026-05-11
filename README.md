@@ -2568,3 +2568,12 @@ When a user is deleted:
 ![Diagram](docs/Sequence-Diagram/Untitled-18.png)
 ![Diagram](docs/Sequence-Diagram/Untitled-19.png)
 ![Diagram](docs/Sequence-Diagram/Untitled-20.png)
+
+
+
+# Other Screenshots
+
+![Screenshot](docs/Other/Screenshot%202026-05-11%20at%209.31.06%20PM.png)
+![Screenshot](docs/Other/Screenshot%202026-05-11%20at%209.31.33%20PM.png)
+![Screenshot](docs/Other/Screenshot%202026-05-11%20at%209.31.49%20PM.png)
+![Screenshot](docs/Other/Screenshot%202026-05-11%20at%209.32.10%20PM.png)
