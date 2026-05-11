@@ -378,3 +378,531 @@ yarn dev
 
 php artisan serve
 ```
+
+# System User Flows & Access Control
+
+## Overview
+
+This system supports multiple user roles with different permissions and dashboards, including:
+
+- Customer
+- ProductSaler
+- Administration
+- Warehouse Manager
+- Vehicle Manager
+- Delivery Man / Delivery Driver
+- Customer Support Staff
+- Finance Manager
+- Shipment Manager
+
+---
+
+# User Flows
+
+---
+
+## 1. Customer
+
+### Entry Point
+- Login / Sign Up
+
+### Features
+
+#### Profile Management
+- View profile
+- Update profile
+- Change password
+
+#### Product Browsing
+- View single products
+- View featured products
+- Browse products by category
+- View recommended products
+- Rate products
+- View product ratings
+
+#### Shopping Management
+- Add products to cart
+- Update cart quantities
+- Remove items from cart
+- Apply coupons
+- View available coupons
+- Make payments
+- Track order status
+
+#### Address Management
+- Add address
+- Edit address
+- View delivery addresses
+
+#### Social & Interaction
+- Create posts
+- View posts
+- Comment on posts
+- Like posts
+- Send connection requests
+- Accept/reject requests
+- Follow/unfollow users
+- View notifications
+- Mark notifications as read
+- Block/unblock users
+- Check block status
+
+#### Chat & Communication
+- View conversations
+- Send messages
+- Send attachments
+- Send icons/emojis
+- Send voice messages
+- Delete messages
+- Load older messages
+- Create/manage groups
+- Interact with chatbot
+
+#### Feedback
+- Submit feedback forms
+- Fill checkboxes
+- Short answers
+- Multiple-choice responses
+
+#### Streaming & Media
+- View streams
+- Create streams
+- Search streams
+- Watch recommended streams
+- View stream messages
+
+---
+
+## 2. ProductSaler
+
+### Entry Point
+- Login
+- Access sales dashboard
+
+### Features
+
+Includes all **Customer** features plus:
+
+#### Product Management
+- Create products
+- Update products
+- Delete products
+- Mark products as featured
+
+#### Coupon Management
+- Create coupons
+- Apply coupons
+
+#### Feedback Management
+- Create feedback forms
+- Update feedback forms
+- View feedback forms
+
+#### Streaming & Media
+- Create streams
+- Stop streams
+- Update streams
+- Send stream messages
+- View stream messages
+
+---
+
+## 3. Administration
+
+### Entry Point
+- Login
+- Access admin dashboard
+
+### Features
+
+Includes all system permissions.
+
+#### User Management
+- Manage users
+- Manage roles
+- Update profiles
+- Change passwords
+- Manage language preferences
+- Two-factor authentication management
+
+#### Product Management
+- Create products
+- Update products
+- Delete products
+- Manage featured products
+
+#### Warehouse Management
+- View inventories
+- Create inventory items
+- Update inventories
+- Track warehouse capacity
+- Track warehouse orders
+- Filter warehouse expenses
+- Generate warehouse charts
+
+#### Vehicle & Delivery Management
+- View vehicles
+- Update vehicles
+- Track shipments
+- Assign vehicles to routes
+
+#### Coupon & Payment Management
+- Create coupons
+- Manage coupons
+- Process payments
+- Prepare deliveries
+
+#### Social & Messaging
+- Manage connections
+- Manage notifications
+- Manage posts
+- Manage groups
+- Manage chat
+- Manage chatbot
+- Manage emails
+
+#### Streaming & LiveKit
+- Create streams
+- Manage streams
+- Manage viewer tokens
+- Manage LiveKit ingress
+
+#### Media & Editor Tools
+- Upload media
+- Remove backgrounds
+- Replace backgrounds
+- Recolor images
+- Extract images
+- Crop videos
+- Generate fills/removals
+- Transcription tools
+
+---
+
+## 4. Warehouse Manager
+
+### Entry Point
+- Login
+- Access warehouse dashboard
+
+### Features
+
+#### Inventory Management
+- View inventories
+- Create inventory items
+- Update inventories
+- Check warehouse capacity
+- Track warehouse geography
+- Track warehouse orders
+- Track warehouse expenses
+- Process license plates
+
+#### Shipment Management
+- Update warehouse shipment statuses
+
+#### Limited Access
+- Basic profile management only
+
+---
+
+## 5. Vehicle Manager
+
+### Entry Point
+- Login
+- Access vehicle dashboard
+
+### Features
+- View vehicles
+- Update vehicle information
+- Manage vehicle details
+
+---
+
+## 6. Delivery Man
+
+### Entry Point
+- Login
+- Access delivery dashboard
+
+### Features
+- View assigned shipments
+- View route details
+- Assign vehicles to route details (if permitted)
+- View assigned vehicle
+
+---
+
+## 7. Customer Support Staff
+
+### Entry Point
+- Login
+- Access support dashboard
+
+### Features
+
+Includes partial customer capabilities:
+
+- View profiles
+- View products
+- View orders
+- View interactions
+
+#### Support Operations
+- Manage customer queries
+- Support tickets
+- Chat support
+- Notification support
+
+---
+
+## 8. Finance Manager
+
+### Entry Point
+- Login
+- Access finance dashboard
+
+### Features
+- View payments
+- View order details
+- Track coupon usage
+- Track discounts
+- Generate financial reports
+
+---
+
+## 9. Shipment Manager
+
+### Entry Point
+- Login
+- Access shipment dashboard
+
+### Features
+- Track shipments
+- Monitor delivery progress
+- Assign delivery drivers
+- Monitor route details
+- View warehouse logistics
+- View vehicle logistics
+
+---
+
+## 10. Delivery Driver
+
+### Entry Point
+- Login
+- Access delivery driver dashboard
+
+### Features
+- View assigned shipments
+- Update delivery progress
+- Confirm completed deliveries
+- View assigned vehicle
+
+---
+
+# Role-Based Access Control (RBAC)
+
+---
+
+## Administration
+
+### Permissions
+- Full system access
+- Full user management
+- Full warehouse management
+- Full vehicle management
+- Full delivery management
+- Full payment management
+- Full social management
+- Full messaging management
+- Full streaming management
+- Full media editor access
+- Full chatbot access
+- Full LiveKit management
+- Two-factor authentication management
+
+---
+
+## Warehouse Manager
+
+### Permissions
+- Manage inventories
+- Manage warehouse orders
+- Manage warehouse expenses
+- Process logistics license plates
+
+### Restrictions
+- No product management
+- No vehicle management
+- No delivery management
+
+---
+
+## Vehicle Manager
+
+### Permissions
+- View vehicles
+- Update vehicles
+
+### Restrictions
+- No warehouse access
+- No product management
+- No user management
+
+---
+
+## Delivery Man / Delivery Driver
+
+### Permissions
+- Access shipment details
+- Access assigned vehicles
+- Manage delivery routes
+
+### Restrictions
+- No warehouse management
+- No product management
+- No financial access
+
+---
+
+## Customer
+
+### Permissions
+- Manage profile
+- Manage addresses
+- Manage cart
+- Make payments
+- Apply coupons
+- View products
+- Rate products
+- Access messaging
+- Access chatbot
+- Access social features
+- Access streaming features
+- Basic media tools
+
+---
+
+## ProductSaler
+
+### Permissions
+Includes all Customer permissions plus:
+- Manage products
+- Manage coupons
+- Manage feedback forms
+- Manage streams
+
+---
+
+## Customer Support Staff
+
+### Permissions
+- Read-only product access
+- Read-only social access
+- Messaging management
+- Chatbot management
+- Customer support operations
+
+### Restrictions
+- No payment management
+- No cart management
+- No product CRUD
+
+---
+
+## Finance Manager
+
+### Permissions
+- Manage payments
+- Track coupons
+- View orders
+- Generate reports
+
+### Restrictions
+- Limited social access
+- Limited messaging access
+
+---
+
+## Shipment Manager
+
+### Permissions
+- Monitor shipments
+- Track delivery progress
+- Assign drivers
+- Monitor logistics
+
+### Restrictions
+- No warehouse management
+- No product management
+- No financial management
+
+---
+
+# Core Modules
+
+## Authentication
+- Login
+- Signup
+- Password reset
+- Two-factor authentication
+- Role-based authorization
+
+## Product System
+- Product CRUD
+- Categories
+- Ratings
+- Recommendations
+- Featured products
+
+## Shopping System
+- Cart
+- Coupons
+- Payments
+- Orders
+
+## Social System
+- Posts
+- Comments
+- Likes
+- Connections
+- Follow system
+- Blocking system
+- Notifications
+
+## Messaging System
+- Conversations
+- Group chat
+- Voice messages
+- Attachments
+- Chatbot integration
+
+## Streaming System
+- Live streams
+- Viewer tokens
+- Stream messaging
+- LiveKit integration
+
+## Warehouse & Logistics
+- Inventory management
+- Shipment tracking
+- Route management
+- Vehicle assignment
+- Warehouse analytics
+
+## Media Tools
+- Image editor
+- Video editor
+- Background removal
+- Recoloring
+- Video cropping
+- AI-generated fills
+
+## Feedback System
+- Dynamic forms
+- Multiple-choice questions
+- Checkbox questions
+- Short-answer questions
+
+---
