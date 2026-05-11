@@ -1562,3 +1562,975 @@ Includes all Customer permissions plus:
 |6                                    |created_at                 |TIMESTAMP |                                              |Yes       |       |No                         |CURRENT_TIMESTAMP |                                             |Record creation time                                     |       |       |       |       |
 |7                                    |updated_at                 |TIMESTAMP |                                              |Yes       |       |No                         |CURRENT_TIMESTAMP |                                             |Record last update time                                  |       |       |       |       |
 
+
+# Core E-Commerce System (Database Design & Normalization)
+
+---
+
+## 1. ORDERS and USERS
+**Relationship type:** One-to-Many (optional on Orders side)
+
+- One User can place many Orders  
+- An Order may belong to one User or none (guest order)
+
+**Normalization applied:**
+- User information is stored only in USERS
+- Orders store only `user_id` as a foreign key
+- Removes duplicated user data in Orders
+
+**Normal form achieved:** 3NF  
+All non-key attributes depend only on `order.id`
+
+---
+
+## 2. ORDERS and ORDER_ITEMS
+**Relationship type:** One-to-Many
+
+- One Order contains many Order Items  
+- Each Order Item belongs to exactly one Order  
+
+**Why this exists:**
+- Prevents repeating product data inside Orders
+- Each row represents one product in an order
+
+**Normalization applied:**
+- Eliminates repeating groups
+- Attributes depend fully on primary key
+
+**Normal form achieved:** 1NF, 2NF, 3NF
+
+---
+
+## 3. PRODUCTS and ORDER_ITEMS
+**Relationship type:** One-to-Many
+
+- One Product can appear in many Order Items  
+- Each Order Item references one Product  
+
+**Normalization applied:**
+- Product details stored once in PRODUCTS
+- Only references stored in ORDER_ITEMS
+
+**Benefit:**
+- No duplication of product info
+
+**Normal form achieved:** 3NF
+
+---
+
+## 4. ORDERS and PRODUCTS (Resolved Many-to-Many)
+**Relationship type:** Many-to-Many (via ORDER_ITEMS)
+
+- Order → many Products  
+- Product → many Orders  
+
+**Normalization applied:**
+- Junction table resolves relationship
+- Prevents duplication and update anomalies
+
+**Normal form achieved:** 3NF / BCNF
+
+---
+
+## 5. PRODUCTS and CATEGORIES
+**Relationship type:** Many-to-Many (via PRODUCTS_CATEGORIES)
+
+- Product can belong to multiple categories  
+- Category can contain multiple products  
+
+**Normalization applied:**
+- Categories stored once
+- No multi-value fields in PRODUCTS
+
+**Normal form achieved:** 3NF
+
+---
+
+## 6. USERS and ROLES
+**Relationship type:** Many-to-Many
+
+- User can have multiple roles  
+- Role can belong to multiple users  
+
+**Normalization applied:**
+- Roles separated from USERS
+- Junction table used
+
+**Normal form achieved:** 3NF
+
+---
+
+## 7. USERS and COUPONS
+**Relationship type:** Many-to-Many
+
+- User can have multiple coupons  
+- Coupon can be assigned to multiple users  
+
+**Normalization applied:**
+- Coupon stored once
+- Assignment handled via junction table
+
+**Normal form achieved:** 3NF
+
+---
+
+## 8. PRODUCTS and COUPONS
+**Relationship type:** Many-to-Many
+
+- Product can have multiple coupons  
+- Coupon can apply to multiple products  
+
+**Normalization applied:**
+- Avoids repeating coupon data
+
+**Normal form achieved:** 3NF
+
+---
+
+## 9. USERS and FEEDBACK_FORMS
+**Relationship type:** One-to-Many
+
+- One User can submit many Feedback Forms  
+
+**Normalization applied:**
+- User data not duplicated in feedback
+
+**Normal form achieved:** 3NF
+
+---
+
+## 10. ORDERS and FEEDBACK_FORMS
+**Relationship type:** One-to-Many (optional)
+
+- Order may have multiple feedback entries  
+- Feedback may exist without an order  
+
+**Normalization applied:**
+- Optional foreign key design
+
+**Normal form achieved:** 3NF
+
+---
+
+## 11. FEEDBACK_FORMS and QUESTIONS
+**Relationship type:** One-to-Many
+
+- One Form contains many Questions  
+
+**Normalization applied:**
+- Questions separated for flexibility
+
+**Normal form achieved:** 3NF
+
+---
+
+## 12. FEEDBACK_FORMS and ANSWERS
+**Relationship type:** One-to-Many
+
+- One Form has multiple Answer sets  
+
+**Normalization applied:**
+- Submission data separated from structure
+
+**Normal form achieved:** 3NF
+
+---
+
+## 13. QUESTIONS and ANSWERS
+**Relationship type:** Many-to-Many
+
+- Questions can have multiple Answers  
+- Answer sets contain multiple Questions  
+
+**Implementation:**
+- FEEDBACK_FORM_QUESTION_ANSWERS junction table
+
+**Normalization applied:**
+- Removes repeating answer columns
+
+**Normal form achieved:** 3NF / BCNF
+
+---
+
+## 14. PRODUCTS and RATINGS
+**Relationship type:** One-to-Many
+
+- One Product can receive many Ratings  
+
+**Normalization applied:**
+- Ratings stored separately
+
+**Normal form achieved:** 3NF
+
+---
+
+## 15. SHIPMENTS and RATINGS
+**Relationship type:** One-to-Many
+
+- One Shipment can have multiple Ratings  
+
+**Normalization applied:**
+- Ensures only delivered products are rated
+
+**Normal form achieved:** 3NF
+
+---
+
+## 16. ORDERS and PAYMENTS
+**Relationship type:** One-to-Many (optional)
+
+- One Order can have multiple Payments  
+- Payment may exist without Order  
+
+**Normalization applied:**
+- Supports partial payments
+- Financial separation
+
+**Normal form achieved:** 3NF
+
+---
+
+## 17. PAYMENTS and INVOICES
+**Relationship type:** One-to-One (mandatory on Invoice side)
+
+- Each Invoice belongs to one Payment  
+- Payment may generate one Invoice  
+
+**Normalization applied:**
+- Prevents duplication of financial records
+- Clear separation of payment vs invoice
+
+**Normal form achieved:** BCNF
+
+# User & Role Management (RBAC System Design)
+
+---
+
+## 1. USERS Table (Core / Parent Entity)
+
+### Role in the system
+The `USERS` table is the central entity. Everything else extends user capabilities (roles, permissions) or stores related profile data.
+
+### Normalization applied
+- **1NF:** All fields are atomic (no repeating groups)
+- **2NF:** All non-key attributes depend on primary key (`id`)
+- **3NF:** No transitive dependencies
+
+### Design notes
+- Roles and permissions are NOT stored directly in USERS
+- Prevents duplication of security-related data
+
+### Why this is good
+- Prevents duplication of role/permission data
+- Keeps authentication and profile data cleanly separated
+
+---
+
+## 2. USERS ↔ ROLES (Many-to-Many via USERS_ROLES)
+
+### Table: `USERS_ROLES` (Junction Table)
+
+### Relationship type
+- Many-to-Many  
+  - One user → multiple roles  
+  - One role → multiple users  
+
+### Why a junction table is needed
+Relational databases cannot store many-to-many relationships directly.
+
+### Normalization applied
+- **3NF:** Only foreign keys and timestamps
+- No duplicated role or user data
+
+### Composite Primary Key
+- `(user_id, role_id)` ensures unique assignments
+
+### Benefit
+- Flexible role assignment
+- Easy role updates without modifying USERS table
+
+---
+
+## 3. ROLES ↔ PERMISSIONS (Many-to-Many via ROLES_PERMISSIONS)
+
+### Table: `ROLES_PERMISSIONS`
+
+### Relationship type
+- Many-to-Many  
+  - One role → multiple permissions  
+  - One permission → multiple roles  
+
+### Normalization applied
+- **3NF:** Permissions defined once and reused
+- No duplication of permission data
+
+### Composite Primary Key
+- Ensures unique role–permission pairs
+
+### Why this matters
+- Enables scalable Role-Based Access Control (RBAC)
+- Avoids hardcoding permissions into users
+
+---
+
+## 4. ROLES Table (Lookup / Authority Entity)
+
+### Role in system
+Defines what a role is (not who has it)
+
+### Normalization applied
+- **3NF:** Role data stored once
+- No dependency beyond pivot tables
+
+### Benefit
+- Roles can evolve without affecting user assignments
+
+---
+
+## 5. PERMISSIONS Table (Capability Definition)
+
+### Role in system
+Represents actions or rights (e.g., `edit_user`, `delete_post`)
+
+### Normalization applied
+- **3NF:** Permissions stored once and reused
+
+### Benefit
+- Fine-grained access control
+- No duplication across roles
+
+---
+
+## 6. USERS ↔ USER_ADDRESSES (One-to-Many)
+
+### Table: `USER_ADDRESSES`
+
+### Relationship type
+- One-to-Many  
+  - One user → multiple addresses  
+  - One address → one user  
+
+### Normalization applied
+- **1NF:** Each address stored as a separate row
+- **2NF:** Attributes depend on `address_id`
+- **3NF:** Address data separated from USERS
+
+### Why this is important
+- Avoids repeating address fields in USERS
+- Supports multiple addresses per user
+
+### Extra note
+- `is_primary` allows selecting default address without breaking normalization
+
+---
+
+## 7. Cascading Rules & Referential Integrity
+
+### Foreign key constraints
+- `ON DELETE CASCADE` ensures:
+  - Deleting a user removes related roles and addresses
+  - Deleting roles/permissions cleans up mappings
+
+### Normalization impact
+- Maintains referential integrity
+- Prevents orphan records
+- Keeps database consistent automatically
+
+# Logistics, Supply Chain & Warehousing Module (Database Design & Normalization)
+
+---
+
+## 1. WAREHOUSES ↔ USERS (One-to-Many)
+
+### Relationship
+- One user can manage multiple warehouses  
+- Each warehouse belongs to one user  
+
+### Implementation
+- `warehouses.user_id` → foreign key to `users.id`
+
+### Normalization
+- **3NF**
+  - User data is not duplicated in WAREHOUSES
+  - Warehouse attributes stored only once
+  - Eliminates redundancy in ownership data
+
+### Design benefit
+- Warehouses can be reassigned without schema changes
+- Clear ownership and access control
+
+---
+
+## 2. WAREHOUSES ↔ INVENTORY ↔ PRODUCTS (Many-to-Many resolved)
+
+### Associative entity: INVENTORY
+
+### Relationship
+- One warehouse stores many products  
+- One product exists in many warehouses  
+
+### Normalization
+- **3NF**
+  - Product data remains in PRODUCTS
+  - Warehouse data remains in WAREHOUSES
+  - Inventory-specific data (stock, weight, etc.) stored only in INVENTORY
+
+### Why this is normalized
+- Prevents duplication of product stock data
+- Avoids repeating warehouse/product attributes
+
+---
+
+## 3. VEHICLES ↔ USERS (Optional One-to-Many)
+
+### Relationship
+- One user (driver) may operate multiple vehicles  
+- Each vehicle may have one or no driver  
+
+### Normalization
+- **3NF**
+  - Driver data not embedded in VEHICLES
+  - Nullable foreign key supports flexibility
+
+### Benefit
+- Vehicles exist independently of drivers
+- Drivers can be reassigned easily
+
+---
+
+## 4. VEHICLES ↔ VEHICLE_MANAGEMENT (One-to-One / One-to-Many)
+
+### Relationship
+- Each vehicle has a management record
+- Tracks operational and maintenance metrics
+
+### Normalization
+- **3NF**
+  - Static vehicle data separated from operational data
+
+### Why this matters
+- Reduces update load on VEHICLES
+- Enables historical tracking
+
+---
+
+## 5. VEHICLE_MANAGEMENT ↔ USERS (One-to-Many)
+
+### Relationship
+- One user manages multiple vehicle records  
+- Each record belongs to one user  
+
+### Normalization
+- **3NF**
+  - Ownership stored once
+  - USERS remain source of truth
+
+---
+
+## 6. VEHICLES ↔ LOCATION_HISTORIES (One-to-Many)
+
+### Relationship
+- One vehicle has many location records  
+- Each record belongs to one vehicle  
+
+### Normalization
+- **1NF:** Each location entry is atomic
+- **3NF:** Vehicle data not duplicated per record
+
+### Benefit
+- Enables time-series tracking
+- Efficient GPS history storage
+
+---
+
+## 7. SHIPMENTS ↔ PROVIDERS (One-to-Many)
+
+### Relationship
+- One provider handles many shipments  
+- Each shipment has one provider  
+
+### Normalization
+- **3NF**
+  - Provider data stored once
+  - Referenced via foreign key
+
+---
+
+## 8. SHIPMENTS ↔ ORDERS (One-to-Many / One-to-One)
+
+### Relationship
+- One order may create multiple shipments  
+- Each shipment belongs to one order  
+
+### Normalization
+- **3NF**
+  - Order data stays in ORDERS
+  - Shipment lifecycle separated
+
+### Benefit
+- Supports partial fulfillment
+- Avoids duplication of order data
+
+---
+
+## 9. SHIPMENTS ↔ ROUTE_OPTIMIZATIONS (One-to-Many)
+
+### Relationship
+- One shipment can have multiple route optimizations  
+- Each optimization belongs to one shipment  
+
+### Normalization
+- **3NF**
+  - Optimization results stored separately
+
+### Benefit
+- Supports route history and comparisons
+
+---
+
+## 10. ROUTE_OPTIMIZATIONS ↔ ROUTE_DETAILS (One-to-Many)
+
+### Relationship
+- One optimization generates multiple route details  
+- Each detail belongs to one optimization  
+
+### Normalization
+- **3NF**
+  - Route metadata separated from results
+
+---
+
+## 11. ROUTE_DETAILS ↔ ROUTE_CONDITIONS (Many-to-One)
+
+### Relationship
+- Many route details reference one condition set  
+
+### Normalization
+- **3NF**
+  - Weather/traffic data stored once
+
+### Benefit
+- Consistent condition tracking
+- Easier updates and reuse
+
+---
+
+## 12. ROUTE_DETAILS ↔ VEHICLES (Many-to-One)
+
+### Relationship
+- One vehicle can appear in many route details  
+- Each route detail references one vehicle (optional)
+
+### Normalization
+- **3NF**
+  - Vehicle specs not duplicated in routes
+
+### Benefit
+- Supports vehicle reassignment
+
+---
+
+## 13. ENUM Usage & Normalization Note
+
+### ENUM in ROUTE_CONDITIONS
+
+- Controlled denormalization for performance
+
+### Trade-offs
+- Faster reads  
+- Less flexible than lookup tables  
+
+### Why it’s acceptable
+- Improves query performance
+- Simplifies condition classification
+
+# Livestream Shopping System (Database Design & Normalization)
+
+---
+
+## 1. USERS ↔ STREAMS (One-to-Many)
+
+### Relationship
+- One user can create and own many streams  
+- Each stream belongs to exactly one user  
+
+### Implementation
+- `streams.user_id` → references `users.id`
+
+### Normalization
+- **3NF**
+  - User data is not duplicated in STREAMS
+  - Stream-specific attributes (live state, keys, config) stored only in STREAMS
+
+### Why this is normalized
+- Prevents duplication of ownership data
+- Supports unlimited streams per user
+
+---
+
+## 2. STREAMS ↔ STREAM_MESSAGES ↔ USERS
+
+### Relationship
+- One stream has many messages  
+- One user can send many messages  
+- Messages reference users in roles:
+  - sender (creator)
+  - participant (viewer context)
+
+### Normalization
+- **1NF:** Each message is atomic
+- **3NF:** No duplication of user or stream data
+
+### Design benefit
+- Clean separation of:
+  - message content
+  - user identity
+  - stream context
+
+- Supports chat history, moderation, analytics
+
+---
+
+## 3. USERS ↔ STREAM_GIFTS ↔ STREAMS (Many-to-Many resolved)
+
+### Associative entity: STREAM_GIFTS
+
+### Relationship
+- Users can send many gifts  
+- Streams can receive many gifts  
+
+### Normalization
+- **3NF**
+  - USERS store identity only
+  - STREAMS store stream metadata only
+  - STREAM_GIFTS stores transactional data only
+
+### ENUM usage
+- Gift type is constrained using ENUM (controlled denormalization)
+
+### Why this works
+- No duplication of gift data
+- Enables analytics (total gifts per user/stream)
+
+---
+
+## 4. USERS ↔ FOLLOWS ↔ USERS (Self-referencing Many-to-Many)
+
+### Table: FOLLOWS
+
+### Relationship
+- Users can follow many users  
+- Users can be followed by many users  
+
+### Normalization
+- **3NF**
+  - No profile duplication
+  - Only relationship data stored
+
+### Constraints
+- Composite unique constraint:
+  - prevents duplicate follow relationships
+
+### Why this is normalized
+- Prevents storing follower lists inside USERS
+- Enables scalable social graph structure
+
+---
+
+## 5. STREAMS ↔ STREAM_GIFTS (One-to-Many)
+
+### Relationship
+- One stream receives many gifts  
+- Each gift belongs to one stream  
+
+### Normalization
+- **3NF**
+  - Stream metadata not duplicated
+  - Gifts are independent records
+
+### Benefit
+- Enables revenue tracking per stream
+- Full audit trail of gift activity
+
+---
+
+## 6. STREAMS ↔ STREAM_MESSAGES (One-to-Many)
+
+### Relationship
+- One stream has many messages  
+- Each message belongs to one stream  
+
+### Normalization
+- **3NF**
+  - Stream data not repeated in messages
+
+### Why this matters
+- Prevents large data bloating in STREAMS
+- Supports pagination and moderation
+
+---
+
+## 7. USERS ↔ STREAM_MESSAGES (One-to-Many)
+
+### Relationship
+- One user can author many messages  
+- Each message belongs to one user  
+
+### Normalization
+- **3NF**
+  - User identity stored once
+  - Messages remain independent of profile changes
+
+---
+
+## 8. Constraints & Data Integrity
+
+### Unique constraints
+- `ingressId` → ensures unique stream endpoints
+- `(follower_id, following_id)` → prevents duplicate follows
+
+### ON DELETE CASCADE
+When a user is deleted:
+- Streams are removed
+- Follows are removed
+- Messages are removed
+- Gifts are removed
+
+### Normalization benefit
+- Maintains referential integrity
+- Prevents orphan records
+- No manual cleanup required
+
+# Social Media & Chatting Features (Database Design & Normalization)
+
+---
+
+## 1. USERS ↔ GROUPS (One-to-Many: Ownership)
+
+### Relationship
+- One user can own multiple groups  
+- Each group has exactly one owner  
+
+### Normalization
+- **3NF**
+  - Ownership stored via foreign key
+  - No duplication of user data in GROUPS
+
+### Why this is normalized
+- Prevents repeating owner information
+- Supports ownership transfer without schema changes
+
+---
+
+## 2. USERS ↔ GROUPS (Many-to-Many via GROUP_USERS)
+
+### Relationship
+- Users can join many groups  
+- Groups can have many users  
+
+### Normalization
+- **3NF**
+  - GROUP_USERS stores only relationships
+  - No duplication of user or group attributes
+
+### Benefit
+- Scales to large memberships
+- Allows future extension (roles, permissions)
+
+---
+
+## 3. USERS ↔ CONVERSATIONS (Private Chat Model)
+
+### Relationship
+- Conversation represents a chat between two users  
+- Users can have many conversations  
+
+### Normalization
+- **3NF**
+  - Conversations are independent entities
+  - No user data duplication
+
+### Why this is correct
+- Avoids embedding chat threads in USERS
+- Centralized message history per conversation
+
+---
+
+## 4. CONVERSATIONS ↔ MESSAGES (One-to-Many)
+
+### Relationship
+- One conversation contains many messages  
+- Each message belongs to one conversation  
+
+### Normalization
+- **1NF:** Atomic message records  
+- **3NF:** No repetition of conversation data  
+
+---
+
+## 5. GROUPS ↔ MESSAGES (One-to-Many)
+
+### Relationship
+- Groups can have many messages  
+- Messages may belong to a group  
+
+### Normalization
+- **3NF**
+  - Group data not duplicated in messages
+  - Nullable foreign key supports unified messaging
+
+### Benefit
+- Single messaging system for both group & private chats
+- Avoids separate message tables
+
+---
+
+## 6. USERS ↔ MESSAGES (One-to-Many)
+
+### Relationship
+- One user sends many messages  
+- Each message has one sender  
+
+### Normalization
+- **3NF**
+  - User identity stored once
+  - Messages reference users
+
+---
+
+## 7. MESSAGES ↔ MESSAGE_ATTACHMENTS (One-to-Many)
+
+### Relationship
+- One message can have many attachments  
+- Each attachment belongs to one message  
+
+### Normalization
+- **3NF**
+  - Attachment data separated from messages
+
+### Benefit
+- Supports unlimited attachments
+- Keeps messages lightweight
+
+---
+
+## 8. USERS ↔ POSTS (One-to-Many)
+
+### Relationship
+- One user can create many posts  
+- Each post has one author  
+
+### Normalization
+- **3NF**
+  - Author referenced via foreign key
+  - No duplication of user data
+
+---
+
+## 9. POSTS ↔ COMMENTS ↔ USERS
+
+### Relationship
+- One post → many comments  
+- One user → many comments  
+- Each comment belongs to one post and one user  
+
+### Normalization
+- **3NF**
+  - Comment data stored once
+  - Relationships referenced via foreign keys
+
+### Benefit
+- Clean moderation and analytics
+- Efficient comment retrieval
+
+---
+
+## 10. POSTS ↔ LIKES ↔ USERS (Many-to-Many resolved)
+
+### Relationship
+- Users can like many posts  
+- Posts can be liked by many users  
+
+### Normalization
+- **3NF**
+  - LIKE table stores only relationships
+
+### Why this is correct
+- Prevents storing like arrays in POSTS
+- Ensures unique user-post likes
+
+---
+
+## 11. USERS ↔ NOTIFICATIONS (One-to-Many)
+
+### Relationship
+- Users receive many notifications  
+- Each notification belongs to one user  
+
+### Normalization
+- **3NF**
+  - Notification data is isolated
+  - References optional related entities
+
+### Benefit
+- Supports flexible notification types
+- Works for system + user events
+
+---
+
+## 12. USERS ↔ CONNECTION_REQUESTS (Self-referencing with state)
+
+### Relationship
+- Users send and receive connection requests  
+
+### Normalization
+- **3NF**
+  - Relationship state stored once (pending/accepted/rejected)
+  - User references only
+
+### Why this matters
+- Separates request lifecycle from final connections
+- Prevents ambiguous states
+
+---
+
+## 13. USERS ↔ USER_CONNECTIONS (Established Relationships)
+
+### Relationship
+- Represents accepted user connections  
+
+### Normalization
+- **3NF**
+  - Stored independently of requests
+  - Composite unique constraint prevents duplicates
+
+### Benefit
+- Clean social graph representation
+- Efficient querying
+
+---
+
+## 14. USERS ↔ BLOCK (Self-referencing Many-to-Many)
+
+### Relationship
+- Users can block multiple users  
+- Users can be blocked by multiple users  
+
+### Normalization
+- **3NF**
+  - Block relations stored once
+  - No duplication of user data
+
+### Why this is important
+- Enforces privacy rules
+- Prevents duplicate block states
+
+---
+
+## 15. Overall Normalization Assessment
+
+- **1NF:** All attributes are atomic  
+- **2NF:** All non-key attributes depend on full primary key  
+- **3NF:** No transitive dependencies  
+- **Near BCNF:** Controlled ENUM usage is acceptable denormalization
+
