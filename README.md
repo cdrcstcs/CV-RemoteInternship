@@ -974,3 +974,57 @@ Includes all Customer permissions plus:
 ![Screenshot 2026-02-12 at 8.24.23 PM](docs/Project-Showcase/Screenshot%202026-02-12%20at%208.24.23%E2%80%AFPM.png)
 
 ![Screenshot 2026-02-12 at 8.24.51 PM](docs/Project-Showcase/Screenshot%202026-02-12%20at%208.24.51%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 1.17.31 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%201.17.31%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 1.17.45 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%201.17.45%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 1.19.03 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%201.19.03%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 1.19.41 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%201.19.41%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 1.20.09 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%201.20.09%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.37.18 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.37.18%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.37.58 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.37.58%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.38.25 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.38.25%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.38.46 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.38.46%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.41.35 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.41.35%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.43.35 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.43.35%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.43.48 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.43.48%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.44.33 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.44.33%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.45.03 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.45.03%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.45.25 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.45.25%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.45.58 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.45.58%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.46.22 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.46.22%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 3.47.03 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%203.47.03%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 4.16.52 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%204.16.52%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 4.18.01 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%204.18.01%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 4.53.39 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%204.53.39%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 4.53.59 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%204.53.59%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 4.55.24 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%204.55.24%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 4.55.42 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%204.55.42%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 4.59.09 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%204.59.09%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 5.02.31 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%205.02.31%E2%80%AFPM.png)
+
+![Screenshot 2026-02-13 at 5.09.40 PM](docs/Project-Showcase/Screenshot%202026-02-13%20at%205.09.40%E2%80%AFPM.png)
