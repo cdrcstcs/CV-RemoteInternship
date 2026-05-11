@@ -6,7 +6,7 @@
 Built a full-scale e-commerce and social commerce platform from scratch using modern full-stack technologies, AI/ML systems, real-time communication, logistics optimization, livestreaming, and cloud-based media processing.
 
 ### Technologies
-`PHP` `Python` `Laravel` `React.js` `Three.js` `TailwindCSS` `Axios` `Zustand` `MySQL` `WebSockets` `Stripe` `Twilio` `LiveKit` `Cloudinary` `YOLOv5` `OpenCV` `Tesseract OCR` `Scikit-learn` `Pandas` `Flask`
+`PHP` `Python` `Golang` `Laravel` `React.js` `Three.js` `TailwindCSS` `Axios` `Zustand` `MySQL` `WebSockets` `Stripe` `Twilio` `LiveKit` `Cloudinary` `YOLOv5` `OpenCV` `Tesseract OCR` `Scikit-learn` `Pandas` `Flask`
 
 ---
 
