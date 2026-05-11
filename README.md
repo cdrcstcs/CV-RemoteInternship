@@ -165,15 +165,6 @@ Built a full-scale e-commerce and social commerce platform from scratch using mo
 
 # Setup & Development Guide
 
-## Clone Repository
-
-```bash
-git clone <your-repository-url>
-cd CV-Logistics
-```
-
----
-
 ## Laravel Backend Setup
 
 ### Create Laravel Project
